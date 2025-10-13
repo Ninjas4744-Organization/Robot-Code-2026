@@ -2,5 +2,36 @@ package frc.robot;
 
 public enum States {
     IDLE,
-    SCORE
+    RESET,
+
+    INTAKE_CORAL,
+    CORAL_IN_INTAKE,
+    CORAL_IN_OUTTAKE,
+
+    DRIVE_REEF,
+
+    L1_READY,
+    L1,
+    L2_READY,
+    L2,
+    L3_READY,
+    L3,
+    L4_READY,
+    L4,
+
+    L2_INVERSE_READY,
+    L2_INVERSE,
+    L3_INVERSE_READY,
+    L3_INVERSE,
+    L4_INVERSE_READY,
+    L4_INVERSE,
+
+    INTAKE_ALGAE_FLOOR,
+    INTAKE_ALGAE_REEF,
+    ALGAE_IN_OUTTAKE,
+
+    NET_READY,
+    NET,
+    NET_INVERSE_READY,
+    NET_INVERSE,
 }
