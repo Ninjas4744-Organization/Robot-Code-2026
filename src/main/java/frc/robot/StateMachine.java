@@ -1,7 +1,17 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
+import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intakealigner.IntakeAligner;
+import frc.robot.subsystems.intakeangle.IntakeAngle;
+import frc.robot.subsystems.outtake.Outtake;
+
+import java.util.Map;
 
 public class StateMachine extends StateMachineBase<States> {
     public StateMachine() {
@@ -14,41 +24,92 @@ public class StateMachine extends StateMachineBase<States> {
 
     @Override
     protected void defineGraph() {
-        addOmniEdge(States.class, States.RESET, Commands.sequence(
+        Intake intake = RobotContainer.getIntake();
+        Outtake outtake = RobotContainer.getOuttake();
+        Arm arm = RobotContainer.getArm();
+        IntakeAngle intakeAngle = RobotContainer.getIntakeAngle();
+        IntakeAligner intakeAligner = RobotContainer.getIntakeAligner();
+        Elevator elevator = RobotContainer.getElevator();
+        SwerveSubsystem swerve = RobotContainer.getSwerve();
 
+        /* **************************************** Reset **************************************** */
+        addOmniEdge(States.RESET, () -> Commands.sequence(
+            elevator.setHeight(() -> 8),
+            arm.reset(),
+            arm.setAngle(() -> Rotation2d.fromDegrees(-90)),
+            intake.stop(),
+            intakeAligner.stop(),
+            intakeAngle.reset(),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(45)),
+            swerve.reset(),
+
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal() && intakeAngle.atGoal())
         ));
 
-        /* **************************************** Coral Intake **************************************** */
-        addMultiEdge(States.INTAKE_CORAL, Commands.sequence(
+        addEdge(States.RESET, States.IDLE);
 
-        ), States.IDLE, States.CORAL_IN_INTAKE, States.CORAL_IN_OUTTAKE);
+        addStateEnd(States.RESET, Map.of(Commands.none(), States.IDLE));
+
+        /* **************************************** Coral Intake **************************************** */
+        addMultiEdge(States.INTAKE_CORAL, () -> Commands.sequence(
+            intake.setVelocity(() -> -1),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(-45)),
+            intakeAligner.align()
+        ), States.IDLE, States.CORAL_IN_INTAKE, States.L1_READY, States.CORAL_IN_OUTTAKE);
+
+        addStateEnd(States.INTAKE_CORAL, Map.of(
+            Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() == 1), States.L1_READY,
+            Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() > 1), States.CORAL_IN_INTAKE
+        ));
 
         addEdge(States.INTAKE_CORAL, States.IDLE, Commands.sequence(
-
+            intake.setVelocity(() -> 0),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(45)),
+            intakeAligner.stop()
         ));
 
         addEdge(States.INTAKE_CORAL, States.CORAL_IN_INTAKE, Commands.sequence(
-
+            intake.setVelocity(() -> 0),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(45)),
+            intakeAligner.stop()
         ));
 
         addEdge(States.CORAL_IN_INTAKE, States.CORAL_IN_OUTTAKE, Commands.sequence(
+            elevator.setHeight(() -> 6.5),
+            Commands.waitUntil(elevator::atGoal),
 
+            outtake.setPercent(() -> -1),
+            intake.setVelocity(() -> 1),
+
+            Commands.waitUntil(() -> !intake.isCoralInside()),
+            Commands.waitSeconds(0.2),
+            Commands.runOnce(() -> outtake.forceKnowCoralInside(true)),
+
+            elevator.setHeight(() -> 8),
+            Commands.waitUntil(elevator::atGoal)
         ));
 
         // Force know coral inside
         addEdge(States.IDLE, States.CORAL_IN_OUTTAKE);
 
         /* **************************************** L1 **************************************** */
-        addEdge(States.CORAL_IN_INTAKE, States.L1_READY, Commands.sequence(
+        addMultiEdge(States.L1_READY, () -> Commands.sequence(
+            intake.stop(),
+            intakeAligner.stop(),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(15))
+        ), States.CORAL_IN_INTAKE, States.INTAKE_CORAL);
 
+        addEdge(States.L1_READY, States.L1, Commands.sequence(
+            intake.setVelocity(() -> 1)
         ));
 
-        addEdge(States.CORAL_IN_INTAKE, States.L1, Commands.sequence(
-
+        addStateEnd(States.L1, Map.of(
+            Commands.waitSeconds(0.5), States.IDLE
         ));
 
         addEdge(States.L1, States.IDLE, Commands.sequence(
-
+            intake.stop(),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(45))
         ));
 
         /* **************************************** Coral Outtake **************************************** */
@@ -56,27 +117,27 @@ public class StateMachine extends StateMachineBase<States> {
 
         ));
 
-        addMultiEdge(States.L2_READY, Commands.sequence(
+        addMultiEdge(States.L2_READY, () -> Commands.sequence(
 
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
-        addMultiEdge(States.L3_READY, Commands.sequence(
+        addMultiEdge(States.L3_READY, () -> Commands.sequence(
 
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
-        addMultiEdge(States.L4_READY, Commands.sequence(
+        addMultiEdge(States.L4_READY, () -> Commands.sequence(
 
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
-        addMultiEdge(States.L2_INVERSE_READY, Commands.sequence(
+        addMultiEdge(States.L2_INVERSE_READY, () -> Commands.sequence(
 
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
-        addMultiEdge(States.L3_INVERSE_READY, Commands.sequence(
+        addMultiEdge(States.L3_INVERSE_READY, () -> Commands.sequence(
 
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
-        addMultiEdge(States.L4_INVERSE_READY, Commands.sequence(
+        addMultiEdge(States.L4_INVERSE_READY, () -> Commands.sequence(
 
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
@@ -104,12 +165,12 @@ public class StateMachine extends StateMachineBase<States> {
 
         ));
 
-        addMultiEdge(States.IDLE, Commands.sequence(
+        addMultiEdge(States.IDLE, () -> Commands.sequence(
 
         ), States.L2_READY, States.L3_READY, States.L4_READY,
             States.L2, States.L3, States.L4);
 
-        addMultiEdge(States.IDLE, Commands.sequence(
+        addMultiEdge(States.IDLE, () -> Commands.sequence(
 
         ), States.L2_INVERSE_READY, States.L3_INVERSE_READY, States.L4_INVERSE_READY,
             States.L2_INVERSE, States.L3_INVERSE, States.L4_INVERSE);

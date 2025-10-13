@@ -3,7 +3,6 @@ package frc.robot.subsystems.intakealigner;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeAligner extends SubsystemBase {
@@ -30,21 +29,11 @@ public class IntakeAligner extends SubsystemBase {
         Logger.processInputs("IntakeAligner", inputs);
     }
 
-//    public Command setPercent(DoubleSupplier percent) {
-//        if (!enabled) {
-//            return Commands.none();
-//        }
-//
-//        return Commands.runOnce(
-//                () -> io.setPercent(percent.getAsDouble())
-//        );
-//    }
-
     public Command align() {
         if(!enabled)
             return Commands.none();
-//        return setPercent(Constants.IntakeAligner.Speeds.Align::get);
-        return Commands.runOnce(() -> io.setVelocity(Constants.IntakeAligner.Speeds.Align.get()));
+
+        return Commands.runOnce(() -> io.setVelocity(1));
     }
 
     public Command stop() {

@@ -4,10 +4,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.RobotState;
 import frc.robot.States;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.DoubleSupplier;
 
 public class Outtake extends SubsystemBase {
     private OuttakeIO io;
@@ -31,7 +32,7 @@ public class Outtake extends SubsystemBase {
         if (!enabled)
             return;
 
-        if (Math.abs(inputs.Current) > Constants.Outtake.kCurrentThreshold && inputs.Output < 0) {
+        if (Math.abs(inputs.Current) > 65 && inputs.Output < 0) {
             if (!yesAlgaeTimer.isRunning())
                 yesAlgaeTimer.restart();
         } else {
@@ -39,7 +40,7 @@ public class Outtake extends SubsystemBase {
             yesAlgaeTimer.reset();
         }
 
-        if (Math.abs(inputs.Current) < Constants.Outtake.kCurrentThreshold) {
+        if (Math.abs(inputs.Current) < 65) {
             if (!noAlgaeTimer.isRunning())
                 noAlgaeTimer.restart();
         } else {
@@ -64,47 +65,20 @@ public class Outtake extends SubsystemBase {
         Logger.recordOutput("Outtake/Algae Inside", isAlgaeInside());
     }
 
-    public Command stop(){
+    public Command setPercent(DoubleSupplier percent) {
         if (!enabled){
             return Commands.none();
         }
+
+        return Commands.runOnce(() -> io.setPercent(percent.getAsDouble()));
+    }
+
+    public Command stop() {
+        if (!enabled){
+            return Commands.none();
+        }
+
         return Commands.runOnce(() -> io.setPercent(0));
-    }
-
-    public Command intake() {
-        if (!enabled)
-            return Commands.none();
-
-        return Commands.runOnce(() -> io.setPercent(Constants.Outtake.Speeds.Intake.get()));
-    }
-
-    public Command intakeAlgae() {
-        if (!enabled)
-            return Commands.none();
-
-        return Commands.runOnce(() -> io.setPercent(Constants.Outtake.Speeds.IntakeAlgae.get()));
-    }
-
-    public Command outtake() {
-        if (!enabled)
-            return Commands.none();
-
-        return Commands.runOnce(() -> {
-            io.setPercent(Constants.Outtake.Speeds.Outtake.get());
-            isAlgaeInside = false;
-            isCoralInside = false;
-        });
-    }
-
-    public Command outtakeAlgae() {
-        if (!enabled)
-            return Commands.none();
-
-        return Commands.runOnce(() -> {
-            io.setPercent(Constants.Outtake.Speeds.OuttakeAlgae.get());
-            isAlgaeInside = false;
-            isCoralInside = false;
-        });
     }
 
     public boolean isCoralInside() {
@@ -125,8 +99,6 @@ public class Outtake extends SubsystemBase {
         return isAlgaeInside;
     }
 
-//    private boolean hadObjectInside = false;
-//    private boolean isReset = false;
     public Command reset() {
         if (!enabled)
             return Commands.none();
@@ -135,41 +107,5 @@ public class Outtake extends SubsystemBase {
             isCoralInside = false;
             isAlgaeInside = false;
         });
-                //Commands.sequence(
-//                Commands.runOnce(() -> {
-//                    hadObjectInside = false;
-//                    isReset = false;
-//                }),
-//                intake(),
-//                Commands.race(
-//                        Commands.waitUntil(() -> {
-//                            if(currentTimer.get() > 0.125)
-//                                hadObjectInside = true;
-//                            return hadObjectInside;
-//                        }),
-//                        Commands.waitSeconds(0.4)
-//                ),
-//                stop(),
-//                Commands.runOnce(() -> {
-////                    if (!hadObjectInside) {
-////                        isCoralInside = false;
-////                        isAlgaeInside = false;
-////                    } else if (!isCoralInside && !isAlgaeInside) {
-////                        Command outtake = outtake().andThen(Commands.waitSeconds(0.5)).andThen(stop());
-////                        outtake.schedule();
-////                    }
-//                    if(hadObjectInside)
-//                        isCoralInside = true;
-//                    else {
-//                        isCoralInside = false;
-//                        isAlgaeInside = false;
-//                    }
-//                    isReset = true;
-//                })
-//        );
-    }
-
-    public boolean isReset() {
-        return true;//isReset;
     }
 }

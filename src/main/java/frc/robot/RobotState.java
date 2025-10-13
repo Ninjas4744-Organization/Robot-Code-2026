@@ -15,7 +15,12 @@ public class RobotState extends RobotStateWithSwerve<States> {
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
         robotState = States.IDLE;
+
         setRobotState(States.IDLE);
+        setL(1);
+        setReefSide(true);
+        setInverseReef(false);
+        setInverseNet(false);
     }
 
     public static RobotState getInstance() {

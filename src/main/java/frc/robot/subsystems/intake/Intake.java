@@ -5,7 +5,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInput;
 import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIO;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -15,8 +14,6 @@ public class Intake extends SubsystemBase {
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
     private boolean enabled;
     private LoggedDigitalInput beamBreaker;
-//    private boolean isCoralInside = false;
-//    private Timer currentTimer = new Timer();
 
     public Intake(boolean enabled, IntakeIO io, LoggedDigitalInputIO beamBreakerIO, int beamBreakerPort) {
         this.enabled = enabled;
@@ -54,22 +51,6 @@ public class Intake extends SubsystemBase {
             return true;
 
         return beamBreaker.get();
-//        return isCoralInside;
-//        return false;
-    }
-
-    public Command intake() {
-        return setVelocity(Constants.Intake.Speeds.Intake::get);
-    }
-
-    public Command outtake() {
-        return Commands.sequence(
-                setVelocity(Constants.Intake.Speeds.Outtake::get)
-        );
-    }
-
-    public Command outtakeL1() {
-        return setVelocity(Constants.Intake.Speeds.OuttakeL1::get);
     }
 
     public Command stop() {
@@ -80,28 +61,6 @@ public class Intake extends SubsystemBase {
     }
 
     public Command reset() {
-        if (!enabled)
-            return Commands.none();
-
-        return Commands.sequence(
-//                intake(),
-//                Commands.race(
-//                        Commands.waitUntil(() -> {
-//                            if (Math.abs(inputs.Current) > 65) {
-//                                if (!currentTimer.isRunning())
-//                                    currentTimer.restart();
-//                            } else {
-//                                currentTimer.stop();
-//                                currentTimer.reset();
-//                            }
-//
-//                            if(currentTimer.get() > 0.25)
-//                                isCoralInside = true;
-//                            return isCoralInside;
-//                        }),
-//                        Commands.waitSeconds(0.5)
-//                ),
-                stop()
-        );
+        return stop();
     }
 }

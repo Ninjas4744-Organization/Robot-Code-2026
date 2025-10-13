@@ -3,7 +3,6 @@ package frc.robot.subsystems.elevator;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -39,10 +38,6 @@ public class Elevator extends SubsystemBase {
         return Commands.runOnce(() -> {
             io.setPosition(wantedHeight.getAsDouble());
         });
-    }
-
-    public Command close() {
-        return setHeight(Constants.Elevator.Positions.Close::get);
     }
 
 //    public Command goToLHeight(IntSupplier L) {
