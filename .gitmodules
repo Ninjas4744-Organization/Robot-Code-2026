@@ -1,0 +1,3 @@
+[submodule "src/main/java/frc/lib/frc.lib.NinjasLib"]
+	path = src/main/java/frc/lib/frc.lib.NinjasLib
+	url = https://github.com/Ninjas4744-Organization/frc.lib.NinjasLib.git
