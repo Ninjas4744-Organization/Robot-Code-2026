@@ -55,7 +55,6 @@ public class Constants {
         public static final int kOperatorControllerPort = 1;
     }
 
-
     /* Example Subsystems */
     public static final ControllerConstants kExampleSubsystemControllerConstants = new ControllerConstants();
     static {
@@ -95,7 +94,6 @@ public class Constants {
         kExampleSubsystemControllerConstants.motorType = DCMotor.getKrakenX60(2);
     }
 
-    // Example System enum for ---
     public enum ExampleSubsystemPositions {
         Down(-90),
         Forwards(-90),
@@ -121,7 +119,6 @@ public class Constants {
 
         public static final SwerveConstants kSwerveConstants = new SwerveConstants();
         static {
-            // Move chassis-related settings to chassis subclass
             kSwerveConstants.chassis.trackWidth = 0.735;
             kSwerveConstants.chassis.wheelBase = 0.735;
             kSwerveConstants.chassis.bumperLength = 0.896;
@@ -133,7 +130,6 @@ public class Constants {
                     new Translation2d(-kSwerveConstants.chassis.wheelBase / 2.0, -kSwerveConstants.chassis.trackWidth / 2.0)
             );
 
-            // Move limits-related settings to limits subclass
             kSwerveConstants.limits.maxSpeed = 4.5;
             kSwerveConstants.limits.maxAngularVelocity = 9.2;
             kSwerveConstants.limits.speedLimit = Double.MAX_VALUE;
@@ -142,7 +138,6 @@ public class Constants {
             kSwerveConstants.limits.rotationAccelerationLimit = Double.MAX_VALUE;
             kSwerveConstants.limits.maxSkidAcceleration = Double.MAX_VALUE;
 
-            // Move modules-related settings to modules subclass
             kSwerveConstants.modules.openLoop = true;
             double wheelRadius = 0.048;
             kSwerveConstants.modules.driveMotorConstants = new ControllerConstants();
@@ -176,23 +171,18 @@ public class Constants {
             kSwerveConstants.modules.moduleConstants[2].CANCoderOffset = 0.229248;
             kSwerveConstants.modules.moduleConstants[3].CANCoderOffset = 0.210938;
 
-            // Move gyro-related settings to gyro subclass
             kSwerveConstants.gyro.gyroID = 45;
             kSwerveConstants.gyro.gyroInverted = false;
             kSwerveConstants.gyro.gyroType = SwerveConstants.Gyro.GyroType.Pigeon2;
 
-            // Move simulation-related settings to simulation subclass
             kSwerveConstants.simulation.driveMotorType = DCMotor.getKrakenX60Foc(1);
             kSwerveConstants.simulation.steerMotorType = DCMotor.getKrakenX60Foc(1);
 
-            // Move special-related settings to special subclass
             kSwerveConstants.special.enableOdometryThread = true;
             kSwerveConstants.special.odometryThreadFrequency = 250;
             kSwerveConstants.special.isReplay = Constants.General.kRobotMode == RobotMode.REPLAY;
             kSwerveConstants.special.robotStartPose = new Pose2d(3, 3, Rotation2d.kZero);
-
-            // Move CAN-related settings
-            kSwerveConstants.modules.CANBus = "Swerve Bus";
+            kSwerveConstants.special.CANBus = "Swerve Bus";
 
             try {
                 kSwerveConstants.special.robotConfig = RobotConfig.fromGUISettings();
@@ -228,10 +218,8 @@ public class Constants {
         public static final VisionConstants kVisionConstants = new VisionConstants();
         static {
             kVisionConstants.cameras = Map.of(
-        //            "FrontRight", Pair.of(new Transform3d(0.0815 + 0.1054, -0.0745, -0.191, new Rotation3d(0, 0, Units.degreesToRadians(-7.5 - 1.5))), VisionConstants.CameraType.PhotonVision),
-        //            "FrontLeft", Pair.of(new Transform3d(0.0815 + 0.1054, 0.0755, -0.191, new Rotation3d(0, 0, Units.degreesToRadians(7.5 - 1.5))), VisionConstants.CameraType.PhotonVision)
-            "Right", Pair.of(new Transform3d(0.735 / 2, -0.03, 0, new Rotation3d(0, 0, 0)), VisionConstants.CameraType.PhotonVision)
-        );
+
+            );
 
             kVisionConstants.fieldLayoutGetter = Constants.Field::getFieldLayoutWithIgnored;
             kVisionConstants.isReplay = Constants.General.kRobotMode == RobotMode.REPLAY;
@@ -312,12 +300,4 @@ public class Constants {
             return getFieldLayout().getTagPose(id).get();
         }
     }
-
-    public static class AutoDrive {
-        public static final double kAutoDriveDistFromReef = 0.5;
-        public static final double kAutoDriveRightSideOffset = 0.25;
-        public static final double kAutoDriveLeftSideOffset = 0.25;
-        public static final double kAutoDriveDistThreshold = 0.3;
-    }
-
 }

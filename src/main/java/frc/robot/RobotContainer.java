@@ -11,11 +11,9 @@ import frc.robot.subsystems.example.ExampleSubsystem;
 import frc.robot.subsystems.example.ExampleSubsystemIO;
 import frc.robot.subsystems.example.ExampleSubsystemIOController;
 import org.ironmaple.simulation.SimulatedArena;
-import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
-    private LoggedCommandController operatorController;
 
     private ExampleSubsystem exampleSubsystem;
 
@@ -26,15 +24,13 @@ public class RobotContainer {
             case REAL, SIM:
                 exampleSubsystem = new ExampleSubsystem(false, new ExampleSubsystemIOController());
 
-                driverController = new LoggedCommandController(new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
-                operatorController = new LoggedCommandController(new LoggedCommandControllerIOPS5(Constants.General.kOperatorControllerPort));
+                driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
                 break;
 
             case REPLAY:
                 exampleSubsystem = new ExampleSubsystem(false, new ExampleSubsystemIO() {});
 
-                driverController = new LoggedCommandController(new LoggedCommandControllerIO() {});
-                operatorController = new LoggedCommandController(new LoggedCommandControllerIO() {});
+                driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
         }
 
@@ -51,8 +47,6 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        Logger.recordOutput("Output1", 5);
-
         if(Constants.General.kRobotMode == Constants.RobotMode.SIM)
             SimulatedArena.getInstance().simulationPeriodic();
     }
