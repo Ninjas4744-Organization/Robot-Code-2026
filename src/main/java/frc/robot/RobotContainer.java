@@ -1,5 +1,8 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
@@ -30,6 +33,7 @@ import frc.robot.subsystems.outtake.Outtake;
 import frc.robot.subsystems.outtake.OuttakeIO;
 import frc.robot.subsystems.outtake.OuttakeIOController;
 import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
@@ -111,11 +115,15 @@ public class RobotContainer {
 
         driverController.triangle().onTrue(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.L1);
+            StateMachine.getInstance().changeRobotState(States.L1_READY);
         }));
 
-        driverController.povDown().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.RESET);
+        driverController.square().onTrue(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
+            StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
         }));
+
+        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
     }
 
     public void periodic() {
@@ -123,6 +131,13 @@ public class RobotContainer {
 
         if(Constants.General.kRobotMode == Constants.RobotMode.SIM)
             SimulatedArena.getInstance().simulationPeriodic();
+
+        double elevator1 = elevator.getHeight() / (10.8 / 1.5);
+        double elevator0 = Math.max(elevator1 - 0.62, 0);
+        Logger.recordOutput("Simulation Poses/Intake", new Pose3d(0, -0.312, 0.18, new Rotation3d(-intakeAngle.getAngle().getRadians() - Math.PI - Units.degreesToRadians(15), 0, 0)));
+        Logger.recordOutput("Simulation Poses/Elevator 0", new Pose3d(0, 0, elevator0, new Rotation3d()));
+        Logger.recordOutput("Simulation Poses/Elevator 1", new Pose3d(0, 0, elevator1, new Rotation3d()));
+        Logger.recordOutput("Simulation Poses/Arm", new Pose3d(0, 0.12, 0.3835 + elevator1, new Rotation3d(Units.degreesToRadians(90), -arm.getAngle().getRadians() + Math.PI / 2, 0)));
     }
 
     public Command getAutonomousCommand() {

@@ -40,7 +40,7 @@ public class StateMachine extends StateMachineBase<States> {
             intake.stop(),
             intakeAligner.stop(),
             intakeAngle.reset(),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(45)),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Close.get())),
             swerve.reset(),
 
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal() && intakeAngle.atGoal())
@@ -53,24 +53,26 @@ public class StateMachine extends StateMachineBase<States> {
         /* **************************************** Coral Intake **************************************** */
         addMultiEdge(States.INTAKE_CORAL, () -> Commands.sequence(
             intake.setVelocity(() -> -1),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(-45)),
-            intakeAligner.align()
+            intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Intake.get())),
+            intakeAligner.align(),
+
+            Commands.waitUntil(intakeAngle::atGoal)
         ), States.IDLE, States.CORAL_IN_INTAKE, States.L1_READY, States.CORAL_IN_OUTTAKE);
 
         addStateEnd(States.INTAKE_CORAL, Map.of(
-            Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() == 1), States.L1_READY,
+            Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() == 1), States.CORAL_IN_INTAKE,
             Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() > 1), States.CORAL_IN_INTAKE
         ));
 
         addEdge(States.INTAKE_CORAL, States.IDLE, Commands.sequence(
             intake.setVelocity(() -> 0),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(45)),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Close.get())),
             intakeAligner.stop()
         ));
 
         addEdge(States.INTAKE_CORAL, States.CORAL_IN_INTAKE, Commands.sequence(
             intake.setVelocity(() -> 0),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(45)),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Close.get())),
             intakeAligner.stop()
         ));
 
@@ -89,6 +91,21 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.waitUntil(elevator::atGoal)
         ));
 
+        addEdge(States.CORAL_IN_OUTTAKE, States.CORAL_IN_INTAKE, Commands.sequence(
+            elevator.setHeight(() -> 6.5),
+            Commands.waitUntil(elevator::atGoal),
+
+            outtake.setPercent(() -> 1),
+            intake.setVelocity(() -> -1),
+
+            Commands.waitUntil(intake::isCoralInside),
+            Commands.waitSeconds(0.2),
+            Commands.runOnce(() -> outtake.forceKnowCoralInside(false)),
+
+            elevator.setHeight(() -> 8),
+            Commands.waitUntil(elevator::atGoal)
+        ));
+
         // Force know coral inside
         addEdge(States.IDLE, States.CORAL_IN_OUTTAKE);
 
@@ -96,7 +113,9 @@ public class StateMachine extends StateMachineBase<States> {
         addMultiEdge(States.L1_READY, () -> Commands.sequence(
             intake.stop(),
             intakeAligner.stop(),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(15))
+            intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.L1.get())),
+
+            Commands.waitUntil(intakeAngle::atGoal)
         ), States.CORAL_IN_INTAKE, States.INTAKE_CORAL);
 
         addEdge(States.L1_READY, States.L1, Commands.sequence(
@@ -109,7 +128,9 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.L1, States.IDLE, Commands.sequence(
             intake.stop(),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(45))
+            intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Close.get())),
+
+            Commands.waitUntil(intakeAngle::atGoal)
         ));
 
         /* **************************************** Coral Outtake **************************************** */
