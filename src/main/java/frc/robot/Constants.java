@@ -392,7 +392,6 @@ public class Constants {
             kSwerveConstants.limits.accelerationLimit = Double.MAX_VALUE;
             kSwerveConstants.limits.rotationAccelerationLimit = Double.MAX_VALUE;
             kSwerveConstants.limits.maxSkidAcceleration = 65;
-//            kSwerveConstants.limits.maxSkidAcceleration = Double.MAX_VALUE;
 
             /* Modules */
             double wheelRadius = 0.048;
@@ -401,7 +400,8 @@ public class Constants {
             kSwerveConstants.modules.driveMotorConstants.real.currentLimit = 100;
             kSwerveConstants.modules.driveMotorConstants.real.gearRatio = 5.9;
             kSwerveConstants.modules.driveMotorConstants.real.conversionFactor = wheelRadius * 2 * Math.PI;
-            kSwerveConstants.modules.driveMotorConstants.real.controlConstants = ControlConstants.createTorqueCurrent(90, 6);
+//            kSwerveConstants.modules.driveMotorConstants.real.controlConstants = ControlConstants.createTorqueCurrent(90, 6);
+            kSwerveConstants.modules.driveMotorConstants.real.controlConstants = ControlConstants.createTorqueCurrent(7, 0);
 
             kSwerveConstants.modules.steerMotorConstants = new ControllerConstants();
             kSwerveConstants.modules.steerMotorConstants.real.currentLimit = 60;
@@ -481,8 +481,8 @@ public class Constants {
         public static final VisionConstants kVisionConstants = new VisionConstants();
         static {
             kVisionConstants.cameras = Map.of(
-                "Front", Pair.of(new Transform3d(0.28286, 0.12995, 0.152, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(-7.5))), VisionConstants.CameraType.PhotonVision),
-                "Back", Pair.of(new Transform3d(-0.28286 - 0.05, 0.12995, 0.152, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(187.5))), VisionConstants.CameraType.PhotonVision)
+                "Front", Pair.of(new Transform3d(0.28286, 0.12995, 0.152, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(-7.5))), VisionConstants.CameraType.PhotonVision)
+//                "Back", Pair.of(new Transform3d(-0.28286 - 0.05, 0.12995, 0.152, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(187.5))), VisionConstants.CameraType.PhotonVision)
             );
 
             kVisionConstants.fieldLayoutGetter = Constants.Field::getFieldLayoutWithIgnored;
