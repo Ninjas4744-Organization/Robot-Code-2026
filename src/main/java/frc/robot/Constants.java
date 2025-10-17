@@ -147,7 +147,7 @@ public class Constants {
             kControllerConstants.real.gearRatio = 6;
 //            kControllerConstants.real.conversionFactor = Math.PI * 0.05; // Fix
             kControllerConstants.real.homePosition = 0;
-            kControllerConstants.real.positionGoalTolerance = 0.5;
+            kControllerConstants.real.positionGoalTolerance = 0.05;
 
             /* Soft Limits */
             kControllerConstants.real.maxSoftLimit = 10.8;

@@ -34,9 +34,9 @@ public class StateMachine extends StateMachineBase<States> {
 
         /* **************************************** Reset **************************************** */
         addOmniEdge(States.RESET, () -> Commands.sequence(
-            elevator.setHeight(() -> 8),
+            elevator.setHeight(Constants.Elevator.Positions.Close::get),
             arm.reset(),
-            arm.setAngle(() -> Rotation2d.fromDegrees(-90)),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
             intake.stop(),
             intakeAligner.stop(),
             intakeAngle.reset(),
@@ -77,7 +77,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.CORAL_IN_INTAKE, States.CORAL_IN_OUTTAKE, Commands.sequence(
-            elevator.setHeight(() -> 6.5),
+            elevator.setHeight(Constants.Elevator.Positions.Intake::get),
             Commands.waitUntil(elevator::atGoal),
 
             outtake.setPercent(() -> -1),
@@ -87,12 +87,12 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.waitSeconds(0.2),
             Commands.runOnce(() -> outtake.forceKnowCoralInside(true)),
 
-            elevator.setHeight(() -> 8),
+            elevator.setHeight(Constants.Elevator.Positions.Close::get),
             Commands.waitUntil(elevator::atGoal)
         ));
 
         addEdge(States.CORAL_IN_OUTTAKE, States.CORAL_IN_INTAKE, Commands.sequence(
-            elevator.setHeight(() -> 6.5),
+            elevator.setHeight(Constants.Elevator.Positions.Intake::get),
             Commands.waitUntil(elevator::atGoal),
 
             outtake.setPercent(() -> 1),
@@ -102,7 +102,7 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.waitSeconds(0.2),
             Commands.runOnce(() -> outtake.forceKnowCoralInside(false)),
 
-            elevator.setHeight(() -> 8),
+            elevator.setHeight(Constants.Elevator.Positions.Close::get),
             Commands.waitUntil(elevator::atGoal)
         ));
 

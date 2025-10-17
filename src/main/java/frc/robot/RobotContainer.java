@@ -132,8 +132,9 @@ public class RobotContainer {
         if(Constants.General.kRobotMode == Constants.RobotMode.SIM)
             SimulatedArena.getInstance().simulationPeriodic();
 
-        double elevator1 = elevator.getHeight() / (10.8 / 1.5);
-        double elevator0 = Math.max(elevator1 - 0.62, 0);
+        double elevatorStroke = 1.415;
+        double elevator1 = elevator.getHeight() * (elevatorStroke / 10.8);
+        double elevator0 = Math.max(elevator1 - 0.58, 0);
         Logger.recordOutput("Simulation Poses/Intake", new Pose3d(0, -0.312, 0.18, new Rotation3d(-intakeAngle.getAngle().getRadians() - Math.PI - Units.degreesToRadians(15), 0, 0)));
         Logger.recordOutput("Simulation Poses/Elevator 0", new Pose3d(0, 0, elevator0, new Rotation3d()));
         Logger.recordOutput("Simulation Poses/Elevator 1", new Pose3d(0, 0, elevator1, new Rotation3d()));
