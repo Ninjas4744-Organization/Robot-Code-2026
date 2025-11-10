@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -61,7 +62,7 @@ public class StateMachine extends StateMachineBase<States> {
 
         addStateEnd(States.INTAKE_CORAL, Map.of(
             Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() == 1), States.CORAL_IN_INTAKE,
-            Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() > 1), States.CORAL_IN_INTAKE
+            Commands.waitUntil(() -> intake.isCoralInside() && RobotState.getL() > 1), States.CORAL_IN_OUTTAKE
         ));
 
         addEdge(States.INTAKE_CORAL, States.IDLE, Commands.sequence(
@@ -139,39 +140,51 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addMultiEdge(States.L2_READY, () -> Commands.sequence(
-
+            elevator.setHeight(Constants.Elevator.Positions.L2::get),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.L2.get())),
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L3_READY, () -> Commands.sequence(
-
+            elevator.setHeight(Constants.Elevator.Positions.L3::get),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.L3.get())),
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L4_READY, () -> Commands.sequence(
-
+            elevator.setHeight(Constants.Elevator.Positions.L4::get),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.L4.get())),
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L2_INVERSE_READY, () -> Commands.sequence(
-
+            elevator.setHeight(Constants.Elevator.Positions.Close::get),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L3_INVERSE_READY, () -> Commands.sequence(
-
+            elevator.setHeight(Constants.Elevator.Positions.Close::get),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L4_INVERSE_READY, () -> Commands.sequence(
-
+            elevator.setHeight(Constants.Elevator.Positions.Close::get),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addEdge(States.L2_READY, States.L2, Commands.sequence(
-
+            outtake.setPercent(() -> 1)
         ));
 
         addEdge(States.L3_READY, States.L3, Commands.sequence(
-
+            outtake.setPercent(() -> 1)
         ));
 
         addEdge(States.L4_READY, States.L4, Commands.sequence(
-
+            outtake.setPercent(() -> 1)
         ));
 
         addEdge(States.L2_INVERSE_READY, States.L2_INVERSE, Commands.sequence(

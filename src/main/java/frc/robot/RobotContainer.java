@@ -130,26 +130,10 @@ public class RobotContainer {
         driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
     }
 
-//    Pose2d start = new Pose2d(4, 4, Rotation2d.kZero);
-//    Pose2d vision = new Pose2d(2, 2, Rotation2d.kZero);
-//    double distSinceLastReset = 3;
-//    double distFromTag = 3;
-//    Random rand = new Random();
     public void periodic() {
         driverController.periodic();
 
         swerveSubsystem.swerveDrive(driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
-
-//        double a = 4;
-//        Pose2d vision_rand = new Pose2d(vision.getX() + (rand.nextDouble() - 0.5) * (distFromTag * 0.0166 * 2),
-//            vision.getY() + (rand.nextDouble() - 0.5) * (distFromTag * 0.0166 * 2),
-//            vision.getRotation());
-//        Logger.recordOutput("Shytt", vision_rand);
-//        double visionStrength = 1 / (1 + a * Math.pow(distSinceLastReset, -0.5) * distFromTag * distFromTag);
-//        Logger.recordOutput("Stren", visionStrength);
-//        RobotState.getInstance().updateRobotPose(Swerve.getInstance().getModulePositions(), Swerve.getInstance().getGyro().getYaw());
-//        if (DriverStation.isEnabled())
-//            RobotState.getInstance().updateRobotPose(vision_rand, MathSharedStore.getTimestamp(), VecBuilder.fill(visionStrength, visionStrength, visionStrength / 2));
 
         if(Constants.General.kRobotMode == Constants.RobotMode.SIM)
             SimulatedArena.getInstance().simulationPeriodic();
