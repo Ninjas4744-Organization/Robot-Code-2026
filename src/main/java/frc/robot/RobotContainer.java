@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,6 +14,7 @@ import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOReal;
 import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOSim;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
+import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.arm.Arm;
@@ -65,12 +67,12 @@ public class RobotContainer {
                 break;
 
             case REPLAY:
-                arm = new Arm(true, new ArmIO() {});
-                elevator = new Elevator(true, new ElevatorIO() {});
-                intake = new Intake(true, new IntakeIO() {}, new LoggedDigitalInputIO() {}, 4);
-                intakeAngle = new IntakeAngle(true, new IntakeAngleIO() {});
-                intakeAligner = new IntakeAligner(true, new IntakeAlignerIO() {});
-                outtake = new Outtake(true, new OuttakeIO() {});
+                arm = new Arm(false, new ArmIO() {});
+                elevator = new Elevator(false, new ElevatorIO() {});
+                intake = new Intake(false, new IntakeIO() {}, new LoggedDigitalInputIO() {}, 4);
+                intakeAngle = new IntakeAngle(false, new IntakeAngleIO() {});
+                intakeAligner = new IntakeAligner(false, new IntakeAlignerIO() {});
+                outtake = new Outtake(false, new OuttakeIO() {});
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
@@ -128,6 +130,8 @@ public class RobotContainer {
         }));
 
         driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+
+        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
     }
 
     public void periodic() {
