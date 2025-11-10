@@ -124,14 +124,29 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.L1_READY);
         }));
 
+        driverController.circle().onTrue(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.L2);
+            StateMachine.getInstance().changeRobotState(States.L2_READY);
+        }));
+
+        driverController.cross().onTrue(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.L3);
+            StateMachine.getInstance().changeRobotState(States.L3_READY);
+        }));
+
         driverController.square().onTrue(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.L4);
+            StateMachine.getInstance().changeRobotState(States.L4_READY);
+        }));
+
+        driverController.R2().onTrue(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
             StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
         }));
 
         driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
 
-        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
+//        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
     }
 
     public void periodic() {
