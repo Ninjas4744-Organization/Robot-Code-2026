@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.arm.Arm;
@@ -12,6 +13,7 @@ import frc.robot.subsystems.intakealigner.IntakeAligner;
 import frc.robot.subsystems.intakeangle.IntakeAngle;
 import frc.robot.subsystems.outtake.Outtake;
 
+import java.awt.Robot;
 import java.util.Map;
 
 public class StateMachine extends StateMachineBase<States> {
@@ -107,6 +109,14 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.waitUntil(elevator::atGoal)
         ));
 
+        addStateEnd(States.CORAL_IN_INTAKE, Map.of(
+                Commands.waitUntil(() -> RobotState.getL() > 1), States.CORAL_IN_OUTTAKE
+        ));
+
+        addStateEnd(States.CORAL_IN_OUTTAKE, Map.of(
+                Commands.waitUntil(() -> RobotState.getL() == 1), States.CORAL_IN_INTAKE
+        ));
+
         // Force know coral inside
         addEdge(States.IDLE, States.CORAL_IN_OUTTAKE);
 
@@ -135,8 +145,17 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         /* **************************************** Coral Outtake **************************************** */
-        addEdge(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF, Commands.sequence(
+        addEdge(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF, new DetachedCommand(
+                swerve.autoDriveToReef(RobotState::isRightReef).get()
+        ));
 
+        addStateEnd(States.DRIVE_REEF, Map.of(
+            Commands.waitUntil(() -> RobotState.getL() == 2 && !RobotState.isInverseReef()), States.L2_READY,
+            Commands.waitUntil(() -> RobotState.getL() == 2 && RobotState.isInverseReef()), States.L2_INVERSE_READY,
+            Commands.waitUntil(() -> RobotState.getL() == 3 && !RobotState.isInverseReef()), States.L3_READY,
+            Commands.waitUntil(() -> RobotState.getL() == 3 && RobotState.isInverseReef()), States.L3_INVERSE_READY,
+            Commands.waitUntil(() -> RobotState.getL() == 4 && !RobotState.isInverseReef()), States.L4_READY,
+            Commands.waitUntil(() -> RobotState.getL() ==4 && RobotState.isInverseReef()), States.L4_INVERSE_READY
         ));
 
         addMultiEdge(States.L2_READY, () -> Commands.sequence(
@@ -206,8 +225,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addMultiEdge(States.IDLE, () -> Commands.sequence(
-            arm.setAngle(() -> Rotation2d.fromRadians(Constants.Arm.Positions.CoralReady.get())),
-            Commands.waitUntil(arm::atGoal),
+            outtake.stop(),
             elevator.setHeight(Constants.Elevator.Positions.Close::get),
             arm.setAngle(() -> Rotation2d.fromRadians(Constants.Arm.Positions.Close.get())),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())

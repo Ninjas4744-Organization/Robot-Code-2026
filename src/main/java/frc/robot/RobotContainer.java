@@ -52,27 +52,27 @@ public class RobotContainer {
     public RobotContainer() {
         switch (Constants.General.kRobotMode) {
             case REAL, SIM:
-                arm = new Arm(false, new ArmIOController());
-                elevator = new Elevator(false, new ElevatorIOController());
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
-                intakeAligner = new IntakeAligner(false, new IntakeAlignerIOController());
-                outtake = new Outtake(false, new OuttakeIOController());
+                arm = new Arm(true, new ArmIOController());
+                elevator = new Elevator(true, new ElevatorIOController());
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
+                intakeAligner = new IntakeAligner(true, new IntakeAlignerIOController());
+                outtake = new Outtake(true, new OuttakeIOController());
 
                 if(Constants.General.kRobotMode == Constants.RobotMode.REAL)
-                    intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
+                    intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
                 else
-                    intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
+                    intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
                 break;
 
             case REPLAY:
-                arm = new Arm(false, new ArmIO() {});
-                elevator = new Elevator(false, new ElevatorIO() {});
-                intake = new Intake(false, new IntakeIO() {}, new LoggedDigitalInputIO() {}, 4);
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIO() {});
-                intakeAligner = new IntakeAligner(false, new IntakeAlignerIO() {});
-                outtake = new Outtake(false, new OuttakeIO() {});
+                arm = new Arm(true, new ArmIO() {});
+                elevator = new Elevator(true, new ElevatorIO() {});
+                intake = new Intake(true, new IntakeIO() {}, new LoggedDigitalInputIO() {}, 4);
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIO() {});
+                intakeAligner = new IntakeAligner(true, new IntakeAlignerIO() {});
+                outtake = new Outtake(true, new OuttakeIO() {});
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
@@ -117,31 +117,39 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driverController.cross().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
-
-        driverController.triangle().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.L1);
-            StateMachine.getInstance().changeRobotState(States.L1_READY);
-        }));
-
-        driverController.circle().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.L2);
-            StateMachine.getInstance().changeRobotState(States.L2_READY);
-        }));
-
-        driverController.cross().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.L3);
-            StateMachine.getInstance().changeRobotState(States.L3_READY);
-        }));
-
-        driverController.square().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.L4);
-            StateMachine.getInstance().changeRobotState(States.L4_READY);
+        driverController.R1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
+        driverController.L1().onTrue(Commands.runOnce(() -> {
+            if(intake.isCoralInside())
+                StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
+            else if(outtake.isCoralInside())
+                StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
+            else
+                StateMachine.getInstance().changeRobotState(States.IDLE);
         }));
 
         driverController.R2().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
-            StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
+            RobotState.setReefSide(true);
+            StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
+        }));
+        driverController.L2().onTrue(Commands.runOnce(() -> {
+            RobotState.setReefSide(false);
+            StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
+        }));
+
+        driverController.square().onTrue(Commands.runOnce(() -> {
+            RobotState.setL(1);
+        }));
+
+        driverController.triangle().onTrue(Commands.runOnce(() -> {
+            RobotState.setL(2);
+        }));
+
+        driverController.circle().onTrue(Commands.runOnce(() -> {
+            RobotState.setL(3);
+        }));
+
+        driverController.cross().onTrue(Commands.runOnce(() -> {
+            RobotState.setL(4);
         }));
 
         driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
