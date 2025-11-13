@@ -92,6 +92,11 @@ public class Outtake extends SubsystemBase {
         isCoralInside = inside;
     }
 
+    public void forceKnowAlgaeInside(boolean inside) {
+        isAlgaeInside = inside;
+    }
+
+
     public boolean isAlgaeInside() {
         if (!enabled)
             return false;

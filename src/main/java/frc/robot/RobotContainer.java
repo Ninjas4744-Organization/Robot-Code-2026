@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -50,16 +51,16 @@ public class RobotContainer {
     public RobotContainer() {
         switch (Constants.General.kRobotMode) {
             case REAL, SIM:
-                arm = new Arm(false, new ArmIOController());
-                elevator = new Elevator(false, new ElevatorIOController());
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
-                intakeAligner = new IntakeAligner(false, new IntakeAlignerIOController());
-                outtake = new Outtake(false, new OuttakeIOController());
+                arm = new Arm(true, new ArmIOController());
+                elevator = new Elevator(true, new ElevatorIOController());
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
+                intakeAligner = new IntakeAligner(true, new IntakeAlignerIOController());
+                outtake = new Outtake(true, new OuttakeIOController());
 
                 if(Constants.General.kRobotMode == Constants.RobotMode.REAL)
-                    intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
+                    intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
                 else
-                    intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
+                    intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
                 break;
@@ -122,12 +123,24 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.L1_READY);
         }));
 
-        driverController.square().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
-            StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
-        }));
-
         driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+
+        driverController.square().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR)));
+
+        driverController.povLeft().onTrue(Commands.runOnce(() -> outtake.forceKnowAlgaeInside(true)));
+
+        driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
+
+        driverController.R2().onTrue(Commands.runOnce(
+                () -> {
+                    double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
+                    if (Math.abs(0 - robotAngle) < 90) {
+                        StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
+                    } else {
+                        StateMachine.getInstance().changeRobotState(States.NET_READY);
+                    }
+                }
+        ));
     }
 
 //    Pose2d start = new Pose2d(4, 4, Rotation2d.kZero);
