@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -127,29 +128,15 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
         }));
 
-        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+//        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
+        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
     }
 
-//    Pose2d start = new Pose2d(4, 4, Rotation2d.kZero);
-//    Pose2d vision = new Pose2d(2, 2, Rotation2d.kZero);
-//    double distSinceLastReset = 3;
-//    double distFromTag = 3;
-//    Random rand = new Random();
     public void periodic() {
         driverController.periodic();
 
         swerveSubsystem.swerveDrive(driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
-
-//        double a = 4;
-//        Pose2d vision_rand = new Pose2d(vision.getX() + (rand.nextDouble() - 0.5) * (distFromTag * 0.0166 * 2),
-//            vision.getY() + (rand.nextDouble() - 0.5) * (distFromTag * 0.0166 * 2),
-//            vision.getRotation());
-//        Logger.recordOutput("Shytt", vision_rand);
-//        double visionStrength = 1 / (1 + a * Math.pow(distSinceLastReset, -0.5) * distFromTag * distFromTag);
-//        Logger.recordOutput("Stren", visionStrength);
-//        RobotState.getInstance().updateRobotPose(Swerve.getInstance().getModulePositions(), Swerve.getInstance().getGyro().getYaw());
-//        if (DriverStation.isEnabled())
-//            RobotState.getInstance().updateRobotPose(vision_rand, MathSharedStore.getTimestamp(), VecBuilder.fill(visionStrength, visionStrength, visionStrength / 2));
 
         if(Constants.General.kRobotMode == Constants.RobotMode.SIM)
             SimulatedArena.getInstance().simulationPeriodic();

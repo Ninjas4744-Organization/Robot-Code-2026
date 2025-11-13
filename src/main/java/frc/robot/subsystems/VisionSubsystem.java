@@ -48,7 +48,8 @@ public class VisionSubsystem extends SubsystemBase {
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Passed Filters", passedFilters);
 
             if (passedFilters || DriverStation.isDisabled()) {
-                RobotState.getInstance().updateRobotPose(estimation.robotPose, estimation.timestamp, strength);
+//                RobotState.getInstance().updateRobotPose(estimation.robotPose, estimation.timestamp, strength);
+                RobotState.getInstance().updateRobotPose(estimation, VecBuilder.fill(1, 1, 1));
                 lastVisionPose = estimation.robotPose;
 
                 odometryDrift *= 1 - strength.get(0, 0);
