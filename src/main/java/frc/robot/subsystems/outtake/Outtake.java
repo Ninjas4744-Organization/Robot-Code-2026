@@ -14,8 +14,6 @@ public class Outtake extends SubsystemBase {
     private OuttakeIO io;
     private final OuttakeIOInputsAutoLogged inputs = new OuttakeIOInputsAutoLogged();
     private boolean enabled;
-    private boolean isCoralInside = false;
-    private boolean isAlgaeInside = false;
     private Timer yesAlgaeTimer = new Timer();
     private Timer noAlgaeTimer = new Timer();
 
@@ -50,12 +48,14 @@ public class Outtake extends SubsystemBase {
 
         if(yesAlgaeTimer.get() > 0.25) {
             if (RobotState.getInstance().getRobotState() == States.INTAKE_ALGAE_REEF || RobotState.getInstance().getRobotState() == States.INTAKE_ALGAE_FLOOR)
-                isAlgaeInside = true;
+                inputs.isAlgaeInside = true;
         }
 
-        if(noAlgaeTimer.get() > 0.25) {
-            isAlgaeInside = false;
-        }
+        //TODO: Temp for sim mode
+
+        //        if(noAlgaeTimer.get() > 0.25) {
+//            inputs.isAlgaeInside = false;
+//        }
 
         io.periodic();
         io.updateInputs(inputs);
@@ -85,15 +85,15 @@ public class Outtake extends SubsystemBase {
         if (!enabled)
             return false;
 
-        return isCoralInside;
+        return inputs.isCoralInside;
     }
 
     public void forceKnowCoralInside(boolean inside) {
-        isCoralInside = inside;
+        inputs.isCoralInside = inside;
     }
 
     public void forceKnowAlgaeInside(boolean inside) {
-        isAlgaeInside = inside;
+        inputs.isAlgaeInside = inside;
     }
 
 
@@ -101,7 +101,7 @@ public class Outtake extends SubsystemBase {
         if (!enabled)
             return false;
 
-        return isAlgaeInside;
+        return inputs.isAlgaeInside;
     }
 
     public Command reset() {
@@ -109,8 +109,8 @@ public class Outtake extends SubsystemBase {
             return Commands.none();
 
         return Commands.runOnce(() -> {
-            isCoralInside = false;
-            isAlgaeInside = false;
+            inputs.isCoralInside = false;
+            inputs.isAlgaeInside = false;
         });
     }
 }

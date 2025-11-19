@@ -212,8 +212,13 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.INTAKE_ALGAE_FLOOR, States.ALGAE_IN_OUTTAKE, Commands.sequence(
-                Commands.waitUntil(outtake::isAlgaeInside)
+                Commands.waitUntil(() -> outtake.isAlgaeInside())
         ));
+
+        //TODO: USE ADD STATE END
+        addStateEnd(
+
+        );
 
 
 

@@ -127,7 +127,11 @@ public class RobotContainer {
 
         driverController.square().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR)));
 
-        driverController.povLeft().onTrue(Commands.runOnce(() -> outtake.forceKnowAlgaeInside(true)));
+        driverController.povUp().whileTrue(Commands.runOnce(() -> {
+            if (!outtake.isAlgaeInside()) {
+                outtake.forceKnowAlgaeInside(true);
+            }
+        }));
 
         driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
 
