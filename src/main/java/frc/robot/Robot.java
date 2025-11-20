@@ -23,7 +23,7 @@ public class Robot extends LoggedRobot {
 
         // Set up data receivers & replay source
         switch (Constants.General.kRobotMode) {
-            case REAL, SIM:
+            case WORKSHOP, COMP, SIM:
                 // A FAT32 formatted USB stick must be connected to one of the roboRIO USB ports.
                 // Running on a real robot, log to a USB stick ("/U/logs")
                 // Also runs sim and logs to logs/ folder
@@ -86,6 +86,8 @@ public class Robot extends LoggedRobot {
         if (autonomousCommand != null) {
             autonomousCommand.cancel();
         }
+
+        robotContainer.reset();
     }
 
     @Override

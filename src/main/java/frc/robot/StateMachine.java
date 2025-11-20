@@ -47,8 +47,15 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.RESET, States.IDLE);
-
         addStateEnd(States.RESET, Map.of(Commands.none(), States.IDLE));
+
+        addEdge(States.STARTING_POSE, States.IDLE, Commands.sequence(
+            elevator.setHeight(Constants.Elevator.Positions.Close::get),
+            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+            swerve.reset(),
+
+            Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
+        ));
 
         /* **************************************** Coral Intake **************************************** */
         addMultiEdge(States.INTAKE_CORAL, () -> Commands.sequence(

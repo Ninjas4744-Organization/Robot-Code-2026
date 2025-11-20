@@ -38,21 +38,28 @@ import java.util.Map;
 
 public class Constants {
     public enum RobotMode {
-        /**
-         * Running on a real robot
-         */
-        REAL,
+        /** Running on a real robot */
+        WORKSHOP,
+
+        /** Running on a real robot in competition */
+        COMP,
 
         /** Running on a simulator */
         SIM,
 
         /** Replaying from a log file */
-        REPLAY
+        REPLAY;
+
+        public boolean isReal() {
+            return this == WORKSHOP || this == COMP;
+        }
     }
 
     public static class General {
-        public static final RobotMode kSimMode = RobotMode.SIM;
-        public static final RobotMode kRobotMode = Robot.isReal() ? RobotMode.REAL : kSimMode;
+        private static final RobotMode kSimMode = RobotMode.SIM;
+        private static final RobotMode kRealMode = RobotMode.WORKSHOP;
+        public static final RobotMode kRobotMode = Robot.isReal() ? kRealMode : kSimMode;
+
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
     }

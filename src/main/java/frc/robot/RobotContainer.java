@@ -50,14 +50,14 @@ public class RobotContainer {
 
     public RobotContainer() {
         switch (Constants.General.kRobotMode) {
-            case REAL, SIM:
+            case WORKSHOP, COMP, SIM:
                 arm = new Arm(false, new ArmIOController());
                 elevator = new Elevator(false, new ElevatorIOController());
                 intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
                 intakeAligner = new IntakeAligner(false, new IntakeAlignerIOController());
                 outtake = new Outtake(false, new OuttakeIOController());
 
-                if(Constants.General.kRobotMode == Constants.RobotMode.REAL)
+                if(Constants.General.kRobotMode.isReal())
                     intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
                 else
                     intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
@@ -81,8 +81,6 @@ public class RobotContainer {
         RobotStateBase.setInstance(new RobotState(Constants.Swerve.kSwerveConstants.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
         new VisionSubsystem();
-
-//        RobotState.getInstance().setRobotPose(start);
 
         configureBindings();
     }
@@ -128,7 +126,6 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
         }));
 
-//        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
     }
@@ -152,5 +149,16 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return Commands.none();
+    }
+
+    public void reset() {
+        if (Constants.General.kRobotMode == Constants.RobotMode.COMP) {
+            RobotState.getInstance().setRobotState(States.STARTING_POSE);
+            StateMachine.getInstance().changeRobotState(States.IDLE, true);
+        }
+        else {
+            RobotState.getInstance().setRobotState(States.UNKNOWN);
+            StateMachine.getInstance().changeRobotState(States.RESET, true);
+        }
     }
 }
