@@ -106,9 +106,8 @@ public class Constants {
             L2Inverse(-225),
             L3Inverse(-225),
             L4Inverse(-225),
-            IntakeAlgae(-15),
-            IntakeAlgaeLow(-15),
-            IntakeAlgaeHigh(0),
+            IntakeAlgaeFloor(-15),
+            IntakeAlgaeReef(0),
             Net(110),
             NetInverse(70),
             Processor(0),
@@ -193,6 +192,8 @@ public class Constants {
 
     public static class Outtake {
         public static final double kCurrentThreshold = 50;
+        //in Seconds
+        public static final double kWaitTimeForAlgaeOuttake = 0.2;
 
         public static final ControllerConstants kControllerConstants = new ControllerConstants();
         static {

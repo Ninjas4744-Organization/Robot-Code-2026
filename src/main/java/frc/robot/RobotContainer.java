@@ -1,7 +1,6 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -128,22 +127,30 @@ public class RobotContainer {
         driverController.square().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR)));
 
         driverController.povUp().whileTrue(Commands.runOnce(() -> {
-            if (!outtake.isAlgaeInside()) {
-                outtake.forceKnowAlgaeInside(true);
-            }
+            outtake.forceKnowAlgaeInside(!outtake.isAlgaeInside());
         }));
 
         driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
 
-        driverController.R2().onTrue(Commands.runOnce(
-                () -> {
+        driverController.R2().onTrue(Commands.either(
+                Commands.runOnce(() -> {
+                    double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
+                    if (Math.abs(0 - robotAngle) < 90) {
+                        StateMachine.getInstance().changeRobotState(States.NET_INVERSE);
+                    } else {
+                        StateMachine.getInstance().changeRobotState(States.NET);
+                    }
+                }),
+                Commands.runOnce(() -> {
                     double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
                     if (Math.abs(0 - robotAngle) < 90) {
                         StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
                     } else {
                         StateMachine.getInstance().changeRobotState(States.NET_READY);
                     }
-                }
+                }),
+                () -> RobotState.getInstance().getRobotState() == States.NET_READY ||
+                        RobotState.getInstance().getRobotState() == States.NET_INVERSE_READY
         ));
     }
 

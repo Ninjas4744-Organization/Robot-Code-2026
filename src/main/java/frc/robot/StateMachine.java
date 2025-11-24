@@ -200,8 +200,9 @@ public class StateMachine extends StateMachineBase<States> {
         /* **************************************** Algae Intake **************************************** */
         //region Algae Intake
         addEdge(States.IDLE, States.INTAKE_ALGAE_FLOOR, Commands.sequence(
-                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeLow.get())),
-                Commands.waitUntil(arm::atGoal),
+                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeFloor.get())),
+                elevator.setHeight(() -> Constants.Elevator.Positions.AlgaeLow.get()),
+                Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal()),
                 outtake.setPercent(Constants.Outtake.Speeds.IntakeAlgae::get)
         ));
 
@@ -212,18 +213,15 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.INTAKE_ALGAE_FLOOR, States.ALGAE_IN_OUTTAKE, Commands.sequence(
-                Commands.waitUntil(() -> outtake.isAlgaeInside())
+                intake.stop()
         ));
 
-        //TODO: USE ADD STATE END
-        addStateEnd(
-
-        );
-
-
+        addStateEnd(States.INTAKE_ALGAE_FLOOR, Map.of(
+                Commands.waitUntil(outtake::isAlgaeInside), States.ALGAE_IN_OUTTAKE
+        ));
 
         addEdge(States.IDLE, States.INTAKE_ALGAE_REEF, Commands.sequence(
-                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeHigh.get())),
+                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeReef.get())),
                 Commands.waitUntil(arm::atGoal),
                 elevator.setHeight(() -> {
                     if (RobotState.getAlliance() == DriverStation.Alliance.Blue)
@@ -243,6 +241,10 @@ public class StateMachine extends StateMachineBase<States> {
         addEdge(States.INTAKE_ALGAE_REEF, States.ALGAE_IN_OUTTAKE, Commands.sequence(
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal() && outtake.isAlgaeInside())
         ));
+
+        addStateEnd(States.INTAKE_ALGAE_REEF, Map.of(
+                Commands.waitUntil(outtake::isAlgaeInside), States.ALGAE_IN_OUTTAKE
+        ));
         //endregion
 
         /* **************************************** Algae Outtake **************************************** */
@@ -254,7 +256,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.NET_READY, States.ALGAE_IN_OUTTAKE, Commands.sequence(
-                arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeHigh.get())),
+                arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeReef.get())),
                 elevator.setHeight(Constants.Elevator.Positions.AlgaeReefHigh::get),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
@@ -273,7 +275,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.NET_INVERSE_READY, States.ALGAE_IN_OUTTAKE, Commands.sequence(
-                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeHigh.get())),
+                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeReef.get())),
                 elevator.setHeight(Constants.Elevator.Positions.AlgaeReefHigh::get),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
@@ -287,14 +289,22 @@ public class StateMachine extends StateMachineBase<States> {
         //region Close From Algae
         addEdge(States.NET, States.IDLE, Commands.sequence(
                 elevator.setHeight(Constants.Elevator.Positions.Close::get),
-                arm.setAngle( Rotation2d.fromRadians(Constants.Arm.Positions.Close.get())),
+                arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.NET_INVERSE, States.IDLE, Commands.sequence(
                 elevator.setHeight(Constants.Elevator.Positions.Close::get),
-                arm.setAngle( Rotation2d.fromRadians(Constants.Arm.Positions.Close.get())),
+                arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
+        ));
+
+        addStateEnd(States.NET, Map.of(
+                Commands.waitSeconds(Constants.Outtake.kWaitTimeForAlgaeOuttake), States.IDLE
+        ));
+
+        addStateEnd(States.NET_INVERSE, Map.of(
+                Commands.waitSeconds(Constants.Outtake.kWaitTimeForAlgaeOuttake), States.IDLE
         ));
         //endregion
     }
