@@ -610,39 +610,6 @@ public class Constants {
     }
 
     public static class AutoDrive {
-        public static double kReefRodOffset = 0.3302 / 2;
 
-        public static double kDistFromReef = 0.56 - 0.005 - 0.01;
-        public static double kDistFromReefInverse = 0.56 - 0.005 - 0.01;
-        public static double kDistFromReefL4 = 0.6 - 0.005 - 0.01;
-
-        public static double kRightSideOffset = 0 - 0.1651 - 0.01;
-        public static double kLeftSideOffset = 0.34 - 0.1651;
-        public static double kRightSideInverseOffset = 0 - 0.1651 + 0.40 - 0.005;
-        public static double kLeftSideInverseOffset = 0 + 0.1651 - 0.40 + 0.33 - 0.36 + 0.03 + 0.005;
-
-        public static double kRightSideL2ExtraOffset = 0;
-        public static double kLeftSideL2ExtraOffset = 0;
-        public static double kRightSideInverseL2ExtraOffset = -0.01;
-        public static double kLeftSideInverseL2ExtraOffset = 0.01;
-
-        public static double kDistThreshold = 0.01;
-        public static Rotation2d kAngleThreshold = Rotation2d.fromDegrees(1.5);
-
-        public static double kDistBackFirstTarget = 0.2;
-        public static double kFirstDistThreshold = 0.08;
-
-        static {
-            boolean isSadna = false;
-
-            if(isSadna) {
-                kDistFromReef = 0.545;
-                kDistFromReefL4 = 0.585;
-                kRightSideOffset = -0.05 - 16.51;
-                kLeftSideOffset = 0.35 - 16.51;
-                kRightSideInverseOffset = -0.05 - 16.51;
-                kLeftSideInverseOffset = 0.35 - 16.51;
-            }
-        }
     }
 }

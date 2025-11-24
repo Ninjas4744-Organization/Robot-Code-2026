@@ -1,11 +1,15 @@
 package frc.robot;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.localization.vision.VisionOutput;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
@@ -83,8 +87,6 @@ public class RobotContainer {
         StateMachineBase.setInstance(new StateMachine());
         new VisionSubsystem();
 
-//        RobotState.getInstance().setRobotPose(start);
-
         configureBindings();
     }
 
@@ -131,6 +133,7 @@ public class RobotContainer {
             RobotState.setReefSide(true);
             StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
         }));
+
         driverController.L2().onTrue(Commands.runOnce(() -> {
             RobotState.setReefSide(false);
             StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
@@ -152,9 +155,9 @@ public class RobotContainer {
             RobotState.setL(4);
         }));
 
-        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
-
-//        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
+        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
+        driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
     }
 
     public void periodic() {
