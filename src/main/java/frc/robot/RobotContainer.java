@@ -115,6 +115,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        driverController.L2().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.IDLE)));
+
+
         driverController.cross().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
 
         driverController.triangle().onTrue(Commands.runOnce(() -> {

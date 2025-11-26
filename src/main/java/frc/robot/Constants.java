@@ -142,7 +142,7 @@ public class Constants {
             kControllerConstants.real.followers[0].inverted = true;
 
             /* Control */
-            kControllerConstants.real.controlConstants = ControlConstants.createProfiledPID(0.8, 0, 0, 0, 14, 100, 0, 0.7, 0.3, 0.3, GravityTypeValue.Elevator_Static);
+            kControllerConstants.real.controlConstants = ControlConstants.createProfiledPID(0.8, 0, 0, 0, 14, 100, 0, 2.5, 0.3, 0.3, GravityTypeValue.Elevator_Static);
             kControllerConstants.real.gearRatio = 6;
 //            kControllerConstants.real.conversionFactor = Math.PI * 0.05; // Fix
             kControllerConstants.real.homePosition = 0;
