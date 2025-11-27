@@ -144,8 +144,11 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         /* **************************************** Coral Outtake **************************************** */
-        addEdge(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF, new DetachedCommand(
-                swerve.autoDriveToReef(RobotState::isRightReef).get()
+        addEdge(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF, Commands.sequence(
+                Commands.runOnce(() -> {
+                    RobotState.setInverseReef(Math.abs(Constants.Field.nearestReef().pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg).minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) > 90);
+                }),
+                new DetachedCommand(swerve.autoDriveToReef())
         ));
 
         addStateEnd(States.DRIVE_REEF, Map.of(
@@ -210,15 +213,15 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addMultiEdge(States.IDLE, () -> Commands.sequence(
-                swerve.close(),
                 outtake.stop(),
                 elevator.setHeight(Constants.Elevator.Positions.Close::get),
                 arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+                swerve.autoBackFromReef(1),
                 Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-                ), States.L2, States.L3, States.L4,
-                States.L2_INVERSE, States.L3_INVERSE, States.L4_INVERSE,
-                States.L2_READY, States.L3_READY, States.L4_READY,
-                States.L2_INVERSE_READY, States.L3_INVERSE_READY, States.L4_INVERSE_READY);
+        ), States.L2, States.L3, States.L4,
+        States.L2_INVERSE, States.L3_INVERSE, States.L4_INVERSE,
+        States.L2_READY, States.L3_READY, States.L4_READY,
+        States.L2_INVERSE_READY, States.L3_INVERSE_READY, States.L4_INVERSE_READY);
 
 
         addMultiEdge(States.L2_READY, () -> Commands.sequence(

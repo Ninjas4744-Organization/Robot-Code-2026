@@ -610,6 +610,15 @@ public class Constants {
     }
 
     public static class AutoDrive {
+        public static final double kDistFromReef = 0.6;
+        public static final double kRightOffset = -0.3;
+        public static final double kLeftOffset = 0.3;
 
+        public static final double kDistFromReefInverse = 0.6;
+        public static final double kRightOffsetInverse = -0.3;
+        public static final double kLeftOffsetInverse = 0.3;
+
+        public static final double kPositionThreshold = 0.03;
+        public static final Rotation2d kRotationThreshold = Rotation2d.fromDegrees(4);
     }
 }
