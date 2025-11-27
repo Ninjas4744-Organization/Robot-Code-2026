@@ -108,6 +108,7 @@ public class Constants {
             L4Inverse(-225),
             IntakeAlgaeFloor(-15),
             IntakeAlgaeReef(0),
+            AlgaeInOuttake(90),
             Net(110),
             NetInverse(70),
             Processor(0),
@@ -174,7 +175,7 @@ public class Constants {
             AlgaeReefHigh(7.5),
             AlgaeReefLow(4.3),
             Net(10.7),
-            AlgaeLow(0.3),
+            AlgaeFloor(0.3),
             Intake(6),
             CoralReady(1.6);
 

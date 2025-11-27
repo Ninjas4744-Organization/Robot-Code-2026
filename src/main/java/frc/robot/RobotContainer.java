@@ -115,10 +115,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driverController.L2().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.IDLE)));
+        driverController.L1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.IDLE)));
 
-
-        driverController.cross().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
+        driverController.R1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
 
         driverController.triangle().onTrue(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.L1);
@@ -127,10 +126,23 @@ public class RobotContainer {
 
         driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
 
-        driverController.square().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR)));
+        driverController.square().onTrue(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR);
 
-        driverController.povUp().whileTrue(Commands.runOnce(() -> {
-            outtake.forceKnowAlgaeInside(!outtake.isAlgaeInside());
+            double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
+            if (Math.abs(0 - robotAngle) < 90) {
+                StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
+                StateMachine.getInstance().changeRobotState(States.NET_INVERSE);
+            } else {
+                StateMachine.getInstance().changeRobotState(States.NET_READY);
+                StateMachine.getInstance().changeRobotState(States.NET);
+            }
+        }));
+
+        driverController.povUp().whileTrue(Commands.startEnd(() -> {
+            outtake.forceKnowAlgaeInside(true);
+        }, () -> {
+            outtake.forceKnowAlgaeInside(false);
         }));
 
         driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
