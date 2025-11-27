@@ -139,6 +139,10 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
         }));
 
+        driverController.create().onTrue(Commands.runOnce(() -> {
+            RobotState.setL(RobotState.getL() % 4 + 1);
+        }));
+
         driverController.square().onTrue(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR);
 
@@ -151,22 +155,12 @@ public class RobotContainer {
                 StateMachine.getInstance().changeRobotState(States.NET);
             }
         }));
-
-        driverController.create().onTrue(Commands.runOnce(() -> {
-            RobotState.setL(RobotState.getL() % 4 + 1);
-        }));
-
-        driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
-        driverController.povUp().whileTrue(Commands.startEnd(() -> {
-            outtake.forceKnowAlgaeInside(true);
-        }, () -> {
-            outtake.forceKnowAlgaeInside(false);
-        }));
-
         driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
 
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
+        driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+        driverController.povUp().whileTrue(Commands.startEnd(() -> outtake.forceKnowAlgaeInside(true), () -> outtake.forceKnowAlgaeInside(false)));
     }
 
     public void periodic() {

@@ -213,7 +213,7 @@ public class StateMachine extends StateMachineBase<States> {
         addMultiEdge(States.IDLE, () -> Commands.sequence(
                 outtake.stop(),
                 elevator.setHeight(Constants.Elevator.Positions.Close::get),
-                arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 swerve.autoBackFromReef(1),
                 Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.L2, States.L3, States.L4,
@@ -224,72 +224,72 @@ public class StateMachine extends StateMachineBase<States> {
 
         addMultiEdge(States.L2_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L2::get),
-            arm.setAngle(() -> Constants.Arm.LPositions[1]),
+            arm.setAngle(Constants.Arm.LPositions[1]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L3_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L3::get),
-            arm.setAngle(() -> Constants.Arm.LPositions[2]),
+            arm.setAngle(Constants.Arm.LPositions[2]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L4_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L4::get),
-            arm.setAngle(() -> Constants.Arm.LPositions[3]),
+            arm.setAngle(Constants.Arm.LPositions[3]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L2_INVERSE_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L2::get),
-            arm.setAngle(() -> Constants.Arm.LPositionsInverse[1]),
+            arm.setAngle(Constants.Arm.LPositionsInverse[1]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L3_INVERSE_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L3::get),
-            arm.setAngle(() -> Constants.Arm.LPositionsInverse[2]),
+            arm.setAngle(Constants.Arm.LPositionsInverse[2]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addMultiEdge(States.L4_INVERSE_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L4::get),
-            arm.setAngle(() -> Constants.Arm.LPositionsInverse[3]),
+            arm.setAngle(Constants.Arm.LPositionsInverse[3]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
 
         addEdge(States.L2_READY, States.L2, Commands.sequence(
-            arm.setAngle(() -> Constants.Arm.LPositionsDown[1]),
+            arm.setAngle(Constants.Arm.LPositionsDown[1]),
             outtake.setPercent(() -> 1),
             Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L3_READY, States.L3, Commands.sequence(
-            arm.setAngle(() -> Constants.Arm.LPositionsDown[2]),
+            arm.setAngle(Constants.Arm.LPositionsDown[2]),
             outtake.setPercent(() -> 1),
             Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L4_READY, States.L4, Commands.sequence(
-            arm.setAngle(() -> Constants.Arm.LPositionsDown[3]),
+            arm.setAngle(Constants.Arm.LPositionsDown[3]),
             outtake.setPercent(() -> 1),
             Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L2_INVERSE_READY, States.L2_INVERSE, Commands.sequence(
-            arm.setAngle(() -> Constants.Arm.LPositionsDownInverse[1]),
+            arm.setAngle(Constants.Arm.LPositionsDownInverse[1]),
             outtake.setPercent(() -> 1),
             Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L3_INVERSE_READY, States.L3_INVERSE, Commands.sequence(
-            arm.setAngle(() -> Constants.Arm.LPositionsDownInverse[2]),
+            arm.setAngle(Constants.Arm.LPositionsDownInverse[2]),
             outtake.setPercent(() -> 1),
             Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L4_INVERSE_READY, States.L4_INVERSE, Commands.sequence(
-            arm.setAngle(() -> Constants.Arm.LPositionsDownInverse[3]),
+            arm.setAngle(Constants.Arm.LPositionsDownInverse[3]),
             outtake.setPercent(() -> 1),
             Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));

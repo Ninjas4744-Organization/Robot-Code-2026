@@ -15,8 +15,6 @@ public class OuttakeIOController implements OuttakeIO{
     @Override
     public void updateInputs(OuttakeIOInputsAutoLogged inputs) {
         controller.updateInputs(inputs);
-        inputs.isCoralInside = RobotContainer.getOuttake().isCoralInside();
-        inputs.isAlgaeInside = RobotContainer.getOuttake().isAlgaeInside();
     }
 
     @Override
