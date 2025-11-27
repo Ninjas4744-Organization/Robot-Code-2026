@@ -51,16 +51,16 @@ public class RobotContainer {
     public RobotContainer() {
         switch (Constants.General.kRobotMode) {
             case REAL, SIM:
-                arm = new Arm(false, new ArmIOController());
-                elevator = new Elevator(false, new ElevatorIOController());
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
-                intakeAligner = new IntakeAligner(false, new IntakeAlignerIOController());
-                outtake = new Outtake(false, new OuttakeIOController());
+                arm = new Arm(true, new ArmIOController());
+                elevator = new Elevator(true, new ElevatorIOController());
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
+                intakeAligner = new IntakeAligner(true, new IntakeAlignerIOController());
+                outtake = new Outtake(true, new OuttakeIOController());
 
                 if(Constants.General.kRobotMode == Constants.RobotMode.REAL)
-                    intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
+                    intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
                 else
-                    intake = new Intake(false, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
+                    intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
                 break;
@@ -116,19 +116,38 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driverController.cross().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
+        driverController.L1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.IDLE)));
+
+        driverController.R1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
 
         driverController.triangle().onTrue(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.L1);
             StateMachine.getInstance().changeRobotState(States.L1_READY);
         }));
 
+        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+
         driverController.square().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
-            StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
+            StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR);
+
+            double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
+            if (Math.abs(0 - robotAngle) < 90) {
+                StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
+                StateMachine.getInstance().changeRobotState(States.NET_INVERSE);
+            } else {
+                StateMachine.getInstance().changeRobotState(States.NET_READY);
+                StateMachine.getInstance().changeRobotState(States.NET);
+            }
         }));
 
-//        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+        driverController.povUp().whileTrue(Commands.startEnd(() -> {
+            outtake.forceKnowAlgaeInside(true);
+        }, () -> {
+            outtake.forceKnowAlgaeInside(false);
+        }));
+
+        driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
+
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
     }

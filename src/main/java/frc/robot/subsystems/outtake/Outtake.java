@@ -14,10 +14,8 @@ public class Outtake extends SubsystemBase {
     private OuttakeIO io;
     private final OuttakeIOInputsAutoLogged inputs = new OuttakeIOInputsAutoLogged();
     private boolean enabled;
-    private boolean isCoralInside = false;
-    private boolean isAlgaeInside = false;
-    private Timer yesAlgaeTimer = new Timer();
-    private Timer noAlgaeTimer = new Timer();
+    boolean isCoralInside = false;
+    boolean isAlgaeInside = false;
 
     public Outtake(boolean enabled, OuttakeIO io) {
         if (enabled) {
@@ -31,31 +29,6 @@ public class Outtake extends SubsystemBase {
     public void periodic() {
         if (!enabled)
             return;
-
-        if (Math.abs(inputs.Current) > 65 && inputs.Output < 0) {
-            if (!yesAlgaeTimer.isRunning())
-                yesAlgaeTimer.restart();
-        } else {
-            yesAlgaeTimer.stop();
-            yesAlgaeTimer.reset();
-        }
-
-        if (Math.abs(inputs.Current) < 65) {
-            if (!noAlgaeTimer.isRunning())
-                noAlgaeTimer.restart();
-        } else {
-            noAlgaeTimer.stop();
-            noAlgaeTimer.reset();
-        }
-
-        if(yesAlgaeTimer.get() > 0.25) {
-            if (RobotState.getInstance().getRobotState() == States.INTAKE_ALGAE_REEF || RobotState.getInstance().getRobotState() == States.INTAKE_ALGAE_FLOOR)
-                isAlgaeInside = true;
-        }
-
-        if(noAlgaeTimer.get() > 0.25) {
-            isAlgaeInside = false;
-        }
 
         io.periodic();
         io.updateInputs(inputs);
@@ -91,6 +64,11 @@ public class Outtake extends SubsystemBase {
     public void forceKnowCoralInside(boolean inside) {
         isCoralInside = inside;
     }
+
+    public void forceKnowAlgaeInside(boolean inside) {
+        isAlgaeInside = inside;
+    }
+
 
     public boolean isAlgaeInside() {
         if (!enabled)

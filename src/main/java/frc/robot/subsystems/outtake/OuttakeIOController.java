@@ -2,6 +2,7 @@ package frc.robot.subsystems.outtake;
 
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class OuttakeIOController implements OuttakeIO{
     private Controller controller;
@@ -14,6 +15,8 @@ public class OuttakeIOController implements OuttakeIO{
     @Override
     public void updateInputs(OuttakeIOInputsAutoLogged inputs) {
         controller.updateInputs(inputs);
+        inputs.isCoralInside = RobotContainer.getOuttake().isCoralInside();
+        inputs.isAlgaeInside = RobotContainer.getOuttake().isAlgaeInside();
     }
 
     @Override
