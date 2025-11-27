@@ -1,11 +1,15 @@
 package frc.robot;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.localization.vision.VisionOutput;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
@@ -14,6 +18,7 @@ import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOReal;
 import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOSim;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
+import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.arm.Arm;
@@ -82,8 +87,6 @@ public class RobotContainer {
         StateMachineBase.setInstance(new StateMachine());
         new VisionSubsystem();
 
-//        RobotState.getInstance().setRobotPose(start);
-
         configureBindings();
     }
 
@@ -116,16 +119,29 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driverController.L1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.IDLE)));
-
         driverController.R1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
-
-        driverController.triangle().onTrue(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.L1);
-            StateMachine.getInstance().changeRobotState(States.L1_READY);
+        driverController.L1().onTrue(Commands.runOnce(() -> {
+            if(intake.isCoralInside())
+                StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
+            else if(outtake.isCoralInside())
+                StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
+            else
+                StateMachine.getInstance().changeRobotState(States.IDLE);
         }));
 
-        driverController.povDown().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+        driverController.R2().onTrue(Commands.runOnce(() -> {
+            RobotState.setReefSide(true);
+            StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
+        }));
+
+        driverController.L2().onTrue(Commands.runOnce(() -> {
+            RobotState.setReefSide(false);
+            StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
+        }));
+
+        driverController.create().onTrue(Commands.runOnce(() -> {
+            RobotState.setL(RobotState.getL() % 4 + 1);
+        }));
 
         driverController.square().onTrue(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR);
@@ -139,17 +155,12 @@ public class RobotContainer {
                 StateMachine.getInstance().changeRobotState(States.NET);
             }
         }));
-
-        driverController.povUp().whileTrue(Commands.startEnd(() -> {
-            outtake.forceKnowAlgaeInside(true);
-        }, () -> {
-            outtake.forceKnowAlgaeInside(false);
-        }));
-
         driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
 
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
+        driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+        driverController.povUp().whileTrue(Commands.startEnd(() -> outtake.forceKnowAlgaeInside(true), () -> outtake.forceKnowAlgaeInside(false)));
     }
 
     public void periodic() {
