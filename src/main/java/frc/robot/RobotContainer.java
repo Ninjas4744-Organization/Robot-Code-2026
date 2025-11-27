@@ -147,26 +147,26 @@ public class RobotContainer {
 
         driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
 
-        driverController.R2().onTrue(Commands.either(
-                Commands.runOnce(() -> {
-                    double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
-                    if (Math.abs(0 - robotAngle) < 90) {
-                        StateMachine.getInstance().changeRobotState(States.NET_INVERSE);
-                    } else {
-                        StateMachine.getInstance().changeRobotState(States.NET);
-                    }
-                }),
-                Commands.runOnce(() -> {
-                    double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
-                    if (Math.abs(0 - robotAngle) < 90) {
-                        StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
-                    } else {
-                        StateMachine.getInstance().changeRobotState(States.NET_READY);
-                    }
-                }),
-                () -> RobotState.getInstance().getRobotState() == States.NET_READY ||
-                        RobotState.getInstance().getRobotState() == States.NET_INVERSE_READY
-        ));
+//        driverController.R2().onTrue(Commands.either(
+//                Commands.runOnce(() -> {
+//                    double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
+//                    if (Math.abs(0 - robotAngle) < 90) {
+//                        StateMachine.getInstance().changeRobotState(States.NET_INVERSE);
+//                    } else {
+//                        StateMachine.getInstance().changeRobotState(States.NET);
+//                    }
+//                }),
+//                Commands.runOnce(() -> {
+//                    double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
+//                    if (Math.abs(0 - robotAngle) < 90) {
+//                        StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
+//                    } else {
+//                        StateMachine.getInstance().changeRobotState(States.NET_READY);
+//                    }
+//                }),
+//                () -> RobotState.getInstance().getRobotState() == States.NET_READY ||
+//                        RobotState.getInstance().getRobotState() == States.NET_INVERSE_READY
+//        ));
     }
 
 //    Pose2d start = new Pose2d(4, 4, Rotation2d.kZero);
