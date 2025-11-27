@@ -140,22 +140,31 @@ public class RobotContainer {
         }));
 
         driverController.square().onTrue(Commands.runOnce(() -> {
-            RobotState.setL(1);
+            StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR);
+
+            double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
+            if (Math.abs(0 - robotAngle) < 90) {
+                StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
+                StateMachine.getInstance().changeRobotState(States.NET_INVERSE);
+            } else {
+                StateMachine.getInstance().changeRobotState(States.NET_READY);
+                StateMachine.getInstance().changeRobotState(States.NET);
+            }
         }));
 
-        driverController.triangle().onTrue(Commands.runOnce(() -> {
-            RobotState.setL(2);
-        }));
-
-        driverController.circle().onTrue(Commands.runOnce(() -> {
-            RobotState.setL(3);
-        }));
-
-        driverController.cross().onTrue(Commands.runOnce(() -> {
-            RobotState.setL(4);
+        driverController.create().onTrue(Commands.runOnce(() -> {
+            RobotState.setL(RobotState.getL() % 4 + 1);
         }));
 
         driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+        driverController.povUp().whileTrue(Commands.startEnd(() -> {
+            outtake.forceKnowAlgaeInside(true);
+        }, () -> {
+            outtake.forceKnowAlgaeInside(false);
+        }));
+
+        driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
+
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
     }

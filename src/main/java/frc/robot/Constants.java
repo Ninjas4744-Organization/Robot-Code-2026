@@ -106,9 +106,9 @@ public class Constants {
             L2Inverse(-225),
             L3Inverse(-225),
             L4Inverse(-225),
-            IntakeAlgae(-15),
-            IntakeAlgaeLow(-15),
-            IntakeAlgaeHigh(0),
+            IntakeAlgaeFloor(-15),
+            IntakeAlgaeReef(0),
+            AlgaeInOuttake(90),
             Net(110),
             NetInverse(70),
             Processor(0),
@@ -145,7 +145,6 @@ public class Constants {
             /* Control */
             kControllerConstants.real.controlConstants = ControlConstants.createProfiledPID(20, 0, 0, 0, 14, 100, 0, 0.7, 0.3, 0.3, GravityTypeValue.Elevator_Static);
             kControllerConstants.real.gearRatio = 6;
-//            kControllerConstants.real.conversionFactor = Math.PI * 0.05; // Fix
             kControllerConstants.real.homePosition = 0;
             kControllerConstants.real.positionGoalTolerance = 0.05;
 
@@ -154,8 +153,6 @@ public class Constants {
 
             /* Hard Limit */
             kControllerConstants.real.isLimitSwitch = true;
-//            kControllerConstants.real.isVirtualLimit = true;
-//            kControllerConstants.real.virtualLimitStallThreshold = 30 / 12.0;
             kControllerConstants.real.limitSwitchID = 7;
             kControllerConstants.real.limitSwitchDirection = -1;
             kControllerConstants.real.limitSwitchAutoStopReset = true;
@@ -175,7 +172,7 @@ public class Constants {
             AlgaeReefHigh(7.5),
             AlgaeReefLow(4.3),
             Net(10.7),
-            AlgaeLow(0.3),
+            AlgaeFloor(0.3),
             Intake(6),
             CoralReady(1.6);
 
@@ -193,6 +190,8 @@ public class Constants {
 
     public static class Outtake {
         public static final double kCurrentThreshold = 50;
+        //in Seconds
+        public static final double kWaitTimeForAlgaeOuttake = 0.2;
 
         public static final ControllerConstants kControllerConstants = new ControllerConstants();
         static {

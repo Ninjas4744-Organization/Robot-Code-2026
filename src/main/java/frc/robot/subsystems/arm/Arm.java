@@ -32,12 +32,12 @@ public class Arm extends SubsystemBase {
         Logger.processInputs("Arm", inputs);
     }
 
-    public Command setAngle(Supplier<Rotation2d> angle){
+    public Command setAngle(Rotation2d angle){
         if (!enabled) {
             return Commands.none();
         }
 
-        return Commands.runOnce(() -> io.setPosition(angle.get()));
+        return Commands.runOnce(() -> io.setPosition(angle));
     }
 
 //    public Command setAngleSmart(Supplier<Rotation2d> angle) {
