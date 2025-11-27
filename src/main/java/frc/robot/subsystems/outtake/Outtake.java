@@ -14,8 +14,8 @@ public class Outtake extends SubsystemBase {
     private OuttakeIO io;
     private final OuttakeIOInputsAutoLogged inputs = new OuttakeIOInputsAutoLogged();
     private boolean enabled;
-    private Timer yesAlgaeTimer = new Timer();
-    private Timer noAlgaeTimer = new Timer();
+    boolean isCoralInside = false;
+    boolean isAlgaeInside = false;
 
     public Outtake(boolean enabled, OuttakeIO io) {
         if (enabled) {
@@ -29,33 +29,6 @@ public class Outtake extends SubsystemBase {
     public void periodic() {
         if (!enabled)
             return;
-
-        if (Math.abs(inputs.Current) > 65 && inputs.Output < 0) {
-            if (!yesAlgaeTimer.isRunning())
-                yesAlgaeTimer.restart();
-        } else {
-            yesAlgaeTimer.stop();
-            yesAlgaeTimer.reset();
-        }
-
-        if (Math.abs(inputs.Current) < 65) {
-            if (!noAlgaeTimer.isRunning())
-                noAlgaeTimer.restart();
-        } else {
-            noAlgaeTimer.stop();
-            noAlgaeTimer.reset();
-        }
-
-        if(yesAlgaeTimer.get() > 0.25) {
-            if (RobotState.getInstance().getRobotState() == States.INTAKE_ALGAE_REEF || RobotState.getInstance().getRobotState() == States.INTAKE_ALGAE_FLOOR)
-                inputs.isAlgaeInside = true;
-        }
-
-        //TODO: Temp for sim mode
-
-        //        if(noAlgaeTimer.get() > 0.25) {
-//            inputs.isAlgaeInside = false;
-//        }
 
         io.periodic();
         io.updateInputs(inputs);
@@ -85,15 +58,15 @@ public class Outtake extends SubsystemBase {
         if (!enabled)
             return false;
 
-        return inputs.isCoralInside;
+        return isCoralInside;
     }
 
     public void forceKnowCoralInside(boolean inside) {
-        inputs.isCoralInside = inside;
+        isCoralInside = inside;
     }
 
     public void forceKnowAlgaeInside(boolean inside) {
-        inputs.isAlgaeInside = inside;
+        isAlgaeInside = inside;
     }
 
 
@@ -101,7 +74,7 @@ public class Outtake extends SubsystemBase {
         if (!enabled)
             return false;
 
-        return inputs.isAlgaeInside;
+        return isAlgaeInside;
     }
 
     public Command reset() {
@@ -109,8 +82,8 @@ public class Outtake extends SubsystemBase {
             return Commands.none();
 
         return Commands.runOnce(() -> {
-            inputs.isCoralInside = false;
-            inputs.isAlgaeInside = false;
+            isCoralInside = false;
+            isAlgaeInside = false;
         });
     }
 }
