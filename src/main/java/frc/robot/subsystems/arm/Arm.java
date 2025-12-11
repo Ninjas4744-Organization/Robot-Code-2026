@@ -32,47 +32,13 @@ public class Arm extends SubsystemBase {
         Logger.processInputs("Arm", inputs);
     }
 
-    public Command setAngle(Supplier<Rotation2d> angle){
+    public Command setAngle(Rotation2d angle){
         if (!enabled) {
             return Commands.none();
         }
 
-        return Commands.runOnce(() -> io.setPosition(angle.get()));
+        return Commands.runOnce(() -> io.setPosition(angle));
     }
-
-//    public Command setAngleSmart(Supplier<Rotation2d> angle) {
-//        if (!enabled) {
-//            return Commands.none();
-//        }
-//        return Commands.run(() -> {
-//            double elevatorHeight = RobotContainer.getElevator().getHeight();
-//            Rotation2d intakeAngle = RobotContainer.getIntakeAngle().getAngle().rotateBy(Rotation2d.fromRadians(1.33));
-//
-//            double armLength = 0.661302;
-//            double baseArmToChassisDist = 0.36339;
-//            double intakeLength = 0.355595;
-//            double baseIntakeToChassisDist = 0.159569;
-//            double chassisHeight = 0;
-//            double safeDist = 0.05;
-//
-//            double targetArmHeight = armLength * angle.get().getSin() + elevatorHeight + baseArmToChassisDist;
-//            double intakeHeight = intakeLength * intakeAngle.getSin() + baseIntakeToChassisDist;
-//
-//            if (targetArmHeight > intakeHeight) {
-//                if(targetArmHeight > chassisHeight)
-//                    io.setPosition(angle.get());
-//                else {
-//                    targetArmHeight = chassisHeight + safeDist;
-//                    double targetAngle = Math.asin((targetArmHeight - elevatorHeight - baseArmToChassisDist) / armLength);
-//                    io.setPosition(Rotation2d.fromRadians(targetAngle));
-//                }
-//            } else {
-//                targetArmHeight = intakeHeight + safeDist;
-//                double targetAngle = Math.asin((targetArmHeight - elevatorHeight - baseArmToChassisDist) / armLength);
-//                io.setPosition(Rotation2d.fromRadians(targetAngle));
-//            }
-//        }).until(() -> Math.abs(angle.get().getRotations() - inputs.Position) < Constants.Arm.kControllerConstants.real.positionGoalTolerance);
-//    }
 
     public Rotation2d getAngle() {
         if (!enabled) {

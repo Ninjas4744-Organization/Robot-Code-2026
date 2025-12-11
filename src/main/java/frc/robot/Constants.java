@@ -113,9 +113,9 @@ public class Constants {
             L2Inverse(-225),
             L3Inverse(-225),
             L4Inverse(-225),
-            IntakeAlgae(-15),
-            IntakeAlgaeLow(-15),
-            IntakeAlgaeHigh(0),
+            IntakeAlgaeFloor(-15),
+            IntakeAlgaeReef(0),
+            AlgaeInOuttake(90),
             Net(110),
             NetInverse(70),
             Processor(0),
@@ -150,9 +150,8 @@ public class Constants {
             kControllerConstants.real.followers[0].inverted = true;
 
             /* Control */
-            kControllerConstants.real.controlConstants = ControlConstants.createProfiledPID(0.8, 0, 0, 0, 14, 100, 0, 0.7, 0.3, 0.3, GravityTypeValue.Elevator_Static);
+            kControllerConstants.real.controlConstants = ControlConstants.createProfiledPID(20, 0, 0, 0, 14, 100, 0, 0.7, 0.3, 0.3, GravityTypeValue.Elevator_Static);
             kControllerConstants.real.gearRatio = 6;
-//            kControllerConstants.real.conversionFactor = Math.PI * 0.05; // Fix
             kControllerConstants.real.homePosition = 0;
             kControllerConstants.real.positionGoalTolerance = 0.05;
 
@@ -161,8 +160,6 @@ public class Constants {
 
             /* Hard Limit */
             kControllerConstants.real.isLimitSwitch = true;
-//            kControllerConstants.real.isVirtualLimit = true;
-//            kControllerConstants.real.virtualLimitStallThreshold = 30 / 12.0;
             kControllerConstants.real.limitSwitchID = 7;
             kControllerConstants.real.limitSwitchDirection = -1;
             kControllerConstants.real.limitSwitchAutoStopReset = true;
@@ -182,7 +179,7 @@ public class Constants {
             AlgaeReefHigh(7.5),
             AlgaeReefLow(4.3),
             Net(10.7),
-            AlgaeLow(0.3),
+            AlgaeFloor(0.3),
             Intake(6),
             CoralReady(1.6);
 
@@ -200,6 +197,8 @@ public class Constants {
 
     public static class Outtake {
         public static final double kCurrentThreshold = 50;
+        //in Seconds
+        public static final double kWaitTimeForAlgaeOuttake = 0.2;
 
         public static final ControllerConstants kControllerConstants = new ControllerConstants();
         static {
@@ -617,39 +616,15 @@ public class Constants {
     }
 
     public static class AutoDrive {
-        public static double kReefRodOffset = 0.3302 / 2;
+        public static final double kDistFromReef = 0.6;
+        public static final double kRightOffset = -0.3;
+        public static final double kLeftOffset = 0.3;
 
-        public static double kDistFromReef = 0.56 - 0.005 - 0.01;
-        public static double kDistFromReefInverse = 0.56 - 0.005 - 0.01;
-        public static double kDistFromReefL4 = 0.6 - 0.005 - 0.01;
+        public static final double kDistFromReefInverse = 0.6;
+        public static final double kRightOffsetInverse = -0.3;
+        public static final double kLeftOffsetInverse = 0.3;
 
-        public static double kRightSideOffset = 0 - 0.1651 - 0.01;
-        public static double kLeftSideOffset = 0.34 - 0.1651;
-        public static double kRightSideInverseOffset = 0 - 0.1651 + 0.40 - 0.005;
-        public static double kLeftSideInverseOffset = 0 + 0.1651 - 0.40 + 0.33 - 0.36 + 0.03 + 0.005;
-
-        public static double kRightSideL2ExtraOffset = 0;
-        public static double kLeftSideL2ExtraOffset = 0;
-        public static double kRightSideInverseL2ExtraOffset = -0.01;
-        public static double kLeftSideInverseL2ExtraOffset = 0.01;
-
-        public static double kDistThreshold = 0.01;
-        public static Rotation2d kAngleThreshold = Rotation2d.fromDegrees(1.5);
-
-        public static double kDistBackFirstTarget = 0.2;
-        public static double kFirstDistThreshold = 0.08;
-
-        static {
-            boolean isSadna = false;
-
-            if(isSadna) {
-                kDistFromReef = 0.545;
-                kDistFromReefL4 = 0.585;
-                kRightSideOffset = -0.05 - 16.51;
-                kLeftSideOffset = 0.35 - 16.51;
-                kRightSideInverseOffset = -0.05 - 16.51;
-                kLeftSideInverseOffset = 0.35 - 16.51;
-            }
-        }
+        public static final double kPositionThreshold = 0.03;
+        public static final Rotation2d kRotationThreshold = Rotation2d.fromDegrees(4);
     }
 }

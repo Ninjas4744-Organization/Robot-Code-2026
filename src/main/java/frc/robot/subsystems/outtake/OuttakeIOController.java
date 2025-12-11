@@ -2,6 +2,7 @@ package frc.robot.subsystems.outtake;
 
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class OuttakeIOController implements OuttakeIO{
     private Controller controller;

@@ -6,6 +6,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface OuttakeIO {
     @AutoLog
     class OuttakeIOInputs extends Controller.ControllerIOInputs {
+
     }
 
     default void setup() {
