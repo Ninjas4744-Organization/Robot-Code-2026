@@ -142,14 +142,9 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR);
 
             double robotAngle = RobotState.getInstance().getRobotPose().getRotation().getDegrees();
-            if (Math.abs(0 - robotAngle) < 90) {
-                StateMachine.getInstance().changeRobotState(States.NET_INVERSE_READY);
-                StateMachine.getInstance().changeRobotState(States.NET_INVERSE);
-            } else {
-                StateMachine.getInstance().changeRobotState(States.NET_READY);
-                StateMachine.getInstance().changeRobotState(States.NET);
-            }
+            RobotState.setInverseNet(Math.abs(0 - robotAngle) < 90);
         }));
+
         driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
 
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
