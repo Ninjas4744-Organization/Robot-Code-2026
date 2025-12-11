@@ -54,7 +54,7 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.STARTING_POSE, States.IDLE, Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.Close::get),
-            arm.setAngle(() -> Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+            arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
             swerve.reset(),
 
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
@@ -231,8 +231,9 @@ public class StateMachine extends StateMachineBase<States> {
 
 
         addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L2_READY, () -> Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.L2::get),
             arm.setAngle(Constants.Arm.LPositions[1]),
+                Commands.waitUntil(() ->  arm.getAngle().getDegrees() < Constants.Arm.LPositions[1].getDegrees() / 2),
+            elevator.setHeight(Constants.Elevator.Positions.L2::get),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ));
 
