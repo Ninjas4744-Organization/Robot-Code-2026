@@ -13,6 +13,7 @@ import frc.robot.subsystems.intakealigner.IntakeAligner;
 import frc.robot.subsystems.intakeangle.IntakeAngle;
 import frc.robot.subsystems.outtake.Outtake;
 
+import java.util.List;
 import java.util.Map;
 
 public class StateMachine extends StateMachineBase<States> {
@@ -53,12 +54,12 @@ public class StateMachine extends StateMachineBase<States> {
         addStateEnd(States.RESET, Map.of(Commands.none(), States.IDLE));
 
         /* **************************************** Coral Intake **************************************** */
-        addMultiEdge(States.INTAKE_CORAL, () -> Commands.sequence(
+        addMultiEdge(List.of(States.IDLE, States.CORAL_IN_INTAKE, States.L1_READY, States.CORAL_IN_OUTTAKE), States.INTAKE_CORAL, () -> Commands.sequence(
             intake.setVelocity(() -> -1),
             intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Intake.get())),
             intakeAligner.align(),
             Commands.waitUntil(intakeAngle::atGoal)
-        ), States.IDLE, States.CORAL_IN_INTAKE, States.L1_READY, States.CORAL_IN_OUTTAKE);
+        ));
 
         addStateEnd(States.INTAKE_CORAL, Map.of(
                 Commands.waitUntil(intake::isCoralInside), States.CORAL_IN_INTAKE
@@ -118,13 +119,13 @@ public class StateMachine extends StateMachineBase<States> {
         addEdge(States.IDLE, States.CORAL_IN_OUTTAKE);
 
         /* **************************************** L1 **************************************** */
-        addMultiEdge(States.L1_READY, () -> Commands.sequence(
+        addMultiEdge(List.of(States.CORAL_IN_INTAKE, States.INTAKE_CORAL), States.L1_READY, () -> Commands.sequence(
                 intake.stop(),
                 intakeAligner.stop(),
                 intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.L1.get())),
 
                 Commands.waitUntil(intakeAngle::atGoal)
-        ), States.CORAL_IN_INTAKE, States.INTAKE_CORAL);
+        ));
 
         addEdge(States.L1_READY, States.L1, Commands.sequence(
                 intake.setVelocity(() -> 1)
@@ -210,53 +211,53 @@ public class StateMachine extends StateMachineBase<States> {
                 Commands.none(), States.IDLE
         ));
 
-        addMultiEdge(States.IDLE, () -> Commands.sequence(
+        addMultiEdge(List.of(States.L2, States.L3, States.L4,
+                States.L2_INVERSE, States.L3_INVERSE, States.L4_INVERSE,
+                States.L2_READY, States.L3_READY, States.L4_READY,
+                States.L2_INVERSE_READY, States.L3_INVERSE_READY, States.L4_INVERSE_READY), States.IDLE, () -> Commands.sequence(
                 outtake.stop(),
                 elevator.setHeight(Constants.Elevator.Positions.Close::get),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 swerve.autoBackFromReef(1),
                 Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-        ), States.L2, States.L3, States.L4,
-        States.L2_INVERSE, States.L3_INVERSE, States.L4_INVERSE,
-        States.L2_READY, States.L3_READY, States.L4_READY,
-        States.L2_INVERSE_READY, States.L3_INVERSE_READY, States.L4_INVERSE_READY);
+        ));
 
 
-        addMultiEdge(States.L2_READY, () -> Commands.sequence(
+        addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L2_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L2::get),
             arm.setAngle(Constants.Arm.LPositions[1]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-        ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
+        ));
 
-        addMultiEdge(States.L3_READY, () -> Commands.sequence(
+        addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L3_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L3::get),
             arm.setAngle(Constants.Arm.LPositions[2]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-        ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
+        ));
 
-        addMultiEdge(States.L4_READY, () -> Commands.sequence(
+        addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L4_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L4::get),
             arm.setAngle(Constants.Arm.LPositions[3]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-        ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
+        ));
 
-        addMultiEdge(States.L2_INVERSE_READY, () -> Commands.sequence(
+        addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L2_INVERSE_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L2::get),
             arm.setAngle(Constants.Arm.LPositionsInverse[1]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-        ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
+        ));
 
-        addMultiEdge(States.L3_INVERSE_READY, () -> Commands.sequence(
+        addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L3_INVERSE_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L3::get),
             arm.setAngle(Constants.Arm.LPositionsInverse[2]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-        ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
+        ));
 
-        addMultiEdge(States.L4_INVERSE_READY, () -> Commands.sequence(
+        addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L4_INVERSE_READY, () -> Commands.sequence(
             elevator.setHeight(Constants.Elevator.Positions.L4::get),
             arm.setAngle(Constants.Arm.LPositionsInverse[3]),
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
-        ), States.CORAL_IN_OUTTAKE, States.DRIVE_REEF);
+        ));
 
         addEdge(States.L2_READY, States.L2, Commands.sequence(
             arm.setAngle(Constants.Arm.LPositionsDown[1]),
