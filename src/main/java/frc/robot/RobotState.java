@@ -14,9 +14,9 @@ public class RobotState extends RobotStateWithSwerve<States> {
 
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
-        robotState = States.IDLE;
+        robotState = States.UNKNOWN;
 
-        setRobotState(States.IDLE);
+        setRobotState(States.UNKNOWN);
         setL(1);
         setReefSide(true);
         setInverseReef(false);

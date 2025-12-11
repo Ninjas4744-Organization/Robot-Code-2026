@@ -1,15 +1,11 @@
 package frc.robot;
 
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.NinjasLib.localization.vision.VisionOutput;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
@@ -18,7 +14,6 @@ import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOReal;
 import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOSim;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
-import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.arm.Arm;
@@ -55,14 +50,14 @@ public class RobotContainer {
 
     public RobotContainer() {
         switch (Constants.General.kRobotMode) {
-            case REAL, SIM:
+            case WORKSHOP, COMP, SIM, SIM_COMP:
                 arm = new Arm(true, new ArmIOController());
                 elevator = new Elevator(true, new ElevatorIOController());
                 intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
                 intakeAligner = new IntakeAligner(true, new IntakeAlignerIOController());
                 outtake = new Outtake(true, new OuttakeIOController());
 
-                if(Constants.General.kRobotMode == Constants.RobotMode.REAL)
+                if(Constants.General.kRobotMode.isReal())
                     intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
                 else
                     intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
@@ -70,7 +65,7 @@ public class RobotContainer {
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
                 break;
 
-            case REPLAY:
+            case REPLAY, REPLAY_COMP:
                 arm = new Arm(true, new ArmIO() {});
                 elevator = new Elevator(true, new ElevatorIO() {});
                 intake = new Intake(true, new IntakeIO() {}, new LoggedDigitalInputIO() {}, 4);
@@ -168,7 +163,7 @@ public class RobotContainer {
 
         swerveSubsystem.swerveDrive(driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
 
-        if(Constants.General.kRobotMode == Constants.RobotMode.SIM)
+        if(Constants.General.kRobotMode.isSim())
             SimulatedArena.getInstance().simulationPeriodic();
 
         double elevatorStroke = 1.415;
@@ -182,5 +177,16 @@ public class RobotContainer {
 
     public Command getAutonomousCommand() {
         return Commands.none();
+    }
+
+    public void reset() {
+        if (Constants.General.kRobotMode.isComp()) {
+            RobotState.getInstance().setRobotState(States.STARTING_POSE);
+            StateMachine.getInstance().changeRobotState(States.IDLE, true);
+        }
+        else {
+            RobotState.getInstance().setRobotState(States.UNKNOWN);
+            StateMachine.getInstance().changeRobotState(States.RESET, true);
+        }
     }
 }
