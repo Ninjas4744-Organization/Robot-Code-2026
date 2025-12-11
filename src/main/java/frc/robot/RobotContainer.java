@@ -50,7 +50,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         switch (Constants.General.kRobotMode) {
-            case WORKSHOP, COMP, SIM:
+            case WORKSHOP, COMP, SIM, SIM_COMP:
                 arm = new Arm(true, new ArmIOController());
                 elevator = new Elevator(true, new ElevatorIOController());
                 intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
@@ -65,7 +65,7 @@ public class RobotContainer {
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
                 break;
 
-            case REPLAY:
+            case REPLAY, REPLAY_COMP:
                 arm = new Arm(true, new ArmIO() {});
                 elevator = new Elevator(true, new ElevatorIO() {});
                 intake = new Intake(true, new IntakeIO() {}, new LoggedDigitalInputIO() {}, 4);
@@ -163,7 +163,7 @@ public class RobotContainer {
 
         swerveSubsystem.swerveDrive(driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
 
-        if(Constants.General.kRobotMode == Constants.RobotMode.SIM)
+        if(Constants.General.kRobotMode.isSim())
             SimulatedArena.getInstance().simulationPeriodic();
 
         double elevatorStroke = 1.415;
@@ -180,7 +180,7 @@ public class RobotContainer {
     }
 
     public void reset() {
-        if (Constants.General.kRobotMode == Constants.RobotMode.COMP) {
+        if (Constants.General.kRobotMode.isComp()) {
             RobotState.getInstance().setRobotState(States.STARTING_POSE);
             StateMachine.getInstance().changeRobotState(States.IDLE, true);
         }

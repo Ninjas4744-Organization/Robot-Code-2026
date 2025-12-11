@@ -47,11 +47,29 @@ public class Constants {
         /** Running on a simulator */
         SIM,
 
+        /** Running on a simulator in competition */
+        SIM_COMP,
+
         /** Replaying from a log file */
-        REPLAY;
+        REPLAY,
+
+        /** Replaying from a competition log file */
+        REPLAY_COMP;
 
         public boolean isReal() {
             return this == WORKSHOP || this == COMP;
+        }
+
+        public boolean isSim() {
+            return this == SIM || this == SIM_COMP;
+        }
+
+        public boolean isReplay() {
+            return this == REPLAY || this == REPLAY_COMP;
+        }
+
+        public boolean isComp() {
+            return this == COMP || this == REPLAY_COMP || this == SIM_COMP;
         }
     }
 
@@ -449,7 +467,7 @@ public class Constants {
             /* Special */
             kSwerveConstants.special.enableOdometryThread = true;
             kSwerveConstants.special.odometryThreadFrequency = 250;
-            kSwerveConstants.special.isReplay = Constants.General.kRobotMode == RobotMode.REPLAY;
+            kSwerveConstants.special.isReplay = Constants.General.kRobotMode.isReplay();
             kSwerveConstants.special.robotStartPose = new Pose2d(3, 3, Rotation2d.kZero);
             kSwerveConstants.special.CANBus = "Swerve Bus";
 
@@ -492,7 +510,7 @@ public class Constants {
             );
 
             kVisionConstants.fieldLayoutGetter = Constants.Field::getFieldLayoutWithIgnored;
-            kVisionConstants.isReplay = Constants.General.kRobotMode == RobotMode.REPLAY;
+            kVisionConstants.isReplay = Constants.General.kRobotMode.isReplay();
             kVisionConstants.robotPoseSupplier = () -> RobotState.getInstance().getRobotPose();
         }
 
