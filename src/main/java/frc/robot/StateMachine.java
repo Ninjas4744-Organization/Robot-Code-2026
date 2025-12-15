@@ -414,11 +414,6 @@ public class StateMachine extends StateMachineBase<States> {
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
-        addStateEnd(States.ALGAE_IN_OUTTAKE, Map.of(
-                Commands.waitUntil(() -> !RobotState.isInverseNet()), States.NET_READY,
-                Commands.waitUntil(RobotState::isInverseNet), States.NET_INVERSE_READY
-        ));
-
         addEdge(States.NET_INVERSE_READY, States.NET_INVERSE, Commands.sequence(
                 outtake.setPercent(Constants.Outtake.Speeds.OuttakeAlgae::get),
                 Commands.waitSeconds(0.2)
@@ -432,14 +427,16 @@ public class StateMachine extends StateMachineBase<States> {
         //endregion
 
         //region Close From Algae
-        addMultiEdge(List.of(States.NET, States.NET_INVERSE), States.IDLE, () -> Commands.sequence(
+        addEdge(States.NET, States.IDLE, Commands.sequence(
                 elevator.setHeight(Constants.Elevator.Positions.Close::get),
                 arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
-        addStateEnd(States.NET, Map.of(
-                Commands.waitSeconds(Constants.Outtake.kWaitTimeForAlgaeOuttake), States.IDLE
+        addEdge(States.NET_INVERSE, States.IDLE, Commands.sequence(
+                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
+                Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addStateEnd(States.NET, Map.of(
