@@ -10,7 +10,6 @@ public class RobotState extends RobotStateWithSwerve<States> {
     private static int L;
     private static boolean rightReef;
     private static boolean inverseReef;
-    private static boolean inverseNet;
 
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
@@ -20,7 +19,6 @@ public class RobotState extends RobotStateWithSwerve<States> {
         setL(1);
         setReefSide(true);
         setInverseReef(false);
-        setInverseNet(false);
     }
 
     public static RobotState getInstance() {
@@ -52,14 +50,5 @@ public class RobotState extends RobotStateWithSwerve<States> {
     public static void setInverseReef(boolean inverseReef) {
         RobotState.inverseReef = inverseReef;
         Logger.recordOutput("Inverse Reef", inverseReef);
-    }
-
-    public static boolean isInverseNet() {
-        return inverseNet;
-    }
-
-    public static void setInverseNet(boolean inverseNet) {
-        RobotState.inverseNet = inverseNet;
-        Logger.recordOutput("Inverse Net", inverseNet);
     }
 }

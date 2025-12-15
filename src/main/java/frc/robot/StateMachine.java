@@ -446,6 +446,24 @@ public class StateMachine extends StateMachineBase<States> {
         addStateEnd(States.NET_INVERSE, Map.of(
                 Commands.waitSeconds(Constants.Outtake.kWaitTimeForAlgaeOuttake), States.IDLE
         ));
+
+        addEdge(States.NET_READY, States.NET_INVERSE_READY, Commands.sequence(
+                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.NetInverse.get())),
+                Commands.waitUntil(arm::atGoal)
+        ));
+
+        addEdge(States.NET_INVERSE_READY, States.NET_READY, Commands.sequence(
+                arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Net.get())),
+                Commands.waitUntil(arm::atGoal)
+        ));
+
+        addStateEnd(States.NET_READY, Map.of(
+                Commands.waitUntil(() -> Math.abs(0 - RobotState.getInstance().getRobotPose().getRotation().getDegrees()) < 90), States.NET_INVERSE_READY
+        ));
+
+        addStateEnd(States.NET_INVERSE_READY, Map.of(
+                Commands.waitUntil(() -> !(Math.abs(0 - RobotState.getInstance().getRobotPose().getRotation().getDegrees()) < 90)), States.NET_READY
+        ));
         //endregion
     }
 }
