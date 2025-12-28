@@ -116,11 +116,17 @@ public class RobotContainer {
     private void configureBindings() {
         driverController.R1().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_CORAL)));
         driverController.L1().onTrue(Commands.runOnce(() -> {
-            if(intake.isCoralInside())
+            System.out.println("L1 Button");
+            if(intake.isCoralInside()) {
+                System.out.println("coral in intake inside");
                 StateMachine.getInstance().changeRobotState(States.CORAL_IN_INTAKE);
-            else if(outtake.isCoralInside())
+            } else if(outtake.isCoralInside()) {
+                System.out.println("coral in outtake inside");
                 StateMachine.getInstance().changeRobotState(States.CORAL_IN_OUTTAKE);
-            else
+            } else if(outtake.isAlgaeInside()) {
+                System.out.println("algae inside");
+                StateMachine.getInstance().changeRobotState(States.ALGAE_IN_OUTTAKE);
+            } else
                 StateMachine.getInstance().changeRobotState(States.IDLE);
         }));
 
@@ -155,7 +161,7 @@ public class RobotContainer {
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
         driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
-        driverController.povUp().whileTrue(Commands.startEnd(() -> outtake.forceKnowAlgaeInside(true), () -> outtake.forceKnowAlgaeInside(false)));
+        driverController.povUp().toggleOnTrue(Commands.startEnd(() -> outtake.forceKnowAlgaeInside(true), () -> outtake.forceKnowAlgaeInside(false)));
     }
 
     public void periodic() {
