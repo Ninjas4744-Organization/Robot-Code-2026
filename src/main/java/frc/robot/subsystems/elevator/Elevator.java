@@ -5,8 +5,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.DoubleSupplier;
-
 public class Elevator extends SubsystemBase {
     private ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
@@ -31,40 +29,14 @@ public class Elevator extends SubsystemBase {
         Logger.processInputs("Elevator", inputs);
     }
 
-    public Command setHeight(DoubleSupplier wantedHeight) {
+    public Command setHeight(double wantedHeight) {
         if (!enabled) {
             return Commands.none();
         }
         return Commands.runOnce(() -> {
-            io.setPosition(wantedHeight.getAsDouble());
+            io.setPosition(wantedHeight);
         });
     }
-
-//    public Command goToLHeight(IntSupplier L) {
-//        return switch (L.getAsInt()) {
-//            case 1 -> setHeight(Constants.Elevator.Positions.Close::get);
-//            case 2 -> setHeight(Constants.Elevator.Positions.L2::get);
-//            case 3 -> setHeight(Constants.Elevator.Positions.L3::get);
-//            case 4-> setHeight(Constants.Elevator.Positions.L4::get);
-//            default -> Commands.none();
-//        };
-//    }
-
-//    public Command goToAlgaeReefHeight() {
-//        return setHeight(Constants.Elevator.Positions.AlgaeReef::get);
-//    }
-//
-//    public Command goToNetHeight() {
-//        return setHeight(Constants.Elevator.Positions.Net::get);
-//    }
-//
-//    public Command goToSafeHeight() {
-//        return setHeight(Constants.Elevator.Positions.Safe::get);
-//    }
-//
-//    public Command goToIntakeHeight() {
-//        return setHeight(Constants.Elevator.Positions.Intake::get);
-//    }
 
     public double getHeight() {
         return inputs.Position;
@@ -99,6 +71,5 @@ public class Elevator extends SubsystemBase {
         }
 
         return inputs.LimitSwitch;
-//        return atGoal();
     }
 }

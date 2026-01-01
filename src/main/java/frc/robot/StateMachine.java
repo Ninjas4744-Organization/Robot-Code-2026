@@ -36,8 +36,31 @@ public class StateMachine extends StateMachineBase<States> {
         SwerveSubsystem swerve = RobotContainer.getSwerve();
 
         /* **************************************** Reset **************************************** */
+        resetRelatedCommands(elevator, arm, intake, intakeAligner, intakeAngle, swerve);
+
+        /* **************************************** Coral Intake **************************************** */
+        coralInputRelatedCommands(intake, intakeAngle, intakeAligner, elevator, outtake);
+
+        /* **************************************** L1 **************************************** */
+        L1RelatedCommands(intake, intakeAligner, intakeAngle);
+
+        /* **************************************** Coral Outtake **************************************** */
+        CoralOuttakeRelatedCommands(swerve, outtake, elevator, arm);
+
+        /* **************************************** Algae Intake **************************************** */
+        algaeIntakeRelatedCommands(arm, elevator, outtake);
+
+        /* **************************************** Algae Outtake **************************************** */
+        algaeOuttakeRelatedCommands(arm, elevator, outtake);
+
+        algaeOuttakeMirroredRelatedCommands(arm, elevator, outtake);
+
+        closeFromAlgaeRelatedCommands(outtake, elevator, arm);
+    }
+
+    private void resetRelatedCommands(Elevator elevator, Arm arm, Intake intake, IntakeAligner intakeAligner, IntakeAngle intakeAngle, SwerveSubsystem swerve) {
         addOmniEdge(States.RESET, () -> Commands.sequence(
-                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 arm.reset(),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 intake.stop(),
@@ -53,19 +76,20 @@ public class StateMachine extends StateMachineBase<States> {
         addStateEnd(States.RESET, Map.of(Commands.none(), States.IDLE));
 
         addEdge(States.STARTING_POSE, States.IDLE, Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.Close::get),
+            elevator.setHeight(Constants.Elevator.Positions.Close.get()),
             arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
             swerve.reset(),
 
             Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ));
+    }
 
-        /* **************************************** Coral Intake **************************************** */
+    private void coralInputRelatedCommands(Intake intake, IntakeAngle intakeAngle, IntakeAligner intakeAligner, Elevator elevator, Outtake outtake) {
         addMultiEdge(List.of(States.IDLE, States.CORAL_IN_INTAKE, States.L1_READY, States.CORAL_IN_OUTTAKE), States.INTAKE_CORAL, () -> Commands.sequence(
-            intake.setVelocity(() -> -1),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Intake.get())),
-            intakeAligner.align(),
-            Commands.waitUntil(intakeAngle::atGoal)
+                intake.setVelocity(() -> -1),
+                intakeAngle.setAngle(Rotation2d.fromDegrees(Constants.IntakeAngle.Positions.Intake.get())),
+                intakeAligner.align(),
+                Commands.waitUntil(intakeAngle::atGoal)
         ));
 
         addStateEnd(States.INTAKE_CORAL, Map.of(
@@ -85,7 +109,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.CORAL_IN_INTAKE, States.CORAL_IN_OUTTAKE, Commands.sequence(
-                elevator.setHeight(Constants.Elevator.Positions.Intake::get),
+                elevator.setHeight(Constants.Elevator.Positions.Intake.get()),
                 Commands.waitUntil(elevator::atGoal),
 
                 outtake.setPercent(() -> -1),
@@ -95,12 +119,12 @@ public class StateMachine extends StateMachineBase<States> {
                 Commands.waitSeconds(0.2),
                 Commands.runOnce(() -> outtake.forceKnowCoralInside(true)),
 
-                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 Commands.waitUntil(elevator::atGoal)
         ));
 
         addEdge(States.CORAL_IN_OUTTAKE, States.CORAL_IN_INTAKE, Commands.sequence(
-                elevator.setHeight(Constants.Elevator.Positions.Intake::get),
+                elevator.setHeight(Constants.Elevator.Positions.Intake.get()),
                 Commands.waitUntil(elevator::atGoal),
 
                 outtake.setPercent(() -> 1),
@@ -110,7 +134,7 @@ public class StateMachine extends StateMachineBase<States> {
                 Commands.waitSeconds(0.2),
                 Commands.runOnce(() -> outtake.forceKnowCoralInside(false)),
 
-                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 Commands.waitUntil(elevator::atGoal)
         ));
 
@@ -124,8 +148,9 @@ public class StateMachine extends StateMachineBase<States> {
 
         // Force know coral inside
         addEdge(States.IDLE, States.CORAL_IN_OUTTAKE);
+    }
 
-        /* **************************************** L1 **************************************** */
+    private void L1RelatedCommands(Intake intake, IntakeAligner intakeAligner, IntakeAngle intakeAngle) {
         addMultiEdge(List.of(States.CORAL_IN_INTAKE, States.INTAKE_CORAL), States.L1_READY, () -> Commands.sequence(
                 intake.stop(),
                 intakeAligner.stop(),
@@ -148,8 +173,9 @@ public class StateMachine extends StateMachineBase<States> {
 
                 Commands.waitUntil(intakeAngle::atGoal)
         ));
+    }
 
-        /* **************************************** Coral Outtake **************************************** */
+    private void CoralOuttakeRelatedCommands(SwerveSubsystem swerve, Outtake outtake, Elevator elevator, Arm arm) {
         addEdge(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF, Commands.sequence(
                 Commands.runOnce(() -> {
                     RobotState.setInverseReef(Math.abs(Constants.Field.nearestReef().pose.toPose2d().getRotation().rotateBy(Rotation2d.k180deg).minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) > 90);
@@ -158,12 +184,12 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addStateEnd(States.DRIVE_REEF, Map.of(
-            Commands.waitUntil(() -> RobotState.getL() == 2 && !RobotState.isInverseReef()), States.L2_READY,
-            Commands.waitUntil(() -> RobotState.getL() == 2 && RobotState.isInverseReef()), States.L2_INVERSE_READY,
-            Commands.waitUntil(() -> RobotState.getL() == 3 && !RobotState.isInverseReef()), States.L3_READY,
-            Commands.waitUntil(() -> RobotState.getL() == 3 && RobotState.isInverseReef()), States.L3_INVERSE_READY,
-            Commands.waitUntil(() -> RobotState.getL() == 4 && !RobotState.isInverseReef()), States.L4_READY,
-            Commands.waitUntil(() -> RobotState.getL() == 4 && RobotState.isInverseReef()), States.L4_INVERSE_READY
+                Commands.waitUntil(() -> RobotState.getL() == 2 && !RobotState.isInverseReef()), States.L2_READY,
+                Commands.waitUntil(() -> RobotState.getL() == 2 && RobotState.isInverseReef()), States.L2_INVERSE_READY,
+                Commands.waitUntil(() -> RobotState.getL() == 3 && !RobotState.isInverseReef()), States.L3_READY,
+                Commands.waitUntil(() -> RobotState.getL() == 3 && RobotState.isInverseReef()), States.L3_INVERSE_READY,
+                Commands.waitUntil(() -> RobotState.getL() == 4 && !RobotState.isInverseReef()), States.L4_READY,
+                Commands.waitUntil(() -> RobotState.getL() == 4 && RobotState.isInverseReef()), States.L4_INVERSE_READY
         ));
 
         addStateEnd(States.L2_READY, Map.of(
@@ -220,7 +246,7 @@ public class StateMachine extends StateMachineBase<States> {
                 States.L2_READY, States.L3_READY, States.L4_READY,
                 States.L2_INVERSE_READY, States.L3_INVERSE_READY, States.L4_INVERSE_READY), States.IDLE, () -> Commands.sequence(
                 outtake.stop(),
-                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 swerve.autoBackFromReef(1),
                 Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
@@ -228,100 +254,100 @@ public class StateMachine extends StateMachineBase<States> {
 
 
         addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L2_READY, () -> Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.L2::get),
-            arm.setAngle(Constants.Arm.LPositions[1]),
-            Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
+                elevator.setHeight(Constants.Elevator.Positions.L2.get()),
+                arm.setAngle(Constants.Arm.LPositions[1]),
+                Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
         ));
 
         addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L3_READY, () -> Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.L3::get),
-            arm.setAngle(Constants.Arm.LPositions[2]),
-            Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
+                elevator.setHeight(Constants.Elevator.Positions.L3.get()),
+                arm.setAngle(Constants.Arm.LPositions[2]),
+                Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
         ));
 
         addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L4_READY, () -> Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.L4::get),
-            arm.setAngle(Constants.Arm.LPositions[3]),
-            Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
+                elevator.setHeight(Constants.Elevator.Positions.L4.get()),
+                arm.setAngle(Constants.Arm.LPositions[3]),
+                Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
         ));
 
         addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L2_INVERSE_READY, () -> Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.L2::get),
-            arm.setAngle(Constants.Arm.LPositionsInverse[1]),
-            Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
+                elevator.setHeight(Constants.Elevator.Positions.L2.get()),
+                arm.setAngle(Constants.Arm.LPositionsInverse[1]),
+                Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
         ));
 
         addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L3_INVERSE_READY, () -> Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.L3::get),
-            arm.setAngle(Constants.Arm.LPositionsInverse[2]),
-            Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
+                elevator.setHeight(Constants.Elevator.Positions.L3.get()),
+                arm.setAngle(Constants.Arm.LPositionsInverse[2]),
+                Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
         ));
 
         addMultiEdge(List.of(States.CORAL_IN_OUTTAKE, States.DRIVE_REEF), States.L4_INVERSE_READY, () -> Commands.sequence(
-            elevator.setHeight(Constants.Elevator.Positions.L4::get),
-            arm.setAngle(Constants.Arm.LPositionsInverse[3]),
-            Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
+                elevator.setHeight(Constants.Elevator.Positions.L4.get()),
+                arm.setAngle(Constants.Arm.LPositionsInverse[3]),
+                Commands.waitUntil(() -> swerve.atGoal() && elevator.atGoal() && arm.atGoal())
         ));
 
         addEdge(States.L2_READY, States.L2, Commands.sequence(
-            arm.setAngle(Constants.Arm.LPositionsDown[1]),
-            outtake.setPercent(() -> 1),
-            Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
+                arm.setAngle(Constants.Arm.LPositionsDown[1]),
+                outtake.setPercent(() -> 1),
+                Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L3_READY, States.L3, Commands.sequence(
-            arm.setAngle(Constants.Arm.LPositionsDown[2]),
-            outtake.setPercent(() -> 1),
-            Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
+                arm.setAngle(Constants.Arm.LPositionsDown[2]),
+                outtake.setPercent(() -> 1),
+                Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L4_READY, States.L4, Commands.sequence(
-            arm.setAngle(Constants.Arm.LPositionsDown[3]),
-            outtake.setPercent(() -> 1),
-            Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
+                arm.setAngle(Constants.Arm.LPositionsDown[3]),
+                outtake.setPercent(() -> 1),
+                Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L2_INVERSE_READY, States.L2_INVERSE, Commands.sequence(
-            arm.setAngle(Constants.Arm.LPositionsDownInverse[1]),
-            outtake.setPercent(() -> 1),
-            Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
+                arm.setAngle(Constants.Arm.LPositionsDownInverse[1]),
+                outtake.setPercent(() -> 1),
+                Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L3_INVERSE_READY, States.L3_INVERSE, Commands.sequence(
-            arm.setAngle(Constants.Arm.LPositionsDownInverse[2]),
-            outtake.setPercent(() -> 1),
-            Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
+                arm.setAngle(Constants.Arm.LPositionsDownInverse[2]),
+                outtake.setPercent(() -> 1),
+                Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.L4_INVERSE_READY, States.L4_INVERSE, Commands.sequence(
-            arm.setAngle(Constants.Arm.LPositionsDownInverse[3]),
-            outtake.setPercent(() -> 1),
-            Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
+                arm.setAngle(Constants.Arm.LPositionsDownInverse[3]),
+                outtake.setPercent(() -> 1),
+                Commands.waitUntil(() -> swerve.atGoal() && arm.atGoal() && elevator.atGoal())
         ));
+    }
 
-        /* **************************************** Algae Intake **************************************** */
-        //region Algae Intake
+    private void algaeIntakeRelatedCommands(Arm arm, Elevator elevator, Outtake outtake) {
         addEdge(States.IDLE, States.INTAKE_ALGAE_FLOOR, Commands.sequence(
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.IntakeAlgaeFloor.get())),
                 Commands.waitUntil(() -> arm.getAngle().getDegrees() > -70),
-                elevator.setHeight(() -> Constants.Elevator.Positions.AlgaeFloor.get()),
+                elevator.setHeight(Constants.Elevator.Positions.AlgaeFloor.get()),
                 Commands.waitUntil(elevator::atGoal),
                 outtake.setPercent(Constants.Outtake.Speeds.IntakeAlgae::get)
         ));
 
         addEdge(States.INTAKE_ALGAE_FLOOR, States.IDLE, Commands.sequence(
                 outtake.stop(),
-                elevator.setHeight(() -> Constants.Elevator.Positions.Close.get()),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 Commands.waitUntil(() -> elevator.getHeight() >= Constants.Elevator.Positions.L3.get()),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.INTAKE_ALGAE_FLOOR, States.ALGAE_IN_OUTTAKE, Commands.sequence(
-                elevator.setHeight(() -> Constants.Elevator.Positions.AlgaeFloor.get()),
+                elevator.setHeight(Constants.Elevator.Positions.AlgaeFloor.get()),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.AlgaeInOuttake.get())),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal()
-        )));
+                )));
 
         addStateEnd(States.INTAKE_ALGAE_FLOOR, Map.of(
                 Commands.waitUntil(outtake::isAlgaeInside), States.ALGAE_IN_OUTTAKE
@@ -341,69 +367,68 @@ public class StateMachine extends StateMachineBase<States> {
         addEdge(States.INTAKE_ALGAE_REEF, States.IDLE, Commands.sequence(
                 outtake.stop(),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
-                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 Commands.waitUntil(() -> elevator.atGoal() && arm.atGoal())
         ));
 
         addEdge(States.INTAKE_ALGAE_REEF, States.ALGAE_IN_OUTTAKE, Commands.sequence(
-                elevator.setHeight(() -> Constants.Elevator.Positions.AlgaeFloor.get()),
+                elevator.setHeight(Constants.Elevator.Positions.AlgaeFloor.get()),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.AlgaeInOuttake.get())),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal()
-        )));
+                )));
 
         addStateEnd(States.INTAKE_ALGAE_REEF, Map.of(
                 Commands.waitUntil(outtake::isAlgaeInside), States.ALGAE_IN_OUTTAKE
         ));
-        //endregion
+    }
 
-        /* **************************************** Algae Outtake **************************************** */
-        //region Algae Outtake
+    private void algaeOuttakeRelatedCommands(Arm arm, Elevator elevator, Outtake outtake) {
         addEdge(States.ALGAE_IN_OUTTAKE, States.NET_READY, Commands.sequence(
                 arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.Net.get())),
-                elevator.setHeight(Constants.Elevator.Positions.Net::get),
+                elevator.setHeight(Constants.Elevator.Positions.Net.get()),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.NET_READY, States.ALGAE_IN_OUTTAKE, Commands.sequence(
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.AlgaeInOuttake.get())),
-                elevator.setHeight(Constants.Elevator.Positions.AlgaeFloor::get),
+                elevator.setHeight(Constants.Elevator.Positions.AlgaeFloor.get()),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.NET_READY, States.NET, Commands.sequence(
                 outtake.setPercent(Constants.Outtake.Speeds.OuttakeAlgae::get)
         ));
-        //endregion
+    }
 
-        //region Algae Outtake Mirrored
+    private void algaeOuttakeMirroredRelatedCommands(Arm arm, Elevator elevator, Outtake outtake) {
         addEdge(States.ALGAE_IN_OUTTAKE, States.NET_INVERSE_READY, Commands.sequence(
                 arm.setAngle( Rotation2d.fromDegrees(Constants.Arm.Positions.NetInverse.get())),
-                elevator.setHeight(Constants.Elevator.Positions.Net::get),
+                elevator.setHeight(Constants.Elevator.Positions.Net.get()),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.NET_INVERSE_READY, States.ALGAE_IN_OUTTAKE, Commands.sequence(
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.AlgaeInOuttake.get())),
-                elevator.setHeight(Constants.Elevator.Positions.AlgaeFloor::get),
+                elevator.setHeight(Constants.Elevator.Positions.AlgaeFloor.get()),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.NET_INVERSE_READY, States.NET_INVERSE, Commands.sequence(
                 outtake.setPercent(Constants.Outtake.Speeds.OuttakeAlgae::get)
         ));
-        //endregion
+    }
 
-        //region Close From Algae
+    private void closeFromAlgaeRelatedCommands(Outtake outtake, Elevator elevator, Arm arm) {
         addEdge(States.NET, States.IDLE, Commands.sequence(
                 outtake.stop(),
-                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal())
         ));
 
         addEdge(States.NET_INVERSE, States.IDLE, Commands.sequence(
                 outtake.stop(),
-                elevator.setHeight(Constants.Elevator.Positions.Close::get),
+                elevator.setHeight(Constants.Elevator.Positions.Close.get()),
                 arm.setAngle(Rotation2d.fromDegrees(270)),
                 Commands.waitUntil(() -> arm.atGoal() && elevator.atGoal()),
                 arm.setAngle(Rotation2d.fromDegrees(Constants.Arm.Positions.Close.get())),
@@ -417,6 +442,5 @@ public class StateMachine extends StateMachineBase<States> {
         addStateEnd(States.NET_INVERSE, Map.of(
                 Commands.waitSeconds(Constants.Outtake.kWaitTimeForAlgaeOuttake), States.IDLE
         ));
-        //endregion
     }
 }
