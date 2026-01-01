@@ -62,7 +62,7 @@ public class Elevator extends SubsystemBase {
             return Commands.none();
         }
 
-        return setHeight(() -> getHeight() + 1.5).until(() -> atGoal() || inputs.Current > 55).andThen(() -> Commands.runOnce(() -> io.setPercent(0)));
+        return setHeight(getHeight() + 1.5).until(() -> atGoal() || inputs.Current > 55).andThen(() -> Commands.runOnce(() -> io.setPercent(0)));
     }
 
     public boolean isReset() {

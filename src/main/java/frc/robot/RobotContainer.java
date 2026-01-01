@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
@@ -140,9 +141,7 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.DRIVE_REEF);
         }));
 
-        driverController.create().onTrue(Commands.runOnce(() -> {
-            RobotState.setL(RobotState.getL() % 4 + 1);
-        }));
+        driverController.create().onTrue(Commands.runOnce(() -> RobotState.setL(RobotState.getL() % 4 + 1)));
 
         driverController.square().onTrue(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_FLOOR);
@@ -156,7 +155,17 @@ public class RobotContainer {
                 StateMachine.getInstance().changeRobotState(States.NET);
             }
         }));
-        driverController.circle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.INTAKE_ALGAE_REEF)));
+
+        driverController.circle().onTrue(Commands.runOnce(() -> {
+            StateMachine stateMachine = StateMachine.getInstance();
+            if (RobotState.getAlliance() == DriverStation.Alliance.Blue) {
+                if (Constants.Field.nearestReef().ID % 2 == 0) stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_HIGH);
+                else stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_LOW);
+            } else {
+                if (Constants.Field.nearestReef().ID % 2 == 1) stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_HIGH);
+                else stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_LOW);
+            }
+        }));
 
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
