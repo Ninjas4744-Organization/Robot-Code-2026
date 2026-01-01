@@ -4,7 +4,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.NinjasLib.controllers.Controller;
-import frc.robot.Constants;
+import frc.robot.constants.SubsystemConstants;
 
 public class IntakeAngleIOController implements IntakeAngleIO {
     private Controller controller;
@@ -12,12 +12,12 @@ public class IntakeAngleIOController implements IntakeAngleIO {
 
     @Override
     public void setup() {
-        controller = Controller.createController(Controller.ControllerType.TalonFX, Constants.IntakeAngle.kControllerConstants);
+        controller = Controller.createController(Controller.ControllerType.TalonFX, SubsystemConstants.kIntakeAngle);
 
-        canCoder = new CANcoder(Constants.IntakeAngle.kCanCoderID);
+        canCoder = new CANcoder(SubsystemConstants.Other.kIntakeAngleCANCoder.canCoderID);
         CANcoderConfiguration config = new CANcoderConfiguration();
-        config.MagnetSensor.MagnetOffset = Constants.IntakeAngle.kCanCoderOffset;
-        config.MagnetSensor.SensorDirection = Constants.IntakeAngle.kCanCoderReversed;
+        config.MagnetSensor.MagnetOffset = SubsystemConstants.Other.kIntakeAngleCANCoder.canCoderOffset;
+        config.MagnetSensor.SensorDirection = SubsystemConstants.Other.kIntakeAngleCANCoder.canCoderReversed;
         canCoder.getConfigurator().apply(config);
     }
 
