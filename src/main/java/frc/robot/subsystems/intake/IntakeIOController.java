@@ -1,14 +1,14 @@
 package frc.robot.subsystems.intake;
 
 import frc.lib.NinjasLib.controllers.Controller;
-import frc.robot.Constants;
+import frc.robot.constants.SubsystemConstants;
 
 public class IntakeIOController implements IntakeIO {
     private Controller controller;
 
     @Override
     public void setup() {
-        controller = Controller.createController(Controller.ControllerType.TalonFX, Constants.Intake.kControllerConstants);
+        controller = Controller.createController(Controller.ControllerType.TalonFX, SubsystemConstants.kIntake);
     }
 
     @Override

@@ -4,8 +4,8 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.NinjasLib.controllers.Controller;
-import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.constants.SubsystemConstants;
 
 public class ArmIOController implements ArmIO {
     private Controller controller;
@@ -13,13 +13,13 @@ public class ArmIOController implements ArmIO {
 
     @Override
     public void setup() {
-        controller = Controller.createController(Controller.ControllerType.TalonFX, Constants.Arm.kControllerConstants);
+        controller = Controller.createController(Controller.ControllerType.TalonFX, SubsystemConstants.kArm);
 
         if (Robot.isReal()) {
-            canCoder = new CANcoder(Constants.Arm.kCanCoderID);
+            canCoder = new CANcoder(SubsystemConstants.Other.kArmCANCoder.canCoderID);
             CANcoderConfiguration config = new CANcoderConfiguration();
-            config.MagnetSensor.MagnetOffset = Constants.Arm.kCanCoderOffset;
-            config.MagnetSensor.SensorDirection = Constants.Arm.kCanCoderReversed;
+            config.MagnetSensor.MagnetOffset = SubsystemConstants.Other.kArmCANCoder.canCoderOffset;
+            config.MagnetSensor.SensorDirection = SubsystemConstants.Other.kArmCANCoder.canCoderReversed;
             canCoder.getConfigurator().apply(config);
         }
     }

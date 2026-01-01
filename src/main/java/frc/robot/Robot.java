@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.constants.GeneralConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -22,7 +23,7 @@ public class Robot extends LoggedRobot {
         Logger.recordMetadata("ProjectName", "Ninjas-Robot-Code-Template");
 
         // Set up data receivers & replay source
-        switch (Constants.General.kRobotMode) {
+        switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
                 // A FAT32 formatted USB stick must be connected to one of the roboRIO USB ports.
                 // Running on a real robot, log to a USB stick ("/U/logs")
