@@ -1,168 +1,221 @@
 package frc.robot.constants;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.lib.NinjasLib.LoggedTunableNumber;
 
 public class PositionsConstants {
     public static class Arm {
-        private static final double DownAngle = -30;
-        public static final Rotation2d[] LPositions = { Rotation2d.fromDegrees(Positions.Close.get()), Rotation2d.fromDegrees(Positions.L2.get()), Rotation2d.fromDegrees(Positions.L3.get()), Rotation2d.fromDegrees(Positions.L4.get()) };
-        public static final Rotation2d[] LPositionsDown = { Rotation2d.fromDegrees(Positions.Close.get()), Rotation2d.fromDegrees(Positions.L2.get() + DownAngle), Rotation2d.fromDegrees(Positions.L3.get() + DownAngle), Rotation2d.fromDegrees(Positions.L4.get() + DownAngle) };
-        public static final Rotation2d[] LPositionsInverse = { Rotation2d.fromDegrees(Positions.Close.get()), Rotation2d.fromDegrees(Positions.L2Inverse.get()), Rotation2d.fromDegrees(Positions.L3Inverse.get()), Rotation2d.fromDegrees(Positions.L4Inverse.get()) };
-        public static final Rotation2d[] LPositionsDownInverse = { Rotation2d.fromDegrees(Positions.Close.get()), Rotation2d.fromDegrees(Positions.L2Inverse.get() - DownAngle), Rotation2d.fromDegrees(Positions.L3Inverse.get() - DownAngle), Rotation2d.fromDegrees(Positions.L4Inverse.get() - DownAngle) };
-        public enum Positions {
-            Close(-90),
-            L2(-315),
-            L3(-315),
-            L4(-315),
-            L2Inverse(-225),
-            L3Inverse(-225),
-            L4Inverse(-225),
-            IntakeAlgaeFloor(-15),
-            IntakeAlgaeReef(0),
-            AlgaeInOuttake(90),
-            Net(110),
-            NetInverse(70),
-            Processor(0),
-            IntakeCoral(-90),
-            CoralReady(-270);
+        private static final double DOWN_ANGLE = -30;
 
-            final double angle;
+        public static final LoggedTunableNumber CLOSE =
+            new LoggedTunableNumber("Arm/Close", -90, false);
 
-            Positions(double angle) {
-                this.angle = angle;
+        public static final LoggedTunableNumber CORAL_OUTTAKE =
+            new LoggedTunableNumber("Arm/L", -315, false);
+
+        public static final LoggedTunableNumber CORAL_OUTTAKE_INVERSE =
+            new LoggedTunableNumber("Arm/LInverse", -225, false);
+
+        public static final LoggedTunableNumber INTAKE_ALGAE_FLOOR =
+            new LoggedTunableNumber("Arm/IntakeAlgaeFloor", -15, false);
+
+        public static final LoggedTunableNumber INTAKE_ALGAE_REEF =
+            new LoggedTunableNumber("Arm/IntakeAlgaeReef", 0, false);
+
+        public static final LoggedTunableNumber ALGAE_IN_OUTTAKE =
+            new LoggedTunableNumber("Arm/AlgaeInOuttake", 90, false);
+
+        public static final LoggedTunableNumber NET =
+            new LoggedTunableNumber("Arm/Net", 110, false);
+
+        public static final LoggedTunableNumber NET_INVERSE =
+            new LoggedTunableNumber("Arm/NetInverse", 70, false);
+
+        public static final LoggedTunableNumber INTAKE_CORAL =
+            new LoggedTunableNumber("Arm/IntakeCoral", -90, false);
+
+        public static final LoggedTunableNumber CORAL_READY =
+            new LoggedTunableNumber("Arm/CoralReady", -270, false);
+
+        public static Rotation2d getLPosition(int L, boolean inverse, boolean down) {
+            double angle;
+
+            switch (L) {
+                case 1:
+                    angle = CLOSE.get();
+                    break;
+
+                case 2, 4, 3:
+                    angle = inverse ? CORAL_OUTTAKE_INVERSE.get() : CORAL_OUTTAKE.get();
+                    break;
+
+                default:
+                    angle = CLOSE.get();
+                    break;
             }
 
-            public double get() {
-                return angle;
+            if (down && L != 1) {
+                angle += inverse ? -DOWN_ANGLE : DOWN_ANGLE;
             }
+
+            return Rotation2d.fromDegrees(angle);
         }
     }
     
     
     
     public static class Elevator {
-        public static final double[] LPositions = { Positions.Close.get(), Positions.L2.get(), Positions.L3.get(), Positions.L4.get() };
-        public static final double[] LPositionsDown = { Positions.Close.get(), Positions.L2.get() - 1, Positions.L3.get() - 1, Positions.L4.get() - 1 };
-        public enum Positions {
-            Close(6.5),
-            L2(2.25),
-            L3(5.5),
-            L4(10.7),
-            AlgaeReefHigh(7.5),
-            AlgaeReefLow(4.3),
-            Net(10.7),
-            AlgaeFloor(0.3),
-            Intake(6),
-            CoralReady(1.6);
+        private static final double DOWN_OFFSET = 1.0;
 
-            final double height;
+        public static final LoggedTunableNumber CLOSE =
+            new LoggedTunableNumber("Elevator/Close", 6.5, false);
 
-            Positions(double height) {
-                this.height = height;
+        public static final LoggedTunableNumber CORAL_OUTTAKE_L2 =
+            new LoggedTunableNumber("Elevator/CoralOuttake/L2", 2.25, false);
+
+        public static final LoggedTunableNumber CORAL_OUTTAKE_L3 =
+            new LoggedTunableNumber("Elevator/CoralOuttake/L3", 5.5, false);
+
+        public static final LoggedTunableNumber CORAL_OUTTAKE_L4 =
+            new LoggedTunableNumber("Elevator/CoralOuttake/L4", 10.7, false);
+
+        public static final LoggedTunableNumber ALGAE_REEF_HIGH =
+            new LoggedTunableNumber("Elevator/AlgaeReefHigh", 7.5, false);
+
+        public static final LoggedTunableNumber ALGAE_REEF_LOW =
+            new LoggedTunableNumber("Elevator/AlgaeReefLow", 4.3, false);
+
+        public static final LoggedTunableNumber NET =
+            new LoggedTunableNumber("Elevator/Net", 10.7, false);
+
+        public static final LoggedTunableNumber ALGAE_FLOOR =
+            new LoggedTunableNumber("Elevator/AlgaeFloor", 0.3, false);
+
+        public static final LoggedTunableNumber INTAKE =
+            new LoggedTunableNumber("Elevator/Intake", 6.0, false);
+
+        public static final LoggedTunableNumber CORAL_READY =
+            new LoggedTunableNumber("Elevator/CoralReady", 1.6, false);
+
+        public static double getLPosition(int L, boolean down) {
+            double height;
+
+            switch (L) {
+                case 1:
+                    height = CLOSE.get();
+                    break;
+
+                case 2:
+                    height = CORAL_OUTTAKE_L2.get();
+                    break;
+
+                case 3:
+                    height = CORAL_OUTTAKE_L3.get();
+                    break;
+
+                case 4:
+                    height = CORAL_OUTTAKE_L4.get();
+                    break;
+
+                default:
+                    height = CLOSE.get();
+                    break;
             }
 
-            public double get() {
-                return height;
+            if (down && L != 1) {
+                height -= DOWN_OFFSET;
             }
+
+            return height;
         }
     }
     
     
 
     public static class Outtake {
-        public static final double kCurrentThreshold = 50;
-        public static final double kWaitTimeForAlgaeOuttake = 0.2;
+        public static final LoggedTunableNumber CURRENT_THRESHOLD =
+            new LoggedTunableNumber("Outtake/CurrentThreshold", 50, false);
 
-        public enum Speeds {
-            Intake(-0.8),
-            Outtake(0.5),
-            IntakeAlgae(-1),
-            OuttakeAlgae(1);
+        public static final LoggedTunableNumber WAIT_TIME_ALGAE_OUTTAKE =
+            new LoggedTunableNumber("Outtake/WaitTimeAlgaeOuttake", 0.2, false);
 
-            final double speed;
+        public static final LoggedTunableNumber INTAKE =
+            new LoggedTunableNumber("Outtake/IntakeSpeed", -0.8, false);
 
-            Speeds(double speed) {
-                this.speed = speed;
-            }
+        public static final LoggedTunableNumber OUTTAKE =
+            new LoggedTunableNumber("Outtake/OuttakeSpeed", 0.5, false);
 
-            public double get() {
-                return speed;
-            }
-        }
+        public static final LoggedTunableNumber INTAKE_ALGAE =
+            new LoggedTunableNumber("Outtake/IntakeAlgaeSpeed", -1.0, false);
+
+        public static final LoggedTunableNumber OUTTAKE_ALGAE =
+            new LoggedTunableNumber("Outtake/OuttakeAlgaeSpeed", 1.0, false);
     }
     
     
 
     public static class Intake {
-        public enum Speeds {
-            Intake(-70),
-            Outtake(60),
-            OuttakeL1(26);
+        public static final LoggedTunableNumber INTAKE =
+            new LoggedTunableNumber("Intake/IntakeSpeed", -70, false);
 
-            final double speed;
+        public static final LoggedTunableNumber OUTTAKE =
+            new LoggedTunableNumber("Intake/OuttakeSpeed", 60, false);
 
-            Speeds(double speed) {
-                this.speed = speed;
-            }
-
-            public double get() {
-                return speed;
-            }
-        }
+        public static final LoggedTunableNumber OUTTAKE_L1 =
+            new LoggedTunableNumber("Intake/OuttakeL1Speed", 26, false);
     }
     
     
 
     public static class IntakeAngle {
-        public enum Positions {
-            Intake(-23 - 35 - 14 + 5 - 0.5),
-            L1(34),
-            Arm(65 - 0.5),
-            Close(65 - 0.5),
-            Algae(0);
+        public static final LoggedTunableNumber INTAKE =
+            new LoggedTunableNumber("IntakeAngle/Intake", -23 - 35 - 14 + 5 - 0.5, false);
 
-            private final double degrees;
+        public static final LoggedTunableNumber L1 =
+            new LoggedTunableNumber("IntakeAngle/L1", 34, false);
 
-            Positions(double degrees) {
-                this.degrees = degrees;
-            }
+        public static final LoggedTunableNumber ARM =
+            new LoggedTunableNumber("IntakeAngle/Arm", 65 - 0.5, false);
 
-            public double get() {
-                return degrees;
-            }
-        }
+        public static final LoggedTunableNumber CLOSE =
+            new LoggedTunableNumber("IntakeAngle/Close", 65 - 0.5, false);
+
+        public static final LoggedTunableNumber ALGAE =
+            new LoggedTunableNumber("IntakeAngle/Algae", 0, false);
     }
     
     
 
     public static class IntakeAligner {
-        public enum Speeds {
-            Align(100);
-
-            final double speed;
-
-            Speeds(double speed) {
-                this.speed = speed;
-            }
-
-            public double get() {
-                return speed;
-            }
-        }
+        public static final LoggedTunableNumber ALIGN =
+            new LoggedTunableNumber("IntakeAligner/AlignSpeed", 100, false);
     }
     
     
     
     public static class AutoDrive {
-        public static final double kDistFromReef = 0.6;
-        public static final double kRightOffset = -0.3;
-        public static final double kLeftOffset = 0.3;
+        public static final LoggedTunableNumber DIST_FROM_REEF =
+            new LoggedTunableNumber("AutoDrive/DistFromReef", 0.6, false);
 
-        public static final double kDistFromReefInverse = 0.6;
-        public static final double kRightOffsetInverse = -0.3;
-        public static final double kLeftOffsetInverse = 0.3;
+        public static final LoggedTunableNumber RIGHT_OFFSET =
+            new LoggedTunableNumber("AutoDrive/RightOffset", -0.3, false);
 
-        public static final double kPositionThreshold = 0.03;
-        public static final Rotation2d kRotationThreshold = Rotation2d.fromDegrees(4);
+        public static final LoggedTunableNumber LEFT_OFFSET =
+            new LoggedTunableNumber("AutoDrive/LeftOffset", 0.3, false);
+
+        public static final LoggedTunableNumber DIST_FROM_REEF_INVERSE =
+            new LoggedTunableNumber("AutoDrive/DistFromReefInverse", 0.6, false);
+
+        public static final LoggedTunableNumber RIGHT_OFFSET_INVERSE =
+            new LoggedTunableNumber("AutoDrive/RightOffsetInverse", -0.3, false);
+
+        public static final LoggedTunableNumber LEFT_OFFSET_INVERSE =
+            new LoggedTunableNumber("AutoDrive/LeftOffsetInverse", 0.3, false);
+
+        public static final LoggedTunableNumber POSITION_THRESHOLD =
+            new LoggedTunableNumber("AutoDrive/PositionThreshold", 0.03, false);
+
+        public static final LoggedTunableNumber ROTATION_THRESHOLD_DEG =
+            new LoggedTunableNumber("AutoDrive/RotationThresholdDeg", 4.0, false);
     }
 }
