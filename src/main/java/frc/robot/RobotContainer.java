@@ -15,6 +15,7 @@ import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOReal;
 import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOSim;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -161,10 +162,10 @@ public class RobotContainer {
         driverController.circle().onTrue(Commands.runOnce(() -> {
             StateMachine stateMachine = StateMachine.getInstance();
             if (RobotState.getAlliance() == DriverStation.Alliance.Blue) {
-                if (Constants.Field.nearestReef().ID % 2 == 0) stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_HIGH);
+                if (FieldConstants.nearestReef().ID % 2 == 0) stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_HIGH);
                 else stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_LOW);
             } else {
-                if (Constants.Field.nearestReef().ID % 2 == 1) stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_HIGH);
+                if (FieldConstants.nearestReef().ID % 2 == 1) stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_HIGH);
                 else stateMachine.changeRobotState(States.INTAKE_ALGAE_REEF_LOW);
             }
         }));

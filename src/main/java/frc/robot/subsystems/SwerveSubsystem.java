@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -47,22 +48,22 @@ public class SwerveSubsystem extends SubsystemBase {
 
                         if (!RobotState.isInverseReef()) {
                             if (RobotState.isRightReef()) {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.kDistFromReef,
-                                    PositionsConstants.AutoDrive.kRightOffsetInverse,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF.get(),
+                                    PositionsConstants.AutoDrive.RIGHT_OFFSET.get(),
                                         Rotation2d.kZero));
                             } else {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.kDistFromReef,
-                                    PositionsConstants.AutoDrive.kLeftOffset,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF.get(),
+                                    PositionsConstants.AutoDrive.LEFT_OFFSET.get(),
                                         Rotation2d.kZero));
                             }
                         } else {
                             if (RobotState.isRightReef()) {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.kDistFromReefInverse,
-                                    PositionsConstants.AutoDrive.kRightOffsetInverse,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF_INVERSE.get(),
+                                    PositionsConstants.AutoDrive.RIGHT_OFFSET_INVERSE.get(),
                                         Rotation2d.k180deg));
                             } else {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.kDistFromReefInverse,
-                                    PositionsConstants.AutoDrive.kLeftOffsetInverse,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF_INVERSE.get(),
+                                    PositionsConstants.AutoDrive.LEFT_OFFSET_INVERSE.get(),
                                         Rotation2d.k180deg));
                             }
                         }
@@ -118,8 +119,8 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public boolean atGoal() {
-        return distFromGoal() < PositionsConstants.AutoDrive.kPositionThreshold
-                && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getRadians()) < PositionsConstants.AutoDrive.kRotationThreshold.getRadians();
+        return distFromGoal() < PositionsConstants.AutoDrive.POSITION_THRESHOLD.get()
+                && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getRadians()) < Units.degreesToRadians(PositionsConstants.AutoDrive.ROTATION_THRESHOLD_DEG.get());
     }
 
     public Command close() {
