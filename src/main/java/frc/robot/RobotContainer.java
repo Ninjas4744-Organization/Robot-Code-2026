@@ -15,6 +15,8 @@ import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOReal;
 import frc.lib.NinjasLib.loggeddigitalinput.LoggedDigitalInputIOSim;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
+import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.subsystems.arm.Arm;
@@ -50,7 +52,7 @@ public class RobotContainer {
     private static SwerveSubsystem swerveSubsystem;
 
     public RobotContainer() {
-        switch (Constants.General.kRobotMode) {
+        switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
                 arm = new Arm(true, new ArmIOController());
                 elevator = new Elevator(true, new ElevatorIOController());
@@ -58,12 +60,12 @@ public class RobotContainer {
                 intakeAligner = new IntakeAligner(true, new IntakeAlignerIOController());
                 outtake = new Outtake(true, new OuttakeIOController());
 
-                if(Constants.General.kRobotMode.isReal())
+                if(GeneralConstants.kRobotMode.isReal())
                     intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOReal(), 4);
                 else
                     intake = new Intake(true, new IntakeIOController(), new LoggedDigitalInputIOSim(() -> driverController.options().getAsBoolean()), 4);
 
-                driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(Constants.General.kDriverControllerPort));
+                driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
                 break;
 
             case REPLAY, REPLAY_COMP:
@@ -79,7 +81,7 @@ public class RobotContainer {
         }
 
         swerveSubsystem = new SwerveSubsystem(true);
-        RobotStateBase.setInstance(new RobotState(Constants.Swerve.kSwerveConstants.chassis.kinematics));
+        RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
         new VisionSubsystem();
 
@@ -178,7 +180,7 @@ public class RobotContainer {
 
         swerveSubsystem.swerveDrive(driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
 
-        if(Constants.General.kRobotMode.isSim())
+        if(GeneralConstants.kRobotMode.isSim())
             SimulatedArena.getInstance().simulationPeriodic();
 
         double elevatorStroke = 1.415;
@@ -195,7 +197,7 @@ public class RobotContainer {
     }
 
     public void reset() {
-        if (Constants.General.kRobotMode.isComp()) {
+        if (GeneralConstants.kRobotMode.isComp()) {
             RobotState.getInstance().setRobotState(States.STARTING_POSE);
             StateMachine.getInstance().changeRobotState(States.IDLE, true);
         }

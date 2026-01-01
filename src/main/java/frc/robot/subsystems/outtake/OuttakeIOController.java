@@ -1,15 +1,14 @@
 package frc.robot.subsystems.outtake;
 
 import frc.lib.NinjasLib.controllers.Controller;
-import frc.robot.Constants;
-import frc.robot.RobotContainer;
+import frc.robot.constants.SubsystemConstants;
 
 public class OuttakeIOController implements OuttakeIO{
     private Controller controller;
 
     @Override
     public void setup() {
-        controller = Controller.createController(Controller.ControllerType.TalonFX, Constants.Outtake.kControllerConstants);
+        controller = Controller.createController(Controller.ControllerType.TalonFX, SubsystemConstants.kOuttake);
     }
 
     @Override
