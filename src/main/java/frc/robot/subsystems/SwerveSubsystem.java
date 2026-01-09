@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -12,9 +13,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveController;
 import frc.lib.NinjasLib.swerve.SwerveInput;
-import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.RobotState;
+import frc.robot.constants.FieldConstants;
+import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.PositionsConstants;
+import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -28,8 +32,8 @@ public class SwerveSubsystem extends SubsystemBase {
         this.enabled = enabled;
 
         if (enabled) {
-            Swerve.setInstance(new Swerve(Constants.Swerve.kSwerveConstants));
-            SwerveController.setInstance(new SwerveController(Constants.Swerve.kSwerveControllerConstants));
+            Swerve.setInstance(new Swerve(SubsystemConstants.kSwerve));
+            SwerveController.setInstance(new SwerveController(SubsystemConstants.kSwerveController));
             SwerveController.getInstance().setChannel("Driver");
 
             target = Pose2d.kZero;
@@ -39,27 +43,27 @@ public class SwerveSubsystem extends SubsystemBase {
                         SwerveController.getInstance().setChannel("AutoReef");
                         SwerveController.getInstance().resetLookAt();
 
-                        target = Constants.Field.nearestReef().pose.toPose2d();
+                        target = FieldConstants.nearestReef().pose.toPose2d();
                         target = new Pose2d(target.getTranslation(), target.getRotation().rotateBy(Rotation2d.k180deg));
 
                         if (!RobotState.isInverseReef()) {
                             if (RobotState.isRightReef()) {
-                                target = target.transformBy(new Transform2d(-Constants.AutoDrive.kDistFromReef,
-                                        Constants.AutoDrive.kRightOffsetInverse,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF.get(),
+                                    PositionsConstants.AutoDrive.RIGHT_OFFSET.get(),
                                         Rotation2d.kZero));
                             } else {
-                                target = target.transformBy(new Transform2d(-Constants.AutoDrive.kDistFromReef,
-                                        Constants.AutoDrive.kLeftOffset,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF.get(),
+                                    PositionsConstants.AutoDrive.LEFT_OFFSET.get(),
                                         Rotation2d.kZero));
                             }
                         } else {
                             if (RobotState.isRightReef()) {
-                                target = target.transformBy(new Transform2d(-Constants.AutoDrive.kDistFromReefInverse,
-                                        Constants.AutoDrive.kRightOffsetInverse,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF_INVERSE.get(),
+                                    PositionsConstants.AutoDrive.RIGHT_OFFSET_INVERSE.get(),
                                         Rotation2d.k180deg));
                             } else {
-                                target = target.transformBy(new Transform2d(-Constants.AutoDrive.kDistFromReefInverse,
-                                        Constants.AutoDrive.kLeftOffsetInverse,
+                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF_INVERSE.get(),
+                                    PositionsConstants.AutoDrive.LEFT_OFFSET_INVERSE.get(),
                                         Rotation2d.k180deg));
                             }
                         }
@@ -85,10 +89,10 @@ public class SwerveSubsystem extends SubsystemBase {
     public void swerveDrive(DoubleSupplier leftX, DoubleSupplier leftY, DoubleSupplier rightX) {
         SwerveController.getInstance().setControl(SwerveController.getInstance().fromPercent(
                 new SwerveInput(
-                        -MathUtil.applyDeadband(leftY.getAsDouble(), Constants.Swerve.kJoystickDeadband) * Constants.Swerve.kDriverSpeedFactor,
-                        -MathUtil.applyDeadband(leftX.getAsDouble(), Constants.Swerve.kJoystickDeadband) * Constants.Swerve.kDriverSpeedFactor,
-                        -MathUtil.applyDeadband(rightX.getAsDouble(), Constants.Swerve.kJoystickDeadband) * Constants.Swerve.kDriverRotationSpeedFactor,
-                        Constants.Swerve.kDriverFieldRelative
+                        -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
+                        -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
+                        -MathUtil.applyDeadband(rightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor,
+                        GeneralConstants.Swerve.kDriverFieldRelative
                 )), "Driver");
     }
 
@@ -115,8 +119,8 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public boolean atGoal() {
-        return distFromGoal() < Constants.AutoDrive.kPositionThreshold
-                && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getRadians()) < Constants.AutoDrive.kRotationThreshold.getRadians();
+        return distFromGoal() < PositionsConstants.AutoDrive.POSITION_THRESHOLD.get()
+                && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getRadians()) < Units.degreesToRadians(PositionsConstants.AutoDrive.ROTATION_THRESHOLD_DEG.get());
     }
 
     public Command close() {
@@ -158,7 +162,7 @@ public class SwerveSubsystem extends SubsystemBase {
         double accLimitAt10 = 24;
         double elevatorHeight = RobotContainer.getElevator().getHeight();
         double accLimit = (accLimitAt0 - accLimitAt10) / -10 * elevatorHeight + accLimitAt0;
-        Constants.Swerve.kSwerveConstants.limits.maxSkidAcceleration = accLimit;
+        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = accLimit;
 
 
         Logger.recordOutput("Swerve/Reef Command", reefCommand.isScheduled() && !reefCommand.isFinished());
