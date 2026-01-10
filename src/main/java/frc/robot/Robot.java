@@ -20,7 +20,7 @@ public class Robot extends LoggedRobot {
 
     public Robot() {
         // Record metadata
-        Logger.recordMetadata("ProjectName", "Ninjas-Robot-Code-Template");
+        Logger.recordMetadata("ProjectName", "Robot-Code-2026");
 
         // Set up data receivers & replay source
         switch (GeneralConstants.kRobotMode) {

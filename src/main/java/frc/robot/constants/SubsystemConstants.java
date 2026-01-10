@@ -1,6 +1,5 @@
 package frc.robot.constants;
 
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -14,7 +13,6 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.constants.ControlConstants;
 import frc.lib.NinjasLib.controllers.constants.ControllerConstants;
-import frc.lib.NinjasLib.controllers.constants.RealControllerConstants;
 import frc.lib.NinjasLib.localization.vision.VisionConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveControllerConstants;
@@ -26,135 +24,6 @@ import java.io.IOException;
 import java.util.Map;
 
 public class SubsystemConstants {
-    public static final ControllerConstants kArm = new ControllerConstants();
-    static {
-        /* Base */
-        kArm.real.main.id = 40;
-        kArm.real.main.inverted = true;
-        kArm.real.currentLimit = 60;
-        kArm.real.isBrakeMode = true;
-
-        /* Control */
-        kArm.real.controlConstants = ControlConstants.createProfiledPID(120, 0, 0, 0, 2, 2, 0, 0, 0, 0.3, GravityTypeValue.Arm_Cosine);
-        kArm.real.gearRatio = 86.4;
-        kArm.real.homePosition = Units.degreesToRotations(-90);
-        kArm.real.positionGoalTolerance = Units.degreesToRotations(4);
-
-        /* Soft Limits */
-        kArm.real.maxSoftLimit = Units.degreesToRotations(360);
-        kArm.real.minSoftLimit = Units.degreesToRotations(-360);
-
-        /* Simulation */
-        kArm.motorType = DCMotor.getKrakenX60(1);
-    }
-
-
-
-    public static final ControllerConstants kElevator = new ControllerConstants();
-    static {
-        /* Base */
-        kElevator.real.main.id = 30;
-        kElevator.real.main.inverted = false;
-        kElevator.real.currentLimit = 60;
-        kElevator.real.isBrakeMode = true;
-
-        /* Followers */
-        kElevator.real.followers = new RealControllerConstants.SimpleControllerConstants[1];
-        kElevator.real.followers[0] = new RealControllerConstants.SimpleControllerConstants();
-        kElevator.real.followers[0].id = 31;
-        kElevator.real.followers[0].inverted = true;
-
-        /* Control */
-        kElevator.real.controlConstants = ControlConstants.createProfiledPID(20, 0, 0, 0, 14, 100, 0, 0.7, 0.3, 0.3, GravityTypeValue.Elevator_Static);
-        kElevator.real.gearRatio = 6;
-        kElevator.real.homePosition = 0;
-        kElevator.real.positionGoalTolerance = 0.05;
-
-        /* Soft Limits */
-        kElevator.real.maxSoftLimit = 10.8;
-
-        /* Hard Limit */
-        kElevator.real.isLimitSwitch = true;
-        kElevator.real.limitSwitchID = 7;
-        kElevator.real.limitSwitchDirection = -1;
-        kElevator.real.limitSwitchAutoStopReset = true;
-        kElevator.real.limitSwitchInverted = true;
-
-        /* Simulation */
-        kElevator.motorType = DCMotor.getKrakenX60(2);
-    }
-
-
-
-    public static final ControllerConstants kOuttake = new ControllerConstants();
-    static {
-        /* Base */
-        kOuttake.real.main.id = 50;
-        kOuttake.real.main.inverted = false;
-        kOuttake.real.currentLimit = 60;
-        kOuttake.real.isBrakeMode = true;
-
-        /* Simulation */
-        kOuttake.motorType = DCMotor.getKrakenX60(1);
-    }
-
-
-
-    public static final ControllerConstants kIntake = new ControllerConstants();
-    static {
-        /* Base */
-        kIntake.real.main.id = 20;
-        kIntake.real.main.inverted = false;
-        kIntake.real.currentLimit = 80;
-        kIntake.real.isBrakeMode = true;
-
-        /* Control */
-        kIntake.real.controlConstants = ControlConstants.createTorqueCurrent(20, 0);
-
-        /* Simulation */
-        kIntake.motorType = DCMotor.getKrakenX60(1);
-    }
-
-
-
-    public static final ControllerConstants kIntakeAngle = new ControllerConstants();
-    static {
-        /* Base */
-        kIntakeAngle.real.main.id = 21;
-        kIntakeAngle.real.main.inverted = true;
-        kIntakeAngle.real.currentLimit = 50;
-        kIntakeAngle.real.isBrakeMode = true;
-
-        /* Control */
-        kIntakeAngle.real.controlConstants = ControlConstants.createProfiledPID(40, 0, 0, 0, 7, 35, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
-        kIntakeAngle.real.gearRatio = 65 + 1 / 3.0;
-        kIntakeAngle.real.conversionFactor = 2 * Math.PI;
-        kIntakeAngle.real.homePosition = Units.degreesToRadians(0);
-        kIntakeAngle.real.positionGoalTolerance = Units.degreesToRadians(3);
-
-        /* Simulation */
-        kIntakeAngle.motorType = DCMotor.getKrakenX60(1);
-    }
-
-
-
-    public static final ControllerConstants kIntakeAligner = new ControllerConstants();
-    static {
-        /* Base */
-        kIntakeAligner.real.main.id = 22;
-        kIntakeAligner.real.main.inverted = true;
-        kIntakeAligner.real.currentLimit = 80;
-        kIntakeAligner.real.isBrakeMode = true;
-
-        /* Control */
-        kIntakeAligner.real.controlConstants = ControlConstants.createTorqueCurrent(20, 0);
-
-        /* Simulation */
-        kIntakeAligner.motorType = DCMotor.getKrakenX60(1);
-    }
-
-
-
     public static final SwerveConstants kSwerve = new SwerveConstants();
     static {
         /* Chassis */
@@ -272,6 +141,8 @@ public class SubsystemConstants {
         kVision.robotPoseSupplier = () -> RobotState.getInstance().getRobotPose();
     }
 
+
+
     public static class Other {
         public static class CANCoderConstants {
             public final int canCoderID;
@@ -284,11 +155,5 @@ public class SubsystemConstants {
                 this.canCoderOffset = canCoderOffset;
             }
         }
-
-        public static final CANCoderConstants kArmCANCoder = new CANCoderConstants(42, 1.010498 - Units.degreesToRotations(2), SensorDirectionValue.CounterClockwise_Positive);
-
-        public static final CANCoderConstants kIntakeAngleCANCoder = new CANCoderConstants(23, 1.322266 - 0.268311, SensorDirectionValue.CounterClockwise_Positive);
-
-        public static final int kIntakeBeamBreakerPort = 8;
     }
 }

@@ -49,7 +49,7 @@ public class GeneralConstants {
     public static class Swerve {
         public static final double kDriverSpeedFactor = 1;
         public static final double kDriverRotationSpeedFactor = 1;
-        public static final double kJoystickDeadband = 0.05;
+        public static final double kJoystickDeadband = 0.02;
         public static final boolean kDriverFieldRelative = true;
     }
 
@@ -60,7 +60,5 @@ public class GeneralConstants {
         public static final double kMaxAngularSpeedFilter = 7;
         public static final double kMaxAmbiguityFilter = 0.2;
         public static final double kOdometryDriftPerMeter = 0.02;
-        public static final double kCrashAcceleration = 15;
-        public static final double kOdometryDriftPerCrash = 0.5;
     }
 }

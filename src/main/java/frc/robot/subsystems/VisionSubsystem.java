@@ -28,15 +28,15 @@ public class VisionSubsystem extends SubsystemBase {
     public void periodic() {
         Vision.getInstance().periodic();
 
-        Logger.recordOutput("Vision/Odometry Drift", odometryDrift);
         odometryDrift += Swerve.getInstance().getOdometryTwist().getNorm() * GeneralConstants.Vision.kOdometryDriftPerMeter;
+        Logger.recordOutput("Vision/Odometry Drift", odometryDrift);
 
         VisionOutput[] estimations = Vision.getInstance().getVisionEstimations();
         for (VisionOutput estimation : estimations) {
             if(!estimation.hasTargets)
                 continue;
 
-            Logger.recordOutput("Vision/" + estimation.cameraName + "/Last Vision Pose", estimation.robotPose);
+            Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose", estimation.robotPose);
 
             Matrix<N3, N1> strength = getVisionStrength(estimation);
 
@@ -50,6 +50,8 @@ public class VisionSubsystem extends SubsystemBase {
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Passed Filters", passedFilters);
 
             if (passedFilters || DriverStation.isDisabled()) {
+                Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose (Passed Filters)", estimation.robotPose);
+
 //                RobotState.getInstance().updateRobotPose(estimation.robotPose, estimation.timestamp, strength);
                 RobotState.getInstance().updateRobotPose(estimation, VecBuilder.fill(1, 1, 1));
                 lastVisionPose = estimation.robotPose;

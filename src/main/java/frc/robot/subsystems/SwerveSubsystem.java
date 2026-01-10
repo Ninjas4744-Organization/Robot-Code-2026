@@ -1,11 +1,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -13,20 +8,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveController;
 import frc.lib.NinjasLib.swerve.SwerveInput;
-import frc.robot.RobotContainer;
-import frc.robot.RobotState;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
-import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
 public class SwerveSubsystem extends SubsystemBase {
     private boolean enabled;
-    private Pose2d target;
-    private Command reefCommand;
 
     public SwerveSubsystem(boolean enabled) {
         this.enabled = enabled;
@@ -35,54 +23,6 @@ public class SwerveSubsystem extends SubsystemBase {
             Swerve.setInstance(new Swerve(SubsystemConstants.kSwerve));
             SwerveController.setInstance(new SwerveController(SubsystemConstants.kSwerveController));
             SwerveController.getInstance().setChannel("Driver");
-
-            target = Pose2d.kZero;
-
-            reefCommand = Commands.sequence(
-                    Commands.runOnce(() -> {
-                        SwerveController.getInstance().setChannel("AutoReef");
-                        SwerveController.getInstance().resetLookAt();
-
-                        target = FieldConstants.nearestReef().pose.toPose2d();
-                        target = new Pose2d(target.getTranslation(), target.getRotation().rotateBy(Rotation2d.k180deg));
-
-                        if (!RobotState.isInverseReef()) {
-                            if (RobotState.isRightReef()) {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF.get(),
-                                    PositionsConstants.AutoDrive.RIGHT_OFFSET.get(),
-                                        Rotation2d.kZero));
-                            } else {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF.get(),
-                                    PositionsConstants.AutoDrive.LEFT_OFFSET.get(),
-                                        Rotation2d.kZero));
-                            }
-                        } else {
-                            if (RobotState.isRightReef()) {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF_INVERSE.get(),
-                                    PositionsConstants.AutoDrive.RIGHT_OFFSET_INVERSE.get(),
-                                        Rotation2d.k180deg));
-                            } else {
-                                target = target.transformBy(new Transform2d(-PositionsConstants.AutoDrive.DIST_FROM_REEF_INVERSE.get(),
-                                    PositionsConstants.AutoDrive.LEFT_OFFSET_INVERSE.get(),
-                                        Rotation2d.k180deg));
-                            }
-                        }
-                    }),
-                    Commands.run(() -> {
-                        Translation2d translation = RobotState.getInstance().getTranslation(target);
-                        Translation2d dir = translation.div(translation.getNorm());
-                        double velocity = f(translation.getNorm());
-
-                        SwerveController.getInstance().setControl(
-                                new SwerveInput(
-                                        velocity * dir.getX(),
-                                        velocity * dir.getY(),
-                                        SwerveController.getInstance().lookAt(target.getRotation()),
-                                        true
-                                ), "AutoReef"
-                        );
-                    })
-            );
         }
     }
 
@@ -96,40 +36,11 @@ public class SwerveSubsystem extends SubsystemBase {
                 )), "Driver");
     }
 
-    double f(double error){
-        double a = 2;
-        double b = 2;
-        return Math.pow(a * error, 1 / b);
-    }
-
-    public Command autoDriveToReef() {
-        return reefCommand;
-    }
-
-    public Command autoBackFromReef(double seconds) {
-        return Commands.runOnce(() -> {
-            reefCommand.cancel();
-            SwerveController.getInstance().setChannel("BackReef");
-            SwerveController.getInstance().setControl(new SwerveInput(RobotState.isInverseReef() ? 2 : -2, 0, 0, false), "BackReef");
-        }).andThen(Commands.waitSeconds(seconds)).andThen(close());
-    }
-
-    public double distFromGoal() {
-        return Math.abs(RobotState.getInstance().getDistance(target));
-    }
-
-    public boolean atGoal() {
-        return distFromGoal() < PositionsConstants.AutoDrive.POSITION_THRESHOLD.get()
-                && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getRadians()) < Units.degreesToRadians(PositionsConstants.AutoDrive.ROTATION_THRESHOLD_DEG.get());
-    }
-
     public Command close() {
         if (!enabled)
             return Commands.none();
 
         return Commands.runOnce(() -> {
-            reefCommand.cancel();
-
             if (DriverStation.isAutonomous()){
                 SwerveController.getInstance().setChannel("Auto");
                 SwerveController.getInstance().setControl(new SwerveInput(), "Auto");
@@ -157,16 +68,5 @@ public class SwerveSubsystem extends SubsystemBase {
             return;
 
         SwerveController.getInstance().periodic();
-
-        double accLimitAt0 = 65;
-        double accLimitAt10 = 24;
-        double elevatorHeight = RobotContainer.getElevator().getHeight();
-        double accLimit = (accLimitAt0 - accLimitAt10) / -10 * elevatorHeight + accLimitAt0;
-        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = accLimit;
-
-
-        Logger.recordOutput("Swerve/Reef Command", reefCommand.isScheduled() && !reefCommand.isFinished());
-        Logger.recordOutput("Swerve/Reef Target", target);
-        Logger.recordOutput("Swerve/Acceleration Limit", accLimit);
     }
 }
