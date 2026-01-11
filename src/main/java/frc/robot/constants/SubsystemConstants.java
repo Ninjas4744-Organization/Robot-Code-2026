@@ -1,5 +1,6 @@
 package frc.robot.constants;
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -24,6 +25,86 @@ import java.io.IOException;
 import java.util.Map;
 
 public class SubsystemConstants {
+    public static final ControllerConstants kShooter= new ControllerConstants();
+    static {
+        /* Base */
+        kShooter.real.main.id = 30;
+        kShooter.real.main.inverted = false;
+        kShooter.real.currentLimit = 1;
+        kShooter.real.isBrakeMode = true;
+
+        /* Control */
+        kShooter.real.controlConstants = ControlConstants.createTorqueCurrent(0, 0);
+
+        /* Simulation */
+        kShooter.motorType = DCMotor.getKrakenX60(1);
+    }
+
+    public static final ControllerConstants kShooterIndexer = new ControllerConstants();
+    static {
+        /* Base */
+        kShooterIndexer.real.main.id = 31;
+        kShooterIndexer.real.main.inverted = false;
+        kShooterIndexer.real.currentLimit = 1;
+        kShooterIndexer.real.isBrakeMode = true;
+
+        /* Control */
+        kShooterIndexer.real.controlConstants = ControlConstants.createTorqueCurrent(0, 0);
+
+        /* Simulation */
+        kShooterIndexer.motorType = DCMotor.getKrakenX60(1);
+    }
+
+    public static final ControllerConstants kIntakeIndexer = new ControllerConstants();
+    static {
+        /* Base */
+        kIntakeIndexer.real.main.id = 22;
+        kIntakeIndexer.real.main.inverted = false;
+        kIntakeIndexer.real.currentLimit = 1;
+        kIntakeIndexer.real.isBrakeMode = true;
+
+        /* Control */
+        kIntakeIndexer.real.controlConstants = ControlConstants.createTorqueCurrent(0, 0);
+
+        /* Simulation */
+        kIntakeIndexer.motorType = DCMotor.getKrakenX60(1);
+    }
+
+    public static final ControllerConstants kIntakeAngle = new ControllerConstants();
+    static {
+        /* Base */
+        kIntakeAngle.real.main.id = 21;
+        kIntakeAngle.real.main.inverted = false;
+        kIntakeAngle.real.currentLimit = 1;
+        kIntakeAngle.real.isBrakeMode = true;
+
+        /* Control */
+        kIntakeAngle.real.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kIntakeAngle.real.gearRatio = 1;
+        kIntakeAngle.real.conversionFactor = 1;
+        kIntakeAngle.real.homePosition = Units.degreesToRadians(0);
+        kIntakeAngle.real.positionGoalTolerance = Units.degreesToRadians(3);
+
+
+        /* Simulation */
+        kIntakeAngle.motorType = DCMotor.getKrakenX60(1);
+    }
+
+    public static final ControllerConstants kIntake = new ControllerConstants();
+    static {
+        /* Base */
+        kIntake.real.main.id = 20;
+        kIntake.real.main.inverted = false;
+        kIntake.real.currentLimit = 1;
+        kIntake.real.isBrakeMode = true;
+
+        /* Control */
+        kIntake.real.controlConstants = ControlConstants.createTorqueCurrent(0, 0);
+
+        /* Simulation */
+        kIntake.motorType = DCMotor.getKrakenX60(1);
+    }
+
     public static final SwerveConstants kSwerve = new SwerveConstants();
     static {
         /* Chassis */
