@@ -1,25 +1,13 @@
 package frc.robot.subsystems.intake;
 
 import frc.lib.NinjasLib.controllers.Controller;
+import frc.lib.NinjasLib.subsystem_interfaces.IO;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface IntakeIO {
+public interface IntakeIO extends
+        IO.Controllable<IntakeIOInputsAutoLogged>
+{
     @AutoLog
     class IntakeIOInputs extends Controller.ControllerIOInputs {
-    }
-
-    default void setup() {
-    }
-
-    default void setPercent(double percent) {
-    }
-
-    default void setVelocity(double velocity) {
-    }
-
-    default void updateInputs(IntakeIOInputsAutoLogged inputs) {
-    }
-
-    default void periodic() {
     }
 }

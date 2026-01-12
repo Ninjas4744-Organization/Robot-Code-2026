@@ -3,11 +3,16 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.NinjasLib.subsystem_interfaces.SubsystemTools;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.DoubleSupplier;
-
-public class Shooter extends SubsystemBase {
+public class Shooter extends SubsystemBase implements
+        SubsystemTools.Periodicable,
+        SubsystemTools.VelocityControlled,
+        SubsystemTools.Stoppable,
+        SubsystemTools.Resettable,
+        SubsystemTools.GoalOriented
+{
     private ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
     private boolean enabled;
@@ -31,12 +36,12 @@ public class Shooter extends SubsystemBase {
         Logger.processInputs("Shooter", inputs);
     }
 
-    public Command setVelocity(DoubleSupplier velocity) {
+    public Command setVelocity(double velocity) {
         if (!enabled)
             return Commands.none();
 
         return Commands.runOnce(
-            () -> io.setVelocity(velocity.getAsDouble())
+            () -> io.setVelocity(velocity)
         );
     }
 
@@ -52,6 +57,11 @@ public class Shooter extends SubsystemBase {
             return Commands.none();
 
         return Commands.runOnce(() -> io.setPercent(0));
+    }
+
+    @Override
+    public boolean isReset() {
+        return false;
     }
 
     public Command reset() {

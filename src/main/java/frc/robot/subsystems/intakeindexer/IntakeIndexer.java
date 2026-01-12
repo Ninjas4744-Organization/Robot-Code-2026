@@ -3,12 +3,15 @@ package frc.robot.subsystems.intakeindexer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.intake.IntakeIOInputsAutoLogged;
+import frc.lib.NinjasLib.subsystem_interfaces.SubsystemTools;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.DoubleSupplier;
-
-public class IntakeIndexer extends SubsystemBase {
+public class IntakeIndexer extends SubsystemBase implements
+        SubsystemTools.Periodicable,
+        SubsystemTools.Resettable,
+        SubsystemTools.Stoppable,
+        SubsystemTools.VelocityControlled
+{
     private IntakeIndexerIO io;
     private final IntakeIndexerIOInputsAutoLogged inputs = new IntakeIndexerIOInputsAutoLogged();
     private boolean enabled;
@@ -32,12 +35,12 @@ public class IntakeIndexer extends SubsystemBase {
         Logger.processInputs("IntakeIndexer", inputs);
     }
 
-    public Command setVelocity(DoubleSupplier velocity) {
+    public Command setVelocity(double velocity) {
         if (!enabled)
             return Commands.none();
 
         return Commands.runOnce(
-            () -> io.setVelocity(velocity.getAsDouble())
+            () -> io.setVelocity(velocity)
         );
     }
 
@@ -46,6 +49,11 @@ public class IntakeIndexer extends SubsystemBase {
             return Commands.none();
 
         return Commands.runOnce(() -> io.setPercent(0));
+    }
+
+    @Override
+    public boolean isReset() {
+        return false;
     }
 
     public Command reset() {

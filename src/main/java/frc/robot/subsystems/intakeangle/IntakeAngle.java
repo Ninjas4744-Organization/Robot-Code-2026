@@ -4,10 +4,17 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.NinjasLib.subsystem_interfaces.SubsystemTools;
 import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeAngle extends SubsystemBase {
+public class IntakeAngle extends SubsystemBase implements
+        SubsystemTools.AngleControlled<Rotation2d>,
+        SubsystemTools.Periodicable,
+        SubsystemTools.GoalOriented,
+        SubsystemTools.Stoppable,
+        SubsystemTools.Resettable
+{
     private IntakeAngleIO io;
     private final IntakeAngleIOInputsAutoLogged inputs = new IntakeAngleIOInputsAutoLogged();
     private boolean enabled;
@@ -48,10 +55,6 @@ public class IntakeAngle extends SubsystemBase {
         return Rotation2d.fromRadians(inputs.Position);
     }
 
-    public Command close() {
-        return setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.CLOSE.getAsDouble()));
-    }
-
     public boolean atGoal(){
         if (!enabled){
             return true;
@@ -75,5 +78,10 @@ public class IntakeAngle extends SubsystemBase {
             return true;
         }
         return inputs.AtGoal;
+    }
+
+    @Override
+    public Command stop() {
+        return setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.CLOSE.getAsDouble()));
     }
 }
