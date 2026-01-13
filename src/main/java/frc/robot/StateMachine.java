@@ -45,31 +45,31 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     private void intakeAndDeliveryCommands() {
-        addEdge(States.INTAKE,);
-        addEdge(States.DELIVERY_HEATED,);
-        addEdge(States.DELIVERY,);
+        addEdge(States.INTAKE,  ,Commands.sequence());
+        addEdge(States.DELIVERY_HEATED,  ,Commands.sequence());
+        addEdge(States.DELIVERY,  ,Commands.sequence());
 
-        addEdge(States.INTAKE_WHILE_DELIVERY_HEATING,);
-        addEdge(States.INTAKE_WHILE_DELIVERY,);
+        addEdge(States.INTAKE_WHILE_DELIVERY_HEATING,  ,Commands.sequence());
+        addEdge(States.INTAKE_WHILE_DELIVERY,  ,Commands.sequence());
 
-        addEdge(States.DUMP,);
+        addEdge(States.DUMP,  ,Commands.sequence());
     }
 
     private void shootingCommands() {
-        addEdge(States.SHOOT_HEATED,);
-        addEdge(States.SHOOT_READY,);
-        addEdge(States.SHOOT,);
-        addEdge(States.INTAKE_WHILE_SHOOT_HEATED,);
+        addEdge(States.SHOOT_HEATED,  ,Commands.sequence());
+        addEdge(States.SHOOT_READY,  ,Commands.sequence());
+        addEdge(States.SHOOT,  ,Commands.sequence());
+        addEdge(States.INTAKE_WHILE_SHOOT_HEATED,  ,Commands.sequence());
     }
 
     private void climbingCommands() {
-        addEdge(States.CLIMB1_READY,);
-        addEdge(States.CLIMB1,);
-        addEdge(States.CLIMB_DOWN,);
+        addEdge(States.CLIMB1_READY,  ,Commands.sequence());
+        addEdge(States.CLIMB1,  ,Commands.sequence());
+        addEdge(States.CLIMB_DOWN,  ,Commands.sequence());
 
-        addEdge(States.CLIMB2_READY,);
-        addEdge(States.CLIMB2,);
-        addEdge(States.CLIMB3_READY,);
-        addEdge(States.CLIMB3,);
+        addEdge(States.CLIMB2_READY,  ,Commands.sequence());
+        addEdge(States.CLIMB2,  ,Commands.sequence());
+        addEdge(States.CLIMB3_READY,  ,Commands.sequence());
+        addEdge(States.CLIMB3,  ,Commands.sequence());
     }
 }
