@@ -11,6 +11,8 @@ public enum States {
      INTAKE_WHILE_DELIVERY,
      DELIVERY_HEATED,
      DELIVERY,
+
+     //Dump
      DUMP,
 
      //Shooting
