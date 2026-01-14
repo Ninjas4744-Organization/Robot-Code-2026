@@ -12,19 +12,51 @@ import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOController;
+import frc.robot.subsystems.intakeangle.IntakeAngle;
+import frc.robot.subsystems.intakeangle.IntakeAngleIO;
+import frc.robot.subsystems.intakeangle.IntakeAngleIOController;
+import frc.robot.subsystems.intakeindexer.IntakeIndexer;
+import frc.robot.subsystems.intakeindexer.IntakeIndexerIO;
+import frc.robot.subsystems.intakeindexer.IntakeIndexerIOController;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOController;
+import frc.robot.subsystems.shooterindexer.ShooterIndexer;
+import frc.robot.subsystems.shooterindexer.ShooterIndexerIO;
+import frc.robot.subsystems.shooterindexer.ShooterIndexerIOController;
 import org.ironmaple.simulation.SimulatedArena;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
     private static SwerveSubsystem swerveSubsystem;
+    private static Intake intake;
+    private static IntakeAngle intakeAngle;
+    private static IntakeIndexer intakeIndexer;
+    private static Shooter shooter;
+    private static ShooterIndexer shooterIndexer;
 
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
+                intake = new Intake(false, new IntakeIOController());
+                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
+                intakeIndexer = new IntakeIndexer(false, new IntakeIndexerIOController());
+                shooter = new Shooter(false, new ShooterIOController());
+                shooterIndexer =  new ShooterIndexer(false, new ShooterIndexerIOController());
+
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
                 break;
 
             case REPLAY, REPLAY_COMP:
+                intake = new Intake(false, new IntakeIO() {});
+                intakeAngle = new IntakeAngle(false, new IntakeAngleIO() {});
+                intakeIndexer = new IntakeIndexer(false, new IntakeIndexerIO() {});
+                shooter = new Shooter(false, new ShooterIO() {});
+                shooterIndexer =  new ShooterIndexer(false, new ShooterIndexerIO() {});
+
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
         }
@@ -39,6 +71,26 @@ public class RobotContainer {
 
     public static SwerveSubsystem getSwerve() {
         return swerveSubsystem;
+    }
+
+    static Intake getIntake() {
+        return intake;
+    }
+
+    static IntakeAngle getIntakeAngle() {
+        return intakeAngle;
+    }
+
+    static IntakeIndexer getIntakeIndexer() {
+        return intakeIndexer;
+    }
+
+    static Shooter getShooter() {
+        return shooter;
+    }
+
+    static ShooterIndexer getShooterIndexer() {
+        return shooterIndexer;
     }
 
     private void configureBindings() {

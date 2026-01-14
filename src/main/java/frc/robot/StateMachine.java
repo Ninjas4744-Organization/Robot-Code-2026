@@ -3,11 +3,22 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.intakeangle.IntakeAngle;
+import frc.robot.subsystems.intakeindexer.IntakeIndexer;
+import frc.robot.subsystems.shooterindexer.ShooterIndexer;
 
 import java.util.Map;
 
 public class StateMachine extends StateMachineBase<States> {
     private SwerveSubsystem swerve;
+    private Intake intake;
+    private Shooter shooter;
+    private IntakeAngle intakeAngle;
+    private IntakeIndexer intakeIndexer;
+    private ShooterIndexer shooterIndexer;
+
 
     public StateMachine() {
         super(States.class);
@@ -20,6 +31,12 @@ public class StateMachine extends StateMachineBase<States> {
     @Override
     protected void defineGraph() {
         swerve = RobotContainer.getSwerve();
+        intake = RobotContainer.getIntake();
+        shooter = RobotContainer.getShooter();
+        intakeAngle = RobotContainer.getIntakeAngle();
+        intakeIndexer = RobotContainer.getIntakeIndexer();
+        shooterIndexer = RobotContainer.getShooterIndexer();
+
 
         resetCommands();
 
