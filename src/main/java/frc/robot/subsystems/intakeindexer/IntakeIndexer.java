@@ -16,7 +16,7 @@ public class IntakeIndexer extends SubsystemBase implements
     private final IntakeIndexerIOInputsAutoLogged inputs = new IntakeIndexerIOInputsAutoLogged();
     private boolean enabled;
 
-    public IntakeIndexer(boolean enabled) {
+    public IntakeIndexer(boolean enabled, IntakeIndexerIO io) {
         this.enabled = enabled;
 
         if (enabled) {

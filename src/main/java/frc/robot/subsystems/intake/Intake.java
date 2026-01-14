@@ -16,7 +16,7 @@ public class Intake extends SubsystemBase implements
     private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
     private boolean enabled;
 
-    public Intake(boolean enabled) {
+    public Intake(boolean enabled,IntakeIO io) {
         this.enabled = enabled;
 
         if (enabled) {

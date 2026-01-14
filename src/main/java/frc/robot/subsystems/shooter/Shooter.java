@@ -17,7 +17,7 @@ public class Shooter extends SubsystemBase implements
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
     private boolean enabled;
 
-    public Shooter(boolean enabled) {
+    public Shooter(boolean enabled, ShooterIO io) {
         this.enabled = enabled;
 
         if (enabled) {

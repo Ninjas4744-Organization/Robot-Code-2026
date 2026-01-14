@@ -16,7 +16,7 @@ public class ShooterIndexer extends SubsystemBase implements
     private final ShooterIndexerIOInputsAutoLogged inputs = new ShooterIndexerIOInputsAutoLogged();
     private boolean enabled;
 
-    public ShooterIndexer(boolean enabled) {
+    public ShooterIndexer(boolean enabled, ShooterIndexerIO io) {
         this.enabled = enabled;
 
         if (enabled) {
