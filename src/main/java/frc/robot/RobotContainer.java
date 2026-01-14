@@ -47,11 +47,12 @@ public class RobotContainer {
         driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
     }
 
-    public void periodic() {
+    public void controllerPeriodic() {
         driverController.periodic();
+//        operatorController.periodic();
+    }
 
-        swerveSubsystem.swerveDrive(driverController::getLeftX, driverController::getLeftY, driverController::getRightX);
-
+    public void periodic() {
         if(GeneralConstants.kRobotMode.isSim())
             SimulatedArena.getInstance().simulationPeriodic();
     }
