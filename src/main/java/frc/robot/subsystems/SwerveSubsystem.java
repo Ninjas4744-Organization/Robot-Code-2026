@@ -28,6 +28,8 @@ public class SwerveSubsystem extends SubsystemBase implements
     private DoubleSupplier leftX, leftY, rightX, rightY;
     private Command lookHubCommand;
     private Command lockCommand;
+    private Command autoDriveCommand;
+    private Command[] commands;
 
     public SwerveSubsystem(boolean enabled, boolean enabledMinimum, DoubleSupplier leftX, DoubleSupplier leftY, DoubleSupplier rightX, DoubleSupplier rightY) {
         this.enabled = enabled;
@@ -46,10 +48,11 @@ public class SwerveSubsystem extends SubsystemBase implements
 
         lookHubCommand = Commands.sequence(
             Commands.runOnce(() -> {
-                if (lockCommand.isScheduled() && !lockCommand.isFinished())
-                    lockCommand.cancel();
+                for (Command command : commands) {
 
-                SwerveController.getInstance().setChannel("Shoot Prepare");
+                }
+
+                SwerveController.getInstance().setChannel("Look Hub");
             }),
             Commands.run(() -> {
                 SwerveController.getInstance().setControl(new SwerveInput(
@@ -77,6 +80,29 @@ public class SwerveSubsystem extends SubsystemBase implements
                 ), "Lock");
             })
         );
+
+        autoDriveCommand = Commands.sequence(
+            Commands.runOnce(() -> {
+                if (lockCommand.isScheduled() && !lockCommand.isFinished())
+                    lockCommand.cancel();
+
+                SwerveController.getInstance().setChannel("Shoot Prepare");
+            }),
+            Commands.run(() -> {
+                SwerveController.getInstance().setControl(new SwerveInput(
+                        -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+                        -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+                        SwerveController.getInstance().lookAt(FieldConstants.getHubPose().toPose2d(), Rotation2d.kZero),
+                        GeneralConstants.Swerve.kDriverFieldRelative
+                ), "Shoot Prepare");
+            })
+        );
+
+        commands = new Command[] {
+            lookHubCommand,
+            lockCommand,
+            autoDriveCommand
+        };
     }
 
     public Command lookHub() {
