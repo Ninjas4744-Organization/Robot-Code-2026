@@ -41,27 +41,27 @@ public class RobotContainer {
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
-                intake = new Intake(false, new IntakeIOController());
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
-                intakeIndexer = new IntakeIndexer(false, new IntakeIndexerIOController());
-                shooter = new Shooter(false, new ShooterIOController());
-                shooterIndexer =  new ShooterIndexer(false, new ShooterIndexerIOController());
+                intake = new Intake(true, new IntakeIOController());
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
+                intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIOController());
+                shooter = new Shooter(true, new ShooterIOController());
+                shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIOController());
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
                 break;
 
             case REPLAY, REPLAY_COMP:
-                intake = new Intake(false, new IntakeIO() {});
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIO() {});
-                intakeIndexer = new IntakeIndexer(false, new IntakeIndexerIO() {});
-                shooter = new Shooter(false, new ShooterIO() {});
-                shooterIndexer =  new ShooterIndexer(false, new ShooterIndexerIO() {});
+                intake = new Intake(true, new IntakeIO() {});
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIO() {});
+                intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIO() {});
+                shooter = new Shooter(true, new ShooterIO() {});
+                shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIO() {});
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
         }
 
-        swerveSubsystem = new SwerveSubsystem(true);
+        swerveSubsystem = new SwerveSubsystem(true, true, () -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX(), () -> driverController.getRightY());
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
         new VisionSubsystem();

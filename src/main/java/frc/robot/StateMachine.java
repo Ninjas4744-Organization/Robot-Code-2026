@@ -217,7 +217,7 @@ public class StateMachine extends StateMachineBase<States> {
         addMultiEdge(List.of(States.SHOOT, States.SHOOT_READY), States.IDLE, () -> Commands.sequence(
             shooterIndexer.stop(),
             shooter.stop(),
-            swerve.close()
+            swerve.stop()
         ));
 
         addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -27,7 +28,7 @@ public class Shooter extends SubsystemBase implements
             io.setup();
         }
 
-        updatingVelocityCommand = Commands.run(() -> io.setVelocity(PositionsConstants.Shooter.getShootSpeed(/* TODO: ADD */)));
+        updatingVelocityCommand = Commands.run(() -> io.setVelocity(PositionsConstants.Shooter.getShootSpeed(FieldConstants.getDistToHub())));
     }
 
     @Override
