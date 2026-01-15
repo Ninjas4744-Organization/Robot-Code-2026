@@ -1,6 +1,5 @@
 package frc.robot.constants;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Robot;
 
 public class GeneralConstants {
@@ -52,8 +51,6 @@ public class GeneralConstants {
         public static final double kDriverRotationSpeedFactor = 1;
         public static final double kJoystickDeadband = 0.02;
         public static final boolean kDriverFieldRelative = true;
-
-        public static final Rotation2d kHubAngleThreshold = Rotation2d.fromDegrees(2);
     }
 
     public static class Vision {

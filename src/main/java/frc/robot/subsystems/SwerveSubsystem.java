@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -21,7 +23,7 @@ import java.util.function.DoubleSupplier;
 
 public class SwerveSubsystem extends SubsystemBase implements
     ISubsystem.Resettable,
-    ISubsystem.GoalOriented<Rotation2d>,
+    ISubsystem.GoalOriented<Pose2d>,
     ISubsystem.Stoppable
 {
     private boolean enabled;
@@ -30,6 +32,7 @@ public class SwerveSubsystem extends SubsystemBase implements
     private Command lockCommand;
     private Command autoDriveCommand;
     private Command[] commands;
+    private Pose2d currentTarget = new Pose2d();
 
     public SwerveSubsystem(boolean enabled, boolean enabledMinimum, DoubleSupplier leftX, DoubleSupplier leftY, DoubleSupplier rightX, DoubleSupplier rightY) {
         this.enabled = enabled;
@@ -49,32 +52,39 @@ public class SwerveSubsystem extends SubsystemBase implements
         lookHubCommand = Commands.sequence(
             Commands.runOnce(() -> {
                 for (Command command : commands) {
-
+                    if (command != lookHubCommand)
+                        command.cancel();
                 }
 
                 SwerveController.getInstance().setChannel("Look Hub");
             }),
             Commands.run(() -> {
+                currentTarget = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle());
                 SwerveController.getInstance().setControl(new SwerveInput(
                         -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                         -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                         SwerveController.getInstance().lookAt(FieldConstants.getHubPose().toPose2d(), Rotation2d.kZero),
                         GeneralConstants.Swerve.kDriverFieldRelative
-                    ), "Shoot Prepare");
+                    ), "Look Hub");
             })
         );
 
         lockCommand = Commands.sequence(
             Commands.runOnce(() -> {
-                if (lookHubCommand.isScheduled() && !lookHubCommand.isFinished())
-                    lookHubCommand.cancel();
+                for (Command command : commands) {
+                    if (command != lockCommand)
+                        command.cancel();
+                }
+
+                currentTarget = RobotState.getInstance().getRobotPose();
 
                 SwerveController.getInstance().setChannel("Lock");
             }),
             Commands.run(() -> {
+                Translation2d pid = SwerveController.getInstance().pidTo(currentTarget.getTranslation());
                 SwerveController.getInstance().setControl(new SwerveInput(
-                    0,
-                    0,
+                    pid.getX(),
+                    pid.getY(),
                     SwerveController.getInstance().lookAt(FieldConstants.getHubPose().toPose2d(), Rotation2d.kZero),
                     true
                 ), "Lock");
@@ -83,10 +93,14 @@ public class SwerveSubsystem extends SubsystemBase implements
 
         autoDriveCommand = Commands.sequence(
             Commands.runOnce(() -> {
-                if (lockCommand.isScheduled() && !lockCommand.isFinished())
-                    lockCommand.cancel();
+                for (Command command : commands) {
+                    if (command != autoDriveCommand)
+                        command.cancel();
+                }
 
-                SwerveController.getInstance().setChannel("Shoot Prepare");
+
+
+                SwerveController.getInstance().setChannel("Auto Drive");
             }),
             Commands.run(() -> {
                 SwerveController.getInstance().setControl(new SwerveInput(
@@ -94,7 +108,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                         -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                         SwerveController.getInstance().lookAt(FieldConstants.getHubPose().toPose2d(), Rotation2d.kZero),
                         GeneralConstants.Swerve.kDriverFieldRelative
-                ), "Shoot Prepare");
+                ), "Auto Drive");
             })
         );
 
@@ -135,10 +149,10 @@ public class SwerveSubsystem extends SubsystemBase implements
             return Commands.none();
 
         return Commands.runOnce(() -> {
-            if (lookHubCommand.isScheduled() && !lookHubCommand.isFinished())
-                lookHubCommand.cancel();
-            if (lockCommand.isScheduled() && !lockCommand.isFinished())
-                lockCommand.cancel();
+            for (Command command : commands) {
+                if (command.isScheduled() && !command.isFinished())
+                    command.cancel();
+            }
 
             if (DriverStation.isAutonomous()){
                 SwerveController.getInstance().setChannel("Auto");
@@ -188,5 +202,7 @@ public class SwerveSubsystem extends SubsystemBase implements
         SwerveController.getInstance().periodic();
 
         Logger.recordOutput("Swerve/Look Hub Command", lookHubCommand.isScheduled() && !lookHubCommand.isFinished());
+        Logger.recordOutput("Swerve/Lock Command", lockCommand.isScheduled() && !lockCommand.isFinished());
+        Logger.recordOutput("Swerve/Auto Drive Command", autoDriveCommand.isScheduled() && !autoDriveCommand.isFinished());
     }
 }

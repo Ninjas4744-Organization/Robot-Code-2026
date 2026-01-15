@@ -1,5 +1,6 @@
 package frc.robot.constants;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.lib.NinjasLib.LoggedTunableNumber;
 
@@ -50,5 +51,9 @@ public class PositionsConstants {
 
     public static class ShooterIndexer {
         public static final LoggedTunableNumber kShoot = new LoggedTunableNumber("ShooterIndexer/Shoot", 100, false);
+    }
+
+    public static class Swerve {
+        public static final Rotation2d kHubAngleThreshold = Rotation2d.fromDegrees(2);
     }
 }
