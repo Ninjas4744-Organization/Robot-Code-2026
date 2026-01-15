@@ -6,21 +6,21 @@ public enum States {
      IDLE,
      RESET,
 
-     //Intake / Delivery
+     //Intake
      INTAKE,
+
+     //Dump & Delivery
+     DUMP,
+     DELIVERY_HEATED,
      INTAKE_WHILE_DELIVERY_HEATING,
      INTAKE_WHILE_DELIVERY,
-     DELIVERY_HEATED,
      DELIVERY,
-
-     //Dump
-     DUMP,
 
      //Shooting
      SHOOT_HEATED,
+     INTAKE_WHILE_SHOOT_HEATED,
      SHOOT_READY,
      SHOOT,
-     INTAKE_WHILE_SHOOT_HEATED,
 
      //Climbing
      CLIMB1_READY,
