@@ -15,25 +15,20 @@ import java.util.function.DoubleSupplier;
 
 public class SwerveSubsystem extends SubsystemBase {
     private boolean enabled;
+    private DoubleSupplier leftX, leftY, rightX, rightY;
 
-    public SwerveSubsystem(boolean enabled) {
+    public SwerveSubsystem(boolean enabled, DoubleSupplier leftX, DoubleSupplier leftY, DoubleSupplier rightX, DoubleSupplier rightY) {
         this.enabled = enabled;
+        this.leftX = leftX;
+        this.leftY = leftY;
+        this.rightX = rightX;
+        this.rightY = rightY;
 
         if (enabled) {
             Swerve.setInstance(new Swerve(SubsystemConstants.kSwerve));
             SwerveController.setInstance(new SwerveController(SubsystemConstants.kSwerveController));
             SwerveController.getInstance().setChannel("Driver");
         }
-    }
-
-    public void swerveDrive(DoubleSupplier leftX, DoubleSupplier leftY, DoubleSupplier rightX) {
-        SwerveController.getInstance().setControl(SwerveController.getInstance().fromPercent(
-                new SwerveInput(
-                        -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
-                        -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
-                        -MathUtil.applyDeadband(rightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor,
-                        GeneralConstants.Swerve.kDriverFieldRelative
-                )), "Driver");
     }
 
     public Command close() {
@@ -66,6 +61,14 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic() {
         if (!enabled)
             return;
+
+        SwerveController.getInstance().setControl(SwerveController.getInstance().fromPercent(
+            new SwerveInput(
+                -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
+                -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
+                -MathUtil.applyDeadband(rightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor,
+                GeneralConstants.Swerve.kDriverFieldRelative
+            )), "Driver");
 
         SwerveController.getInstance().periodic();
     }
