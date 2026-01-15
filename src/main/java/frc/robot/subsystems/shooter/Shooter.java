@@ -3,7 +3,9 @@ package frc.robot.subsystems.shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
+import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase implements
@@ -15,6 +17,7 @@ public class Shooter extends SubsystemBase implements
     private ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
     private boolean enabled;
+    private Command updatingVelocityCommand;
 
     public Shooter(boolean enabled, ShooterIO io) {
         this.enabled = enabled;
@@ -23,6 +26,8 @@ public class Shooter extends SubsystemBase implements
             this.io = io;
             io.setup();
         }
+
+        updatingVelocityCommand = Commands.run(() -> io.setVelocity(PositionsConstants.Shooter.getShootSpeed(/* TODO: ADD */)));
     }
 
     @Override
@@ -33,13 +38,23 @@ public class Shooter extends SubsystemBase implements
         io.periodic();
         io.updateInputs(inputs);
         Logger.processInputs("Shooter", inputs);
+
+        Logger.recordOutput("Updating Velocity Command", updatingVelocityCommand.isScheduled() && !updatingVelocityCommand.isFinished());
     }
 
+    @Override
     public Command setVelocity(double velocity) {
         if (!enabled)
             return Commands.none();
 
         return Commands.runOnce(() -> io.setVelocity(velocity));
+    }
+
+    public Command startUpdatingVelocity() {
+        if (!enabled)
+            return Commands.none();
+
+        return new DetachedCommand(updatingVelocityCommand);
     }
 
     @Override
@@ -69,7 +84,10 @@ public class Shooter extends SubsystemBase implements
         if (!enabled)
             return Commands.none();
 
-        return Commands.runOnce(io::stopMotor);
+        return Commands.runOnce(() -> {
+            updatingVelocityCommand.cancel();
+            io.stopMotor();
+        });
     }
 
     @Override

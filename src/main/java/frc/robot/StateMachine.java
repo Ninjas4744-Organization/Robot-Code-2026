@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -12,6 +11,7 @@ import frc.robot.subsystems.intakeindexer.IntakeIndexer;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterindexer.ShooterIndexer;
 
+import java.util.List;
 import java.util.Map;
 
 public class StateMachine extends StateMachineBase<States> {
@@ -169,38 +169,55 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.setVelocity(PositionsConstants.Shooter.kDump.get()),
             shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
         ));
+
+        addEdge(States.DUMP, States.IDLE, Commands.sequence(
+            shooter.stop(),
+            shooterIndexer.stop()
+        ));
     }
 
     private void shootingCommands() {
         addEdge(States.IDLE, States.SHOOT_HEATED, Commands.sequence(
-            shooter.setVelocity(PositionsConstants.)
+            shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
 
             Commands.waitUntil(shooter::atGoal)
         ));
 
-        addEdge(States.SHOOT_HEATED, States.SHOOT_READY, Commands.sequence(
-            new DetachedCommand(swerve.lookHub()),
+        addMultiEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
+            swerve.lookHub(),
+            shooter.startUpdatingVelocity(),
 
-            Commands.waitUntil(swerve::atGoal)
+            Commands.waitUntil(() -> swerve.atGoal() && shooter.atGoal())
         ));
 
         addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
-            shooterIndexer.setVelocity(PositionsConstants.)
-        ));
-
-        addEdge(States.SHOOT, States.IDLE, Commands.sequence(
-            shooterIndexer.stop(),
-            shooter.stop()
+            swerve.lock(),
+            shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
         ));
 
         addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
-            // Intake stuff
+            intake.stop(),
+            intakeIndexer.stop(),
+
+            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
+
+            Commands.waitUntil(intakeAngle::atGoal)
         ));
 
         addEdge(States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
-            shooter.setVelocity(PositionsConstants.)
+            shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
 
             Commands.waitUntil(shooter::atGoal)
+        ));
+
+        addEdge(States.SHOOT_HEATED, States.IDLE, Commands.sequence(
+            shooter.stop()
+        ));
+
+        addMultiEdge(List.of(States.SHOOT, States.SHOOT_READY), States.IDLE, () -> Commands.sequence(
+            shooterIndexer.stop(),
+            shooter.stop(),
+            swerve.close()
         ));
 
         addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));

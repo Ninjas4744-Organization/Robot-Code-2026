@@ -5,16 +5,19 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveController;
 import frc.lib.NinjasLib.swerve.SwerveInput;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
 public class SwerveSubsystem extends SubsystemBase {
     private boolean enabled;
+    private Command lookHubCommand;
 
     public SwerveSubsystem(boolean enabled) {
         this.enabled = enabled;
@@ -24,6 +27,12 @@ public class SwerveSubsystem extends SubsystemBase {
             SwerveController.setInstance(new SwerveController(SubsystemConstants.kSwerveController));
             SwerveController.getInstance().setChannel("Driver");
         }
+
+        lookHubCommand = Commands.sequence(
+            Commands.runOnce(() -> {
+                SwerveController.getInstance().setChannel("Driver");
+            })
+        );
     }
 
     public void swerveDrive(DoubleSupplier leftX, DoubleSupplier leftY, DoubleSupplier rightX) {
@@ -34,6 +43,17 @@ public class SwerveSubsystem extends SubsystemBase {
                         -MathUtil.applyDeadband(rightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor,
                         GeneralConstants.Swerve.kDriverFieldRelative
                 )), "Driver");
+    }
+
+    public Command lookHub() {
+        return new DetachedCommand(lookHubCommand);
+    }
+
+    public Command lock() {
+        return Commands.runOnce(() -> {
+            SwerveController.getInstance().setChannel("Lock");
+            SwerveController.getInstance().setControl(new SwerveInput(), "Lock");
+        });
     }
 
     public Command close() {
@@ -57,8 +77,8 @@ public class SwerveSubsystem extends SubsystemBase {
             return Commands.none();
 
         return Commands.sequence(
-                close(),
-                Commands.runOnce(() -> Swerve.getInstance().resetModulesToAbsolute())
+            close(),
+            Commands.runOnce(() -> Swerve.getInstance().resetModulesToAbsolute())
         );
     }
 
@@ -68,5 +88,7 @@ public class SwerveSubsystem extends SubsystemBase {
             return;
 
         SwerveController.getInstance().periodic();
+
+        Logger.recordOutput("Swerve/Look Hub Command", lookHubCommand.isScheduled() && !lookHubCommand.isFinished());
     }
 }
