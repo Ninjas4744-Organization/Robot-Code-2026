@@ -1,5 +1,6 @@
 package frc.robot.constants;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.lib.NinjasLib.LoggedTunableNumber;
@@ -54,6 +55,17 @@ public class PositionsConstants {
     }
 
     public static class Swerve {
-        public static final Rotation2d kHubAngleThreshold = Rotation2d.fromDegrees(2);
+        public static final LoggedTunableNumber kHubPositionThreshold = new LoggedTunableNumber("Swerve/Pos Thresh", 0.03, false);
+        public static final LoggedTunableNumber kHubAngleThreshold = new LoggedTunableNumber("Swerve/Angle Thresh", 2, false);
+
+        public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub Min Dist", 1.5, false);
+        public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 3, false);
+
+        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 3, false);
+        private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 3, false);
+
+        public static Pose2d getDeliveryTarget() {
+            return new Pose2d(kDeliveryTargetX.get(), kDeliveryTargetY.get(), Rotation2d.kZero);
+        }
     }
 }
