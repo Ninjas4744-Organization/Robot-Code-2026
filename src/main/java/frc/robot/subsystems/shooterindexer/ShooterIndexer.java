@@ -3,14 +3,13 @@ package frc.robot.subsystems.shooterindexer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.NinjasLib.subsystem_interfaces.SubsystemTools;
+import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterIndexer extends SubsystemBase implements
-        SubsystemTools.Periodicable,
-        SubsystemTools.VelocityControlled,
-        SubsystemTools.Stoppable,
-        SubsystemTools.Resettable
+        ISubsystem.Resettable,
+        ISubsystem.VelocityControlled,
+        ISubsystem.Stoppable
 {
     private ShooterIndexerIO io;
     private final ShooterIndexerIOInputsAutoLogged inputs = new ShooterIndexerIOInputsAutoLogged();
@@ -39,21 +38,30 @@ public class ShooterIndexer extends SubsystemBase implements
         if (!enabled)
             return Commands.none();
 
-        return Commands.runOnce(
-            () -> io.setVelocity(velocity)
-        );
+        return Commands.runOnce(() -> io.setVelocity(velocity));
+    }
+
+    @Override
+    public double getVelocity() {
+        if (!enabled)
+            return 0;
+
+        return inputs.Velocity;
     }
 
     public Command stop() {
         if (!enabled)
             return Commands.none();
 
-        return Commands.runOnce(() -> io.setPercent(0));
+        return Commands.runOnce(io::stopMotor);
     }
 
     @Override
     public boolean isReset() {
-        return false;
+        if (!enabled)
+            return true;
+
+        return Math.abs(inputs.Velocity) < 5;
     }
 
     public Command reset() {

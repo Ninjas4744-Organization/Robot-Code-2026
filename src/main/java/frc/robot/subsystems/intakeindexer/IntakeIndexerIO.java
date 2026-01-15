@@ -2,10 +2,13 @@ package frc.robot.subsystems.intakeindexer;
 
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.subsystem_interfaces.IO;
-import frc.robot.subsystems.intake.IntakeIOInputsAutoLogged;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface IntakeIndexerIO extends IO.Controllable<IntakeIndexerIOInputsAutoLogged>{
+public interface IntakeIndexerIO extends
+    IO.BaseIO<IntakeIndexerIOInputsAutoLogged>,
+    IO.VelocityControlled,
+    IO.Stoppable
+{
     @AutoLog
     class IntakeIndexerIOInputs extends Controller.ControllerIOInputs {
     }
