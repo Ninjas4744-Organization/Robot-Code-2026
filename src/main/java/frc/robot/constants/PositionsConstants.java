@@ -25,15 +25,15 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kDump = new LoggedTunableNumber("Shooter/Dump", 50, false);
 
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
-        private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot 0", 60, false);
-        private static final LoggedTunableNumber kShoot05 = new LoggedTunableNumber("Shooter/Shoot 0.5", 65, false);
-        private static final LoggedTunableNumber kShoot1 = new LoggedTunableNumber("Shooter/Shoot 1", 70, false);
-        private static final LoggedTunableNumber kShoot15 = new LoggedTunableNumber("Shooter/Shoot 1.5", 75, false);
-        private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot 2", 80, false);
-        private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot 2.5", 85, false);
-        private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot 3", 90, false);
-        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot 3.5", 95, false);
-        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot 4", 100, false);
+        private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 60, false);
+        private static final LoggedTunableNumber kShoot05 = new LoggedTunableNumber("Shooter/Shoot/0.5", 65, false);
+        private static final LoggedTunableNumber kShoot1 = new LoggedTunableNumber("Shooter/Shoot/1", 70, false);
+        private static final LoggedTunableNumber kShoot15 = new LoggedTunableNumber("Shooter/Shoot/1.5", 75, false);
+        private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot/2", 80, false);
+        private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot/2.5", 85, false);
+        private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot/3", 90, false);
+        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 95, false);
+        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 100, false);
 
         public static double getShootSpeed(double dist) {
             kShootMap.put(0.0, kShoot0.get());
@@ -47,6 +47,31 @@ public class PositionsConstants {
             kShootMap.put(4.0, kShoot4.get());
 
             return kShootMap.get(dist);
+        }
+
+        private static final InterpolatingDoubleTreeMap kDeliveryMap = new InterpolatingDoubleTreeMap();
+        private static final LoggedTunableNumber kDelivery0 = new LoggedTunableNumber("Shooter/Delivery/0", 60, false);
+        private static final LoggedTunableNumber kDelivery05 = new LoggedTunableNumber("Shooter/Delivery/0.5", 65, false);
+        private static final LoggedTunableNumber kDelivery1 = new LoggedTunableNumber("Shooter/Delivery/1", 70, false);
+        private static final LoggedTunableNumber kDelivery15 = new LoggedTunableNumber("Shooter/Delivery/1.5", 75, false);
+        private static final LoggedTunableNumber kDelivery2 = new LoggedTunableNumber("Shooter/Delivery/2", 80, false);
+        private static final LoggedTunableNumber kDelivery25 = new LoggedTunableNumber("Shooter/Delivery/2.5", 85, false);
+        private static final LoggedTunableNumber kDelivery3 = new LoggedTunableNumber("Shooter/Delivery/3", 90, false);
+        private static final LoggedTunableNumber kDelivery35 = new LoggedTunableNumber("Shooter/Delivery/3.5", 95, false);
+        private static final LoggedTunableNumber kDelivery4 = new LoggedTunableNumber("Shooter/Delivery/4", 100, false);
+
+        public static double getDeliverySpeed(double dist) {
+            kDeliveryMap.put(0.0, kDelivery0.get());
+            kDeliveryMap.put(0.5, kDelivery05.get());
+            kDeliveryMap.put(1.0, kDelivery1.get());
+            kDeliveryMap.put(1.5, kDelivery15.get());
+            kDeliveryMap.put(2.0, kDelivery2.get());
+            kDeliveryMap.put(2.5, kDelivery25.get());
+            kDeliveryMap.put(3.0, kDelivery3.get());
+            kDeliveryMap.put(3.5, kDelivery35.get());
+            kDeliveryMap.put(4.0, kDelivery4.get());
+
+            return kDeliveryMap.get(dist);
         }
     }
 

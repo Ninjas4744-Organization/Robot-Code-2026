@@ -5,9 +5,9 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
-import frc.robot.constants.FieldConstants;
-import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.DoubleSupplier;
 
 public class Shooter extends SubsystemBase implements
         ISubsystem.Resettable,
@@ -18,7 +18,7 @@ public class Shooter extends SubsystemBase implements
     private ShooterIO io;
     private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
     private boolean enabled;
-    private Command updatingVelocityCommand;
+    private Command shooterCommand;
 
     public Shooter(boolean enabled, ShooterIO io) {
         this.enabled = enabled;
@@ -27,8 +27,6 @@ public class Shooter extends SubsystemBase implements
             this.io = io;
             io.setup();
         }
-
-        updatingVelocityCommand = Commands.run(() -> io.setVelocity(PositionsConstants.Shooter.getShootSpeed(FieldConstants.getDistToHub())));
     }
 
     @Override
@@ -40,7 +38,7 @@ public class Shooter extends SubsystemBase implements
         io.updateInputs(inputs);
         Logger.processInputs("Shooter", inputs);
 
-        Logger.recordOutput("Updating Velocity Command", updatingVelocityCommand.isScheduled() && !updatingVelocityCommand.isFinished());
+        Logger.recordOutput("Shooter Command", shooterCommand.isScheduled() && !shooterCommand.isFinished());
     }
 
     @Override
@@ -51,11 +49,16 @@ public class Shooter extends SubsystemBase implements
         return Commands.runOnce(() -> io.setVelocity(velocity));
     }
 
-    public Command startUpdatingVelocity() {
+    public Command createShooterCommand(DoubleSupplier velocity) {
         if (!enabled)
             return Commands.none();
 
-        return new DetachedCommand(updatingVelocityCommand);
+        if (shooterCommand != null && shooterCommand.isScheduled() && !shooterCommand.isFinished())
+            shooterCommand.cancel();
+
+        shooterCommand = Commands.run(() -> io.setVelocity(velocity.getAsDouble()));
+
+        return new DetachedCommand(shooterCommand);
     }
 
     @Override
@@ -86,7 +89,7 @@ public class Shooter extends SubsystemBase implements
             return Commands.none();
 
         return Commands.runOnce(() -> {
-            updatingVelocityCommand.cancel();
+            shooterCommand.cancel();
             io.stopMotor();
         });
     }
@@ -96,7 +99,7 @@ public class Shooter extends SubsystemBase implements
         if (!enabled)
             return true;
 
-        return Math.abs(inputs.Velocity) < 5;
+        return Math.abs(inputs.Velocity) < 5 && (!shooterCommand.isScheduled() || shooterCommand.isFinished());
     }
 
     public Command reset() {
