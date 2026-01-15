@@ -4,7 +4,11 @@ import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.subsystem_interfaces.IO;
 import org.littletonrobotics.junction.AutoLog;
 
-public interface ShooterIndexerIO extends IO.Controllable<ShooterIndexerIOInputsAutoLogged>{
+public interface ShooterIndexerIO extends
+    IO.BaseIO<ShooterIndexerIOInputsAutoLogged>,
+    IO.VelocityControlled,
+    IO.Stoppable
+{
     @AutoLog
     class ShooterIndexerIOInputs extends Controller.ControllerIOInputs {
     }

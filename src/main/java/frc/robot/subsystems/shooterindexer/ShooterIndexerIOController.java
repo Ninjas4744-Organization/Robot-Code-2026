@@ -22,12 +22,12 @@ public class ShooterIndexerIOController implements ShooterIndexerIO {
     }
 
     @Override
-    public void setPercent(double percent) {
-        controller.setPercent(percent);
+    public void setVelocity(double velocity) {
+        controller.setVelocity(velocity);
     }
 
     @Override
-    public void setVelocity(double velocity) {
-        controller.setVelocity(velocity);
+    public void stopMotor() {
+        controller.stop();
     }
 }
