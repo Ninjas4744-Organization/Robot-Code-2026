@@ -1,22 +1,21 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.climber;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class Intake extends SubsystemBase implements
+public class Climber extends SubsystemBase implements
         ISubsystem.Resettable,
         ISubsystem.VelocityControlled,
         ISubsystem.Stoppable
 {
-    private IntakeIO io;
-    private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+    private ClimberIO io;
+    private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
     private boolean enabled;
 
-    public Intake(boolean enabled, IntakeIO io) {
+    public Climber(boolean enabled, ClimberIO io) {
         this.enabled = enabled;
 
         if (enabled) {
@@ -32,7 +31,7 @@ public class Intake extends SubsystemBase implements
 
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("Intake", inputs);
+        Logger.processInputs("Climber", inputs);
     }
 
     public Command setVelocity(double velocity) {

@@ -27,6 +27,48 @@ import java.io.IOException;
 import java.util.Map;
 
 public class SubsystemConstants {
+    public static final ControllerConstants kClimberAngle = new ControllerConstants();
+    static {
+        /* Base */
+        kClimberAngle.real.base.main.id = 41;
+        kClimberAngle.real.base.main.inverted = false;
+        kClimberAngle.real.base.currentLimit = 60;
+        kClimberAngle.real.base.isBrakeMode = true;
+
+        /* Control */
+        kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kClimberAngle.real.control.gearRatio = 1;
+        kClimberAngle.real.control.conversionFactor = 1;
+        kClimberAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);
+
+        /* Soft Limits */
+        kClimberAngle.real.softLimits.min = Units.degreesToRadians(0);
+        kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
+
+        /* Simulation */
+        kClimberAngle.motorType = DCMotor.getKrakenX60(1);
+    }
+
+    public static final ControllerConstants kClimber = new ControllerConstants();
+    static {
+        /* Base */
+        kClimber.real.base.main.id = 40;
+        kClimber.real.base.main.inverted = false;
+        kClimber.real.base.currentLimit = 60;
+        kClimber.real.base.isBrakeMode = true;
+
+        /* Control */
+        kClimber.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kClimber.real.control.gearRatio = 2;
+
+        /* Limit Switch */
+        kClimber.real.hardLimit.id = 3;
+        kClimber.real.hardLimit.homePosition = 0;
+
+        /* Simulation */
+        kClimber.motorType = DCMotor.getKrakenX60(1);
+    }
+
     public static final ControllerConstants kIntake = new ControllerConstants();
     static {
         /* Base */
@@ -54,7 +96,7 @@ public class SubsystemConstants {
         kIntakeAngle.real.base.isBrakeMode = true;
 
         /* Control */
-        kIntakeAngle.real.control.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kIntakeAngle.real.control.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
         kIntakeAngle.real.control.gearRatio = 1;
         kIntakeAngle.real.control.conversionFactor = 1;
         kIntakeAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.climberangle;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -7,16 +7,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class Intake extends SubsystemBase implements
+public class ClimberAngle extends SubsystemBase implements
         ISubsystem.Resettable,
-        ISubsystem.VelocityControlled,
-        ISubsystem.Stoppable
+        ISubsystem.AngleControlled,
+        ISubsystem.Stoppable,
+        ISubsystem.GoalOriented
 {
-    private IntakeIO io;
-    private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+    private ClimberAngleIO io;
+    private final ClimberAngleIOInputsAutoLogged inputs = new ClimberAngleIOInputsAutoLogged();
     private boolean enabled;
 
-    public Intake(boolean enabled, IntakeIO io) {
+    public ClimberAngle(boolean enabled, ClimberAngleIO io) {
         this.enabled = enabled;
 
         if (enabled) {
@@ -32,7 +33,7 @@ public class Intake extends SubsystemBase implements
 
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("Intake", inputs);
+        Logger.processInputs("Climber Angle", inputs);
     }
 
     public Command setVelocity(double velocity) {
@@ -40,14 +41,6 @@ public class Intake extends SubsystemBase implements
             return Commands.none();
 
         return Commands.runOnce(() -> io.setVelocity(velocity));
-    }
-
-    @Override
-    public double getVelocity() {
-        if (!enabled)
-            return 0;
-
-        return inputs.Velocity;
     }
 
     @Override
@@ -71,5 +64,36 @@ public class Intake extends SubsystemBase implements
             return Commands.none();
 
         return stop();
+    }
+
+    @Override
+    public Command setAngle(Rotation2d angle) {
+        if (!enabled)
+            return Commands.none();
+
+        return Commands.runOnce(
+                () -> io.setPosition(angle.getRadians())
+        );
+    }
+
+    @Override
+    public Rotation2d getAngle() {
+        return null;
+    }
+
+    @Override
+    public boolean atGoal() {
+        if (!enabled)
+            return true;
+
+        return inputs.AtGoal;
+    }
+
+    @Override
+    public Object getGoal() {
+        if (!enabled)
+            return Rotation2d.kZero;
+
+        return Rotation2d.fromRotations(inputs.Goal);
     }
 }

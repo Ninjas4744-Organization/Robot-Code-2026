@@ -12,6 +12,10 @@ import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOController;
+import frc.robot.subsystems.climberangle.ClimberAngle;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOController;
@@ -27,7 +31,6 @@ import frc.robot.subsystems.shooter.ShooterIOController;
 import frc.robot.subsystems.shooterindexer.ShooterIndexer;
 import frc.robot.subsystems.shooterindexer.ShooterIndexerIO;
 import frc.robot.subsystems.shooterindexer.ShooterIndexerIOController;
-import org.ironmaple.simulation.SimulatedArena;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
@@ -37,6 +40,8 @@ public class RobotContainer {
     private static IntakeIndexer intakeIndexer;
     private static Shooter shooter;
     private static ShooterIndexer shooterIndexer;
+    private static Climber climber;
+    private static ClimberAngle climberAngle;
 
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
@@ -46,6 +51,7 @@ public class RobotContainer {
                 intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIOController());
                 shooter = new Shooter(true, new ShooterIOController());
                 shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIOController());
+                climber = new Climber(true, new ClimberIOController());
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
                 break;
@@ -56,6 +62,7 @@ public class RobotContainer {
                 intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIO() {});
                 shooter = new Shooter(true, new ShooterIO() {});
                 shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIO() {});
+                climber = new Climber(true, new ClimberIO() {});
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
@@ -91,6 +98,14 @@ public class RobotContainer {
 
     static ShooterIndexer getShooterIndexer() {
         return shooterIndexer;
+    }
+
+    static Climber getClimber() {
+        return climber;
+    }
+
+    static ClimberAngle getClimberAngle() {
+        return climberAngle;
     }
 
     private void configureBindings() {

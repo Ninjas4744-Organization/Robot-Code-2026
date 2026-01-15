@@ -4,17 +4,27 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.lib.NinjasLib.LoggedTunableNumber;
 
 public class PositionsConstants {
+    public static class ClimberAngle {
+        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Climber Angle/Close", 90, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Climber Angle/Open", 0, false);
+    }
+
+    public static class Climber {
+        public static final LoggedTunableNumber kRightClimb = new LoggedTunableNumber("Climber/Right Climb", 90, false);
+        public static final LoggedTunableNumber kLeftClimb = new LoggedTunableNumber("Climber/Left Climb", -90, false);
+    }
+
     public static class Intake {
         public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 100, false);
     }
 
     public static class IntakeIndexer {
-        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("IntakeIndexer/Intake", 100, false);
+        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake Indexer/Intake", 100, false);
     }
 
     public static class IntakeAngle {
-        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("IntakeAngle/Close", 90, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("IntakeAngle/Open", -90, false);
+        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Angle/Close", 90, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Angle/Open", -90, false);
     }
 
     public static class Shooter {
