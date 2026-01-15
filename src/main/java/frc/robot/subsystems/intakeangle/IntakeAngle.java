@@ -77,7 +77,7 @@ public class IntakeAngle extends SubsystemBase implements
 
         return Commands.runOnce(() -> {
             io.setEncoder(inputs.AbsoluteAngle.getRotations());
-            io.setPosition(PositionsConstants.IntakeAngle.CLOSE.get() / 360);
+            io.setPosition(PositionsConstants.IntakeAngle.kClose.get() / 360);
         });
     }
 

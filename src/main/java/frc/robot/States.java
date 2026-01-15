@@ -12,7 +12,7 @@ public enum States {
      //Dump & Delivery
      DUMP,
      DELIVERY_HEATED,
-     INTAKE_WHILE_DELIVERY_HEATING,
+    INTAKE_WHILE_DELIVERY_HEATED,
      INTAKE_WHILE_DELIVERY,
      DELIVERY,
 
