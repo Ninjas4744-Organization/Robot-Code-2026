@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -90,10 +91,38 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     private void shootingCommands() {
-        addEdge(States.SHOOT_HEATED,  ,Commands.sequence());
-        addEdge(States.SHOOT_READY,  ,Commands.sequence());
-        addEdge(States.SHOOT,  ,Commands.sequence());
-        addEdge(States.INTAKE_WHILE_SHOOT_HEATED,  ,Commands.sequence());
+        addEdge(States.IDLE, States.SHOOT_HEATED, Commands.sequence(
+            shooter.setVelocity(PositionsConstants.)
+
+            Commands.waitUntil(shooter::atGoal)
+        ));
+
+        addEdge(States.SHOOT_HEATED, States.SHOOT_READY, Commands.sequence(
+            new DetachedCommand(swerve.lookHub()),
+
+            Commands.waitUntil(swerve::atGoal)
+        ));
+
+        addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
+            shooterIndexer.setVelocity(PositionsConstants.)
+        ));
+
+        addEdge(States.SHOOT, States.IDLE, Commands.sequence(
+            shooterIndexer.stop(),
+            shooter.stop()
+        ));
+
+        addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
+            // Intake stuff
+        ));
+
+        addEdge(States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
+            shooter.setVelocity(PositionsConstants.)
+
+            Commands.waitUntil(shooter::atGoal)
+        ));
+
+        addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));
     }
 
     private void climbingCommands() {
