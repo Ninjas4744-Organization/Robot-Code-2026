@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.climber.Climber;
@@ -14,7 +13,6 @@ import frc.robot.subsystems.intakeindexer.IntakeIndexer;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooterindexer.ShooterIndexer;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -106,10 +104,10 @@ public class StateMachine extends StateMachineBase<States> {
 
     private void deliveryCommands() {
         addEdge(States.IDLE, States.DELIVERY_READY, Commands.sequence(
-                swerve.deliveryDrive(),
-            Commands.defer(() -> shooter.createShooterCommand(() -> PositionsConstants.Shooter.getDeliverySpeed(RobotState.getInstance().getDistance(PositionsConstants.Swerve.getDeliveryTarget()))), Collections.emptySet()),
+            swerve.deliveryDrive(),
+            shooter.autoDeliveryVelocity(),
 
-                Commands.waitUntil(shooter::atGoal)
+            Commands.waitUntil(shooter::atGoal)
         ));
 
         addEdge(States.DELIVERY_READY, States.DELIVERY, Commands.sequence(
@@ -118,7 +116,7 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.INTAKE, States.INTAKE_WHILE_DELIVERY_READY, Commands.sequence(
                 swerve.deliveryDrive(),
-            Commands.defer(() -> shooter.createShooterCommand(() -> PositionsConstants.Shooter.getDeliverySpeed(RobotState.getInstance().getDistance(PositionsConstants.Swerve.getDeliveryTarget()))), Collections.emptySet()),
+                shooter.autoDeliveryVelocity(),
 
                 Commands.waitUntil(shooter::atGoal)
         ));
@@ -185,7 +183,7 @@ public class StateMachine extends StateMachineBase<States> {
 
         addMultiEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
             swerve.autoDrive(),
-            Commands.defer(() -> shooter.createShooterCommand(() -> PositionsConstants.Shooter.getShootSpeed(FieldConstants.getDistToHub())), Collections.emptySet()),
+            shooter.autoHubVelocity(),
 
             Commands.waitUntil(() -> swerve.atGoal() && shooter.atGoal())
         ));
