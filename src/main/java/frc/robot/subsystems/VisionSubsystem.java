@@ -36,24 +36,16 @@ public class VisionSubsystem extends SubsystemBase {
             if(!estimation.hasTargets)
                 continue;
 
-            Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose", estimation.robotPose);
-
             Matrix<N3, N1> strength = getVisionStrength(estimation);
+            boolean passedFilters = isPassedFilters(estimation);
 
-            ChassisSpeeds speed = Swerve.getInstance().getChassisSpeeds(false);
-            boolean passedFilters = Math.hypot(speed.vxMetersPerSecond, speed.vyMetersPerSecond) <= GeneralConstants.Vision.kMaxSpeedFilter
-                && speed.omegaRadiansPerSecond <= GeneralConstants.Vision.kMaxAngularSpeedFilter
-                && estimation.closestTargetDist <= GeneralConstants.Vision.kMaxDistanceFilter
-                && estimation.closestTargetDist >= GeneralConstants.Vision.kMinDistanceFilter
-                && estimation.ambiguity <= GeneralConstants.Vision.kMaxAmbiguityFilter;
-
+            Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose", estimation.robotPose);
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Passed Filters", passedFilters);
 
             if (passedFilters || DriverStation.isDisabled()) {
                 Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose (Passed Filters)", estimation.robotPose);
 
-//                RobotState.getInstance().updateRobotPose(estimation.robotPose, estimation.timestamp, strength);
-                RobotState.getInstance().updateRobotPose(estimation, VecBuilder.fill(1, 1, 1));
+                RobotState.getInstance().updateRobotPose(estimation.robotPose, estimation.timestamp, strength);
                 lastVisionPose = estimation.robotPose;
 
                 odometryDrift *= 1 - strength.get(0, 0);
@@ -66,6 +58,16 @@ public class VisionSubsystem extends SubsystemBase {
         double visionStrength = 1 / (1 + a * Math.pow(odometryDrift, -0.5) * estimation.closestTargetDist * estimation.closestTargetDist);
 
         return VecBuilder.fill(visionStrength, visionStrength, visionStrength / 2);
+    }
+
+    private boolean isPassedFilters(VisionOutput estimation) {
+        ChassisSpeeds speed = Swerve.getInstance().getChassisSpeeds(false);
+
+        return Math.hypot(speed.vxMetersPerSecond, speed.vyMetersPerSecond) <= GeneralConstants.Vision.kMaxSpeedFilter
+            && speed.omegaRadiansPerSecond <= GeneralConstants.Vision.kMaxAngularSpeedFilter
+            && estimation.closestTargetDist <= GeneralConstants.Vision.kMaxDistanceFilter
+            && estimation.closestTargetDist >= GeneralConstants.Vision.kMinDistanceFilter
+            && estimation.ambiguity <= GeneralConstants.Vision.kMaxAmbiguityFilter;
     }
 
     public double getOdometryDrift() {
