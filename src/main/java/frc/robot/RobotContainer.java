@@ -12,24 +12,63 @@ import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import org.ironmaple.simulation.SimulatedArena;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOController;
+import frc.robot.subsystems.climberangle.ClimberAngle;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.IntakeIO;
+import frc.robot.subsystems.intake.IntakeIOController;
+import frc.robot.subsystems.intakeangle.IntakeAngle;
+import frc.robot.subsystems.intakeangle.IntakeAngleIO;
+import frc.robot.subsystems.intakeangle.IntakeAngleIOController;
+import frc.robot.subsystems.intakeindexer.IntakeIndexer;
+import frc.robot.subsystems.intakeindexer.IntakeIndexerIO;
+import frc.robot.subsystems.intakeindexer.IntakeIndexerIOController;
+import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.subsystems.shooter.ShooterIO;
+import frc.robot.subsystems.shooter.ShooterIOController;
+import frc.robot.subsystems.shooterindexer.ShooterIndexer;
+import frc.robot.subsystems.shooterindexer.ShooterIndexerIO;
+import frc.robot.subsystems.shooterindexer.ShooterIndexerIOController;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
     private static SwerveSubsystem swerveSubsystem;
+    private static Intake intake;
+    private static IntakeAngle intakeAngle;
+    private static IntakeIndexer intakeIndexer;
+    private static Shooter shooter;
+    private static ShooterIndexer shooterIndexer;
+    private static Climber climber;
+    private static ClimberAngle climberAngle;
 
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
+                intake = new Intake(true, new IntakeIOController());
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
+                intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIOController());
+                shooter = new Shooter(true, new ShooterIOController());
+                shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIOController());
+                climber = new Climber(true, new ClimberIOController());
+
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
                 break;
 
             case REPLAY, REPLAY_COMP:
+                intake = new Intake(true, new IntakeIO() {});
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIO() {});
+                intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIO() {});
+                shooter = new Shooter(true, new ShooterIO() {});
+                shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIO() {});
+                climber = new Climber(true, new ClimberIO() {});
+
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
         }
 
-        swerveSubsystem = new SwerveSubsystem(true);
+        swerveSubsystem = new SwerveSubsystem(true, true, () -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX(), () -> driverController.getRightY());
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
         new VisionSubsystem();
@@ -39,6 +78,34 @@ public class RobotContainer {
 
     public static SwerveSubsystem getSwerve() {
         return swerveSubsystem;
+    }
+
+    static Intake getIntake() {
+        return intake;
+    }
+
+    static IntakeAngle getIntakeAngle() {
+        return intakeAngle;
+    }
+
+    static IntakeIndexer getIntakeIndexer() {
+        return intakeIndexer;
+    }
+
+    static Shooter getShooter() {
+        return shooter;
+    }
+
+    static ShooterIndexer getShooterIndexer() {
+        return shooterIndexer;
+    }
+
+    static Climber getClimber() {
+        return climber;
+    }
+
+    static ClimberAngle getClimberAngle() {
+        return climberAngle;
     }
 
     private void configureBindings() {
