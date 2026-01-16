@@ -11,7 +11,7 @@ public class ClimberAngle extends SubsystemBase implements
         ISubsystem.Resettable,
         ISubsystem.AngleControlled,
         ISubsystem.Stoppable,
-        ISubsystem.GoalOriented
+        ISubsystem.GoalOriented<Rotation2d>
 {
     private ClimberAngleIO io;
     private final ClimberAngleIOInputsAutoLogged inputs = new ClimberAngleIOInputsAutoLogged();
@@ -71,14 +71,15 @@ public class ClimberAngle extends SubsystemBase implements
         if (!enabled)
             return Commands.none();
 
-        return Commands.runOnce(
-                () -> io.setPosition(angle.getRadians())
-        );
+        return Commands.runOnce(() -> io.setPosition(angle.getRadians()));
     }
 
     @Override
     public Rotation2d getAngle() {
-        return null;
+        if (!enabled)
+            return null;
+
+        return inputs.Position;
     }
 
     @Override
@@ -90,7 +91,7 @@ public class ClimberAngle extends SubsystemBase implements
     }
 
     @Override
-    public Object getGoal() {
+    public Rotation2d getGoal() {
         if (!enabled)
             return Rotation2d.kZero;
 

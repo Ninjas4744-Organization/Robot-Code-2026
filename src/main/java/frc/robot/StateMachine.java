@@ -65,7 +65,9 @@ public class StateMachine extends StateMachineBase<States> {
             intakeAngle.reset(),
             intakeIndexer.reset(),
             shooterIndexer.reset(),
-            shooter.reset()
+            shooter.reset(),
+            climber.reset(),
+            climberAngle.reset()
         ));
 
         addEdge(States.RESET, States.IDLE);
@@ -81,6 +83,8 @@ public class StateMachine extends StateMachineBase<States> {
             && intakeIndexer.isReset()
             && shooterIndexer.isReset()
             && shooter.isReset()
+            && climber.isReset()
+            && climberAngle.isReset()
         ), States.IDLE));
     }
 
@@ -225,18 +229,51 @@ public class StateMachine extends StateMachineBase<States> {
 
     private void climbingCommands() {
         addEdge(States.IDLE, States.CLIMB1_READY ,Commands.sequence(
-            climberAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.ClimberAngle.kOpen.getAsDouble())),
+                climberAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.ClimberAngle.kOpen.getAsDouble())),
 
-            Commands.waitUntil(climberAngle::atGoal)
+                Commands.waitUntil(climberAngle::atGoal),
+
+                climber.setPosition(PositionsConstants.Climber.kClimbReady.get()),
+
+                Commands.waitUntil(climber::atGoal)
         ));
+
+        addEdge(States.CLIMB1_READY, States.CLIMB1_AUTO ,Commands.sequence(
+                climber.setPosition(PositionsConstants.Climber.kRightAutoClimb.get()),
+
+                Commands.waitUntil(climber::atGoal)
+        ));
+
+
+        addEdge(States.CLIMB1_AUTO, States.CLIMB_DOWN ,Commands.sequence(
+                climber.setPosition(PositionsConstants.Climber.kLeftClimb.get()),
+
+                Commands.waitUntil(climber::atGoal)
+        ));
+
+        addEdge(States.CLIMB_DOWN, States.IDLE ,Commands.sequence(
+                climberAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.ClimberAngle.kClose.getAsDouble())),
+
+                Commands.waitUntil(climberAngle::atGoal)
+        ));
+
+
         addEdge(States.CLIMB1_READY, States.CLIMB1 ,Commands.sequence(
+                climber.setPosition(PositionsConstants.Climber.kRightClimb.get()),
 
+            Commands.waitUntil(climber::atGoal)
         ));
-        addEdge(States.CLIMB1, States.CLIMB_DOWN ,Commands.sequence());
-        addEdge(States.CLIMB1, States.CLIMB2_READY ,Commands.sequence());
-        addEdge(States.CLIMB_DOWN, States.IDLE ,Commands.sequence());
-        addEdge(States.CLIMB2_READY, States.CLIMB2 ,Commands.sequence());
-        addEdge(States.CLIMB2, States.CLIMB3_READY ,Commands.sequence());
-        addEdge(States.CLIMB3_READY, States.CLIMB3 ,Commands.sequence());
+
+        addEdge(States.CLIMB1, States.CLIMB2 ,Commands.sequence(
+                climber.setPosition(PositionsConstants.Climber.kLeftClimb.get()),
+
+                Commands.waitUntil(climber::atGoal)
+        ));
+
+        addEdge(States.CLIMB2, States.CLIMB3 ,Commands.sequence(
+                climber.setPosition(PositionsConstants.Climber.kRightClimb.get()),
+
+                Commands.waitUntil(climber::atGoal)
+        ));
     }
 }

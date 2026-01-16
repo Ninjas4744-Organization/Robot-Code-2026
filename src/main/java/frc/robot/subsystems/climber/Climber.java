@@ -4,11 +4,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
+import frc.robot.RobotState;
+import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase implements
         ISubsystem.Resettable,
-        ISubsystem.VelocityControlled,
+        ISubsystem.PositionControlled,
+        ISubsystem.PercentControlled,
+        ISubsystem.GoalOriented<Double>,
         ISubsystem.Stoppable
 {
     private ClimberIO io;
@@ -34,21 +38,6 @@ public class Climber extends SubsystemBase implements
         Logger.processInputs("Climber", inputs);
     }
 
-    public Command setVelocity(double velocity) {
-        if (!enabled)
-            return Commands.none();
-
-        return Commands.runOnce(() -> io.setVelocity(velocity));
-    }
-
-    @Override
-    public double getVelocity() {
-        if (!enabled)
-            return 0;
-
-        return inputs.Velocity;
-    }
-
     @Override
     public Command stop() {
         if (!enabled)
@@ -62,13 +51,61 @@ public class Climber extends SubsystemBase implements
         if (!enabled)
             return true;
 
-        return Math.abs(inputs.Output) < 0.05;
+        return inputs.LimitSwitch;
     }
 
     public Command reset() {
         if (!enabled)
             return Commands.none();
 
-        return stop();
+        return Commands.runOnce(() -> io.setPercent(-0.4)).andThen(Commands.waitUntil(() -> inputs.LimitSwitch)).finallyDo(() -> io.setPercent(0));
+    }
+
+    @Override
+    public Command setPosition(double position) {
+        if (!enabled)
+            return Commands.none();
+
+        return Commands.runOnce(() -> io.setPosition(position));
+    }
+
+    @Override
+    public double getPosition() {
+        if (!enabled)
+            return 0;
+
+        return inputs.Position;
+    }
+
+    @Override
+    public boolean atGoal() {
+        if (!enabled)
+            return false;
+
+        return inputs.AtGoal;
+    }
+
+    @Override
+    public Double getGoal() {
+        if (!enabled)
+            return 0.0;
+
+        return inputs.Goal;
+    }
+
+    @Override
+    public Command setPercent(double percent) {
+        if (!enabled)
+            return Commands.none();
+
+        return Commands.runOnce(() -> io.setPercent(percent));
+    }
+
+    @Override
+    public double getOutput() {
+        if (!enabled)
+            return 0;
+
+        return inputs.Output;
     }
 }
