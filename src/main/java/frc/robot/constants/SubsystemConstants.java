@@ -1,5 +1,6 @@
 package frc.robot.constants;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -248,7 +249,7 @@ public class SubsystemConstants {
         kSwerve.special.odometryThreadFrequency = 250;
         kSwerve.special.isReplay = GeneralConstants.kRobotMode.isReplay();
         kSwerve.special.robotStartPose = new Pose2d(2, 4, Rotation2d.kZero);
-        kSwerve.special.CANBus = "Swerve Bus";
+        kSwerve.special.CANBus = new CANBus("Swerve Bus");
 
         try {
             kSwerve.special.robotConfig = RobotConfig.fromGUISettings();

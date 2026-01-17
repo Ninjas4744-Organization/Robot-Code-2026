@@ -31,7 +31,7 @@ public class ShooterIndexer extends SubsystemBase implements
 
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("ShooterIndexer", inputs);
+        Logger.processInputs("Shooter Indexer", inputs);
     }
 
     public Command setVelocity(double velocity) {

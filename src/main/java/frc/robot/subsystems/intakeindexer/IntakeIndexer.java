@@ -31,7 +31,7 @@ public class IntakeIndexer extends SubsystemBase implements
 
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("IntakeIndexer", inputs);
+        Logger.processInputs("Intake Indexer", inputs);
     }
 
     @Override

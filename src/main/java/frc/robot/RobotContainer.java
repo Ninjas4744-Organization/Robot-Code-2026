@@ -16,6 +16,8 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOController;
 import frc.robot.subsystems.climberangle.ClimberAngle;
+import frc.robot.subsystems.climberangle.ClimberAngleIO;
+import frc.robot.subsystems.climberangle.ClimberAngleIOController;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeIOController;
@@ -31,6 +33,7 @@ import frc.robot.subsystems.shooter.ShooterIOController;
 import frc.robot.subsystems.shooterindexer.ShooterIndexer;
 import frc.robot.subsystems.shooterindexer.ShooterIndexerIO;
 import frc.robot.subsystems.shooterindexer.ShooterIndexerIOController;
+import org.ironmaple.simulation.SimulatedArena;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
@@ -52,6 +55,7 @@ public class RobotContainer {
                 shooter = new Shooter(true, new ShooterIOController());
                 shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIOController());
                 climber = new Climber(true, new ClimberIOController());
+                climberAngle = new ClimberAngle(true, new ClimberAngleIOController());
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
                 break;
@@ -63,12 +67,13 @@ public class RobotContainer {
                 shooter = new Shooter(true, new ShooterIO() {});
                 shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIO() {});
                 climber = new Climber(true, new ClimberIO() {});
+                climberAngle = new ClimberAngle(true, new ClimberAngleIO() {});
 
                 driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
                 break;
         }
 
-        swerveSubsystem = new SwerveSubsystem(true, true, () -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX(), () -> driverController.getRightY());
+        swerveSubsystem = new SwerveSubsystem(true, false, () -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX(), () -> driverController.getRightY());
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
         new VisionSubsystem();
@@ -80,31 +85,31 @@ public class RobotContainer {
         return swerveSubsystem;
     }
 
-    static Intake getIntake() {
+    public static Intake getIntake() {
         return intake;
     }
 
-    static IntakeAngle getIntakeAngle() {
+    public static IntakeAngle getIntakeAngle() {
         return intakeAngle;
     }
 
-    static IntakeIndexer getIntakeIndexer() {
+    public static IntakeIndexer getIntakeIndexer() {
         return intakeIndexer;
     }
 
-    static Shooter getShooter() {
+    public static Shooter getShooter() {
         return shooter;
     }
 
-    static ShooterIndexer getShooterIndexer() {
+    public static ShooterIndexer getShooterIndexer() {
         return shooterIndexer;
     }
 
-    static Climber getClimber() {
+    public static Climber getClimber() {
         return climber;
     }
 
-    static ClimberAngle getClimberAngle() {
+    public static ClimberAngle getClimberAngle() {
         return climberAngle;
     }
 
