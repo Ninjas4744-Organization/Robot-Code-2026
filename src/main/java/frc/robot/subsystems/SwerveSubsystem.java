@@ -65,7 +65,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setControl(new SwerveInput(
                     -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-                    SwerveController.getInstance().lookAt(FieldConstants.getHubPose().toPose2d(), Rotation2d.kZero),
+                    SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Look Hub");
             })
@@ -87,7 +87,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setControl(new SwerveInput(
                     pid.getX(),
                     pid.getY(),
-                    SwerveController.getInstance().lookAt(FieldConstants.getHubPose().toPose2d(), Rotation2d.kZero),
+                    SwerveController.getInstance().lookAt(target.getRotation()),
                     true
                 ), "Lock");
             })
@@ -112,9 +112,10 @@ public class SwerveSubsystem extends SubsystemBase implements
                     transform = new Transform2d(dir.times(PositionsConstants.Swerve.kHubMinDist.get() - dist), Rotation2d.kZero);
                 }
 
-                target = new Pose2d(robot.getX() + transform.getX(),
+                target = new Pose2d(
+                    robot.getX() + transform.getX(),
                     robot.getY() + transform.getY(),
-                    robot.getRotation().rotateBy(transform.getRotation()));
+                    FieldConstants.getTranslationToHub().getAngle());
 
                 SwerveController.getInstance().setChannel("Auto Drive");
             }),
@@ -123,7 +124,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setControl(new SwerveInput(
                     pid.getX(),
                     pid.getY(),
-                    SwerveController.getInstance().lookAt(FieldConstants.getHubPose().toPose2d(), Rotation2d.kZero),
+                    SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Auto Drive");
             })
@@ -145,7 +146,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setControl(new SwerveInput(
                     -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-                    SwerveController.getInstance().lookAt(PositionsConstants.Swerve.getDeliveryTarget(), Rotation2d.kZero),
+                    SwerveController.getInstance().lookAt(target.getRotation()),
                     true
                 ), "Delivery");
             })

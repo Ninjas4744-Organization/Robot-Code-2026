@@ -144,9 +144,9 @@ public class SubsystemConstants {
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kShooter.real.control.controlConstants = ControlConstants.createTorqueCurrent(2, 1, 0.2);
         kShooter.real.control.gearRatio = 1;
-        kShooter.real.control.velocityGoalTolerance = 5;
+        kShooter.real.control.velocityGoalTolerance = 60;
 
         /* Simulation */
         kShooter.motorType = DCMotor.getKrakenX60(2);
