@@ -111,56 +111,56 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.DELIVERY_READY, States.DELIVERY, Commands.sequence(
-                shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
+            shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
         ));
 
         addEdge(States.INTAKE, States.INTAKE_WHILE_DELIVERY_READY, Commands.sequence(
-                swerve.deliveryDrive(),
-                shooter.autoDeliveryVelocity(),
+            swerve.deliveryDrive(),
+            shooter.autoDeliveryVelocity(),
 
-                Commands.waitUntil(shooter::atGoal)
+            Commands.waitUntil(shooter::atGoal)
         ));
 
         addEdge(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY, Commands.sequence(
-                shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
+            shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
         ));
 
         addEdge(States.DELIVERY, States.INTAKE_WHILE_DELIVERY, Commands.sequence(
-                intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kOpen.get())),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kOpen.get())),
 
-                Commands.waitUntil(intakeAngle::atGoal),
+            Commands.waitUntil(intakeAngle::atGoal),
 
-                intake.setVelocity(PositionsConstants.Intake.kIntake.get()),
-                intakeIndexer.setVelocity(PositionsConstants.IntakeIndexer.kIntake.get())
+            intake.setVelocity(PositionsConstants.Intake.kIntake.get()),
+            intakeIndexer.setVelocity(PositionsConstants.IntakeIndexer.kIntake.get())
         ));
 
         addEdge(States.INTAKE_WHILE_DELIVERY, States.DELIVERY, Commands.sequence(
-                intake.stop(),
-                intakeIndexer.stop(),
+            intake.stop(),
+            intakeIndexer.stop(),
 
-                intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
 
-                Commands.waitUntil(intakeAngle::atGoal)
+            Commands.waitUntil(intakeAngle::atGoal)
         ));
 
-        addMultiEdge(List.of(States.DELIVERY_READY, States.DELIVERY), States.IDLE, () -> Commands.sequence(
+        addEdge(List.of(States.DELIVERY_READY, States.DELIVERY), States.IDLE, () -> Commands.sequence(
             swerve.stop(),
-                shooter.stop(),
-                shooterIndexer.stop()
+            shooter.stop(),
+            shooterIndexer.stop()
         ));
 
-        addMultiEdge(List.of(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY), States.IDLE, () ->Commands.sequence(
-                swerve.stop(),
+        addEdge(List.of(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY), States.IDLE, () -> Commands.sequence(
+            swerve.stop(),
 
 
-                shooter.stop(),
-                shooterIndexer.stop(),
-                intake.stop(),
-                intakeIndexer.stop(),
+            shooter.stop(),
+            shooterIndexer.stop(),
+            intake.stop(),
+            intakeIndexer.stop(),
 
-                intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
 
-                Commands.waitUntil(intakeAngle::atGoal)
+            Commands.waitUntil(intakeAngle::atGoal)
         ));
 
         addEdge(States.IDLE, States.DUMP, Commands.sequence(
@@ -172,6 +172,9 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.stop(),
             shooterIndexer.stop()
         ));
+
+        addStateEnd(States.DELIVERY_READY, Map.of(Commands.none(), States.DELIVERY));
+        addStateEnd(States.INTAKE_WHILE_DELIVERY_READY, Map.of(Commands.none(), States.INTAKE_WHILE_DELIVERY));
     }
 
     private void shootingCommands() {
@@ -181,7 +184,7 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.waitUntil(shooter::atGoal)
         ));
 
-        addMultiEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
+        addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
             swerve.autoDrive(),
             shooter.autoHubVelocity(),
 
@@ -212,7 +215,7 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.stop()
         ));
 
-        addMultiEdge(List.of(States.SHOOT, States.SHOOT_READY), States.IDLE, () -> Commands.sequence(
+        addEdge(List.of(States.SHOOT, States.SHOOT_READY), States.IDLE, () -> Commands.sequence(
             shooterIndexer.stop(),
             shooter.stop(),
             swerve.stop()

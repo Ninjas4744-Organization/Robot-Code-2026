@@ -114,9 +114,28 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driverController.povUp().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
-        driverController.povRight().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.RESET, true)));
+        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
+        driverController.povRight().onTrue(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false));
+//        driverController.povUp().onTrue(Commands.runOnce(() -> ));
+
+        driverController.L1().onTrue(StateMachine.getInstance().changeRobotStateCommand(States.IDLE));
+
+        driverController.R1().onTrue(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_DELIVERY_READY);
+            StateMachine.getInstance().changeRobotState(States.INTAKE);
+        }));
+
+        driverController.R2().onTrue(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.SHOOT);
+            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+        }));
+
+        driverController.L2().onTrue(Commands.runOnce(() -> {
+            // Climbing shit
+        }));
+
+        driverController.square().onTrue(StateMachine.getInstance().changeRobotStateCommand(States.DUMP));
     }
 
     public void controllerPeriodic() {
@@ -135,12 +154,12 @@ public class RobotContainer {
 
     public void reset() {
         if (GeneralConstants.kRobotMode.isComp()) {
-            RobotState.getInstance().setRobotState(States.STARTING_POSE);
-            StateMachine.getInstance().changeRobotState(States.IDLE, true);
+            StateMachine.getInstance().changeRobotState(States.STARTING_POSE, false, true);
+            StateMachine.getInstance().changeRobotState(States.IDLE, true, false);
         }
         else {
-            RobotState.getInstance().setRobotState(States.UNKNOWN);
-            StateMachine.getInstance().changeRobotState(States.RESET, true);
+            StateMachine.getInstance().changeRobotState(States.UNKNOWN, false, true);
+            StateMachine.getInstance().changeRobotState(States.RESET, true, false);
         }
     }
 }

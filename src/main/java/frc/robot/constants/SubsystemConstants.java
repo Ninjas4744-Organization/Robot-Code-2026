@@ -97,7 +97,7 @@ public class SubsystemConstants {
         kIntakeAngle.real.base.isBrakeMode = true;
 
         /* Control */
-        kIntakeAngle.real.control.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kIntakeAngle.real.control.controlConstants = ControlConstants.createProfiledPID(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
         kIntakeAngle.real.control.gearRatio = 1;
         kIntakeAngle.real.control.conversionFactor = 1;
         kIntakeAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);

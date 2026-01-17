@@ -96,8 +96,8 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub Min Dist", 1.5, false);
         public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 3, false);
 
-        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 3, false);
-        private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 3, false);
+        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 3, true);
+        private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 3, true);
 
         public static Pose2d getDeliveryTarget() {
             return new Pose2d(kDeliveryTargetX.get(), kDeliveryTargetY.get(), Rotation2d.kZero);
