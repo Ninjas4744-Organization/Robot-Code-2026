@@ -79,7 +79,7 @@ public class ClimberAngle extends SubsystemBase implements
         if (!enabled)
             return null;
 
-        return inputs.Position;
+        return Rotation2d.fromRotations(inputs.Position);
     }
 
     @Override

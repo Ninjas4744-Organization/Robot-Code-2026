@@ -215,7 +215,7 @@ public class SubsystemConstants {
 
         /* Modules */
         double wheelRadius = 0.048;
-        kSwerve.modules.openLoop = false;
+        kSwerve.modules.openLoop = true;
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
@@ -240,7 +240,7 @@ public class SubsystemConstants {
                 i,
                 10 + i * 2,
                 11 + i * 2,
-                false,
+                true,
                 false,
                 6 + i,
                 false,
@@ -248,10 +248,10 @@ public class SubsystemConstants {
             );
         }
 
-        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.291260;
-        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.268799;
-        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.267334;
-        kSwerve.modules.moduleConstants[3].CANCoderOffset = 0.279541;
+        kSwerve.modules.moduleConstants[0].CANCoderOffset = 0.279541;
+        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.267334;
+        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.268799;
+        kSwerve.modules.moduleConstants[3].CANCoderOffset = -0.291260;
 
         /* Gyro */
         kSwerve.gyro.gyroID = 45;
@@ -298,8 +298,7 @@ public class SubsystemConstants {
     public static final VisionConstants kVision = new VisionConstants();
     static {
         kVision.cameras = Map.of(
-            "Front", Pair.of(new Transform3d(0.28286, 0.12995, 0.152, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(-7.5))), VisionConstants.CameraType.Limelight),
-            "Back", Pair.of(new Transform3d(-0.28286 - 0.05, 0.12995, 0.152, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(187.5))), VisionConstants.CameraType.Limelight)
+            "limelight-front", Pair.of(new Transform3d(0.73 / 2, 0, 0.35, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))), VisionConstants.CameraType.Limelight)
         );
 
         kVision.fieldLayoutGetter = FieldConstants::getFieldLayoutWithIgnored;

@@ -22,8 +22,13 @@ public class ClimberIOController implements ClimberIO {
     }
 
     @Override
-    public void setVelocity(double velocity) {
-        controller.setVelocity(velocity);
+    public void setPosition(double position) {
+        controller.setPosition(position);
+    }
+
+    @Override
+    public void setPercent(double percent) {
+        controller.setPercent(percent);
     }
 
     @Override

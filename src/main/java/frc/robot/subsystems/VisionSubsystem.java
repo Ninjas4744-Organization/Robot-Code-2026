@@ -37,10 +37,13 @@ public class VisionSubsystem extends SubsystemBase {
                 continue;
 
             Matrix<N3, N1> strength = getVisionStrength(estimation);
+            if (DriverStation.isDisabled())
+                strength = VecBuilder.fill(1, 1, 1);
             boolean passedFilters = isPassedFilters(estimation);
 
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose", estimation.robotPose);
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Passed Filters", passedFilters);
+            Logger.recordOutput("Vision/" + estimation.cameraName + "/Strength", strength.get(0, 0));
 
             if (passedFilters || DriverStation.isDisabled()) {
                 Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose (Passed Filters)", estimation.robotPose);
@@ -55,7 +58,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Matrix<N3, N1> getVisionStrength(VisionOutput estimation) {
         double a = 4;
-        double visionStrength = 1 / (1 + a * Math.pow(odometryDrift, -0.5) * estimation.closestTargetDist * estimation.closestTargetDist);
+        double visionStrength = 1 / (1 + a * Math.pow(Math.max(odometryDrift, 0.1), -0.5) * estimation.closestTargetDist * estimation.closestTargetDist);
 
         return VecBuilder.fill(visionStrength, visionStrength, visionStrength / 2);
     }
