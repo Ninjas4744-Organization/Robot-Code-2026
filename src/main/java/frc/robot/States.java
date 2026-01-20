@@ -23,11 +23,10 @@ public enum States {
     SHOOT,
 
     //Climbing
-    CLIMB1_READY,
-    CLIMB1,
     CLIMB_DOWN,
-    CLIMB2_READY,
+    CLIMB1_READY,
+    CLIMB1_AUTO,
+    CLIMB1,
     CLIMB2,
-    CLIMB3_READY,
     CLIMB3
 }

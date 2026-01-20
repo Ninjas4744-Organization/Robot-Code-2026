@@ -64,7 +64,7 @@ public class SubsystemConstants {
 
         /* Limit Switch */
         kClimber.real.hardLimit.id = 3;
-        kClimber.real.hardLimit.homePosition = 0;
+        kClimber.real.hardLimit.homePosition = PositionsConstants.Climber.kLeftClimb.get();
 
         /* Simulation */
         kClimber.motorType = DCMotor.getKrakenX60(1);

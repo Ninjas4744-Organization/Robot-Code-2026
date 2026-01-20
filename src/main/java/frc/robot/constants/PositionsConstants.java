@@ -12,8 +12,12 @@ public class PositionsConstants {
     }
 
     public static class Climber {
-        public static final LoggedTunableNumber kRightClimb = new LoggedTunableNumber("Climber/Right Climb", 90, false);
+        // I considered LeftClimb is the starting pos, so the system starts with the left hook down
         public static final LoggedTunableNumber kLeftClimb = new LoggedTunableNumber("Climber/Left Climb", -90, false);
+        public static final LoggedTunableNumber kRightClimb = new LoggedTunableNumber("Climber/Right Climb", 90, false);
+        public static final LoggedTunableNumber kClimbReady = new LoggedTunableNumber("Climber/Left Climb", -45, false);
+        // half climb for auto, so the second hook wouldn't lock and the robot could go down
+        public static final LoggedTunableNumber kRightAutoClimb = new LoggedTunableNumber("Climber/Right Climb", -60, false);
     }
 
     public static class Intake {

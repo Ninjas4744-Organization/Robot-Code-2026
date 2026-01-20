@@ -6,7 +6,8 @@ import org.littletonrobotics.junction.AutoLog;
 
 public interface ClimberIO extends
         IO.BaseIO<ClimberIOInputsAutoLogged>,
-        IO.VelocityControlled,
+        IO.PercentControlled,
+        IO.PositionControlled,
         IO.Stoppable
 {
     @AutoLog
