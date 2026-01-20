@@ -33,6 +33,9 @@ import frc.robot.subsystems.shooter.ShooterIOController;
 import frc.robot.subsystems.shooterindexer.ShooterIndexer;
 import frc.robot.subsystems.shooterindexer.ShooterIndexerIO;
 import frc.robot.subsystems.shooterindexer.ShooterIndexerIOController;
+import frc.robot.subsystems.shooterindexer2.shooterindexer.ShooterIndexer2;
+import frc.robot.subsystems.shooterindexer2.shooterindexer.ShooterIndexer2IO;
+import frc.robot.subsystems.shooterindexer2.shooterindexer.ShooterIndexer2IOController;
 import org.ironmaple.simulation.SimulatedArena;
 
 public class RobotContainer {
@@ -43,6 +46,7 @@ public class RobotContainer {
     private static IntakeIndexer intakeIndexer;
     private static Shooter shooter;
     private static ShooterIndexer shooterIndexer;
+    private static ShooterIndexer2 shooterIndexer2;
     private static Climber climber;
     private static ClimberAngle climberAngle;
 
@@ -54,6 +58,7 @@ public class RobotContainer {
                 intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIOController());
                 shooter = new Shooter(true, new ShooterIOController());
                 shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIOController());
+                shooterIndexer2 =  new ShooterIndexer2(true, new ShooterIndexer2IOController());
                 climber = new Climber(true, new ClimberIOController());
                 climberAngle = new ClimberAngle(true, new ClimberAngleIOController());
 
@@ -66,6 +71,7 @@ public class RobotContainer {
                 intakeIndexer = new IntakeIndexer(true, new IntakeIndexerIO() {});
                 shooter = new Shooter(true, new ShooterIO() {});
                 shooterIndexer =  new ShooterIndexer(true, new ShooterIndexerIO() {});
+                shooterIndexer2 =  new ShooterIndexer2(true, new ShooterIndexer2IO() {});
                 climber = new Climber(true, new ClimberIO() {});
                 climberAngle = new ClimberAngle(true, new ClimberAngleIO() {});
 
@@ -103,6 +109,10 @@ public class RobotContainer {
 
     public static ShooterIndexer getShooterIndexer() {
         return shooterIndexer;
+    }
+
+    public static ShooterIndexer2 getShooterIndexer2() {
+        return shooterIndexer2;
     }
 
     public static Climber getClimber() {

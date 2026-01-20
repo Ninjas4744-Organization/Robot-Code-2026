@@ -167,7 +167,25 @@ public class SubsystemConstants {
         kShooterIndexer.real.control.gearRatio = 2;
 
         /* Simulation */
-        kShooterIndexer.motorType = DCMotor.getKrakenX60(2);
+        kShooterIndexer.motorType = DCMotor.getKrakenX60(1);
+    }
+
+
+
+    public static final ControllerConstants kShooterIndexer2 = new ControllerConstants();
+    static {
+        /* Base */
+        kShooterIndexer2.real.base.main.id = 32;
+        kShooterIndexer2.real.base.main.inverted = false;
+        kShooterIndexer2.real.base.currentLimit = 80;
+        kShooterIndexer2.real.base.isBrakeMode = true;
+
+        /* Control */
+        kShooterIndexer2.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kShooterIndexer2.real.control.gearRatio = 1.5;
+
+        /* Simulation */
+        kShooterIndexer2.motorType = DCMotor.getKrakenX60(1);
     }
 
 
