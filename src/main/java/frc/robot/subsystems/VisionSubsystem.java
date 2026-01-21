@@ -19,6 +19,7 @@ import org.littletonrobotics.junction.Logger;
 public class VisionSubsystem extends SubsystemBase {
     private double odometryDrift = 0;
     private Pose2d lastVisionPose = new Pose2d();
+    private Pose2d lastMegaTag1Pose = new Pose2d();
 
     public VisionSubsystem() {
         Vision.setInstance(new Vision(SubsystemConstants.kVision));
@@ -41,6 +42,8 @@ public class VisionSubsystem extends SubsystemBase {
                 strength = VecBuilder.fill(1, 1, 1);
             boolean passedFilters = isPassedFilters(estimation);
 
+            lastMegaTag1Pose = estimation.robotPoseMegaTag1;
+
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose", estimation.robotPose);
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Passed Filters", passedFilters);
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Strength", strength.get(0, 0));
@@ -48,7 +51,7 @@ public class VisionSubsystem extends SubsystemBase {
             if (passedFilters || DriverStation.isDisabled()) {
                 Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose (Passed Filters)", estimation.robotPose);
 
-                RobotState.getInstance().updateRobotPose(estimation.robotPose, estimation.timestamp, strength);
+                RobotState.getInstance().updateRobotPose(!DriverStation.isDisabled() ? estimation.robotPose : estimation.robotPoseMegaTag1, estimation.timestamp, strength);
                 lastVisionPose = estimation.robotPose;
 
                 odometryDrift *= 1 - strength.get(0, 0);
@@ -79,5 +82,9 @@ public class VisionSubsystem extends SubsystemBase {
 
     public Pose2d getLastVisionPose() {
         return lastVisionPose;
+    }
+
+    public Pose2d getLastMegaTag1Pose() {
+        return lastMegaTag1Pose;
     }
 }

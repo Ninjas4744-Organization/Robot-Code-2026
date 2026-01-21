@@ -41,6 +41,7 @@ import org.ironmaple.simulation.SimulatedArena;
 public class RobotContainer {
     private LoggedCommandController driverController;
     private static SwerveSubsystem swerveSubsystem;
+    private static VisionSubsystem visionSubsystem;
     private static Intake intake;
     private static IntakeAngle intakeAngle;
     private static IntakeIndexer intakeIndexer;
@@ -82,7 +83,7 @@ public class RobotContainer {
         swerveSubsystem = new SwerveSubsystem(true, false, () -> driverController.getLeftX(), () -> driverController.getLeftY(), () -> driverController.getRightX(), () -> driverController.getRightY());
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
-        new VisionSubsystem();
+        visionSubsystem = new VisionSubsystem();
 
         configureBindings();
     }
@@ -124,7 +125,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(RobotState.getInstance().getRobotPose().getRotation())));
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation())));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povRight().onTrue(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false));
 //        driverController.povUp().onTrue(Commands.runOnce(() -> ));

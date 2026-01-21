@@ -49,7 +49,7 @@ public class GeneralConstants {
     public static class Swerve {
         public static final double kDriverSpeedFactor = 1;
         public static final double kDriverRotationSpeedFactor = 1;
-        public static final double kJoystickDeadband = 0.02;
+        public static final double kJoystickDeadband = 0;
         public static final boolean kDriverFieldRelative = true;
     }
 
