@@ -58,16 +58,22 @@ public class SwerveSubsystem extends SubsystemBase implements
         return backgroundCommand.setNewTaskCommand(Commands.sequence(
             Commands.runOnce(() -> {
                 SwerveController.getInstance().setChannel("Look Hub");
+                SwerveController.getInstance().resetLookAt();
             }),
             Commands.run(() -> {
-                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle());
+                Translation2d robotRelativeVelocity = new Translation2d(Swerve.getInstance().getChassisSpeeds(false).vxMetersPerSecond, Swerve.getInstance().getChassisSpeeds(false).vyMetersPerSecond);
+                double angleFix = PositionsConstants.Swerve.getAngleFix(Math.abs(robotRelativeVelocity.getY())) * -Math.signum(robotRelativeVelocity.getY());
+                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
 
                 SwerveController.getInstance().setControl(new SwerveInput(
                     -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+//                    -MathUtil.applyDeadband(rightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor * SubsystemConstants.kSwerve.limits.maxAngularVelocity,
                     SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Look Hub");
+
+                Logger.recordOutput("Swerve/Angle Fix", angleFix);
             })
         ));
     }

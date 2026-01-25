@@ -1,6 +1,8 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -10,6 +12,7 @@ import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
+import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
@@ -40,7 +43,14 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIO;
 import frc.robot.subsystems.shooter.ShooterIOController;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
+import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static edu.wpi.first.units.Units.*;
 
 public class RobotContainer {
     private LoggedCommandController driverController;
@@ -170,6 +180,7 @@ public class RobotContainer {
         driverController.square().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
     }
 
+    List<GamePieceProjectile> balls = new ArrayList<>();
     private void configureTestBindings() {
         driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
             () -> CommandScheduler.getInstance().schedule(intake.setPercent(0.5)),
@@ -178,12 +189,33 @@ public class RobotContainer {
 
         driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
             () -> {
-                CommandScheduler.getInstance().schedule(swerveSubsystem.lookHub());
-                CommandScheduler.getInstance().schedule(indexer.setPercent(0.3));
-                CommandScheduler.getInstance().schedule(indexer2.setPercent(0.3));
-                CommandScheduler.getInstance().schedule(accelerator.setVelocity(80));
-//                CommandScheduler.getInstance().schedule(shooter.setVelocity(50));
-                CommandScheduler.getInstance().schedule(shooter.autoHubVelocity());
+                CommandScheduler.getInstance().schedule(Commands.sequence(
+                    swerveSubsystem.lookHub(),
+                    indexer.setPercent(0.3),
+                    indexer2.setPercent(0.3),
+                    accelerator.setVelocity(80),
+                    shooter.autoHubVelocity(),
+                    Commands.runOnce(() -> {
+                        if (GeneralConstants.kRobotMode.isSim()) {
+                            GamePieceProjectile ball = new RebuiltFuelOnFly(
+                                RobotState.getInstance().getRobotPose().getTranslation(),
+                                new Translation2d(),
+                                Swerve.getInstance().getChassisSpeeds(true),
+                                RobotState.getInstance().getRobotPose().getRotation(),
+                                Meters.of(0.25),
+//                                MetersPerSecond.of(24 * Math.abs(shooter.getVelocity()) / 100),
+                                MetersPerSecond.of(13.35 * Math.abs(shooter.getGoal()) / 100),
+                                Degrees.of(58)
+                            );
+
+                            balls.add(ball);
+                            SimulatedArena.getInstance().addGamePieceProjectile(ball);
+                        }
+                    }).andThen(Commands.waitSeconds(0.1)).repeatedly().raceWith(Commands.waitSeconds(1)).andThen(Commands.waitSeconds(1)).andThen(Commands.runOnce(() -> {
+                        SimulatedArena.getInstance().clearGamePieces();
+                        balls.clear();
+                    }))
+                ));
             },
             () -> {
                 CommandScheduler.getInstance().schedule(swerveSubsystem.stop());
@@ -203,8 +235,15 @@ public class RobotContainer {
     public void periodic() {
         Logger.recordOutput("Distance", FieldConstants.getDistToHub());
 
-        if(GeneralConstants.kRobotMode.isSim())
+        if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
+//            Logger.recordOutput("Balls", SimulatedArena.getInstance().getGamePiecesArrayByType("RebuiltFuelOnFly"));
+            Pose3d[] balls = new Pose3d[this.balls.size()];
+            for (int i = 0; i < this.balls.size(); i++) {
+                balls[i] = this.balls.get(i).getPose3d();
+            }
+            Logger.recordOutput("Balls", balls);
+        }
     }
 
     public Command getAutonomousCommand() {

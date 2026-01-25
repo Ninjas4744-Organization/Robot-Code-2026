@@ -281,7 +281,7 @@ public class SubsystemConstants {
     static {
         kSwerveController.swerveConstants = kSwerve;
         kSwerveController.drivePIDConstants = ControlConstants.createPID(5, 0, 0, 0);
-        kSwerveController.rotationPIDConstants = ControlConstants.createPID(6, 0.5, 0, Units.degreesToRadians(5));
+        kSwerveController.rotationPIDConstants = ControlConstants.createProfiledPID(20, 0, 0, 0, 20, 100, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
         kSwerveController.rotationPIDContinuousConnections = Pair.of(-Math.PI, Math.PI);
     }
 

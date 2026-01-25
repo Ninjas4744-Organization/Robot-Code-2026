@@ -67,6 +67,31 @@ public class PositionsConstants {
             return kShootMap.get(dist);
         }
 
+        private static final InterpolatingDoubleTreeMap kShootFixMap = new InterpolatingDoubleTreeMap();
+        private static final LoggedTunableNumber kShootFix0 = new LoggedTunableNumber(" Shooter/ShootFix/0",   0 * 0, true);
+        private static final LoggedTunableNumber kShootFix05 = new LoggedTunableNumber("Shooter/ShootFix/0.5", 1 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix1 = new LoggedTunableNumber(" Shooter/ShootFix/1",   2 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix15 = new LoggedTunableNumber("Shooter/ShootFix/1.5", 3 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix2 = new LoggedTunableNumber(" Shooter/ShootFix/2",   4 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix25 = new LoggedTunableNumber("Shooter/ShootFix/2.5", 5 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix3 = new LoggedTunableNumber(" Shooter/ShootFix/3",   6 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix35 = new LoggedTunableNumber("Shooter/ShootFix/3.5", 7 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix4 = new LoggedTunableNumber(" Shooter/ShootFix/4",   8 * 2 - 1, true);
+
+        public static double getShootFix(double relativeVelocity) {
+            kShootFixMap.put(0.0, kShootFix0.get());
+            kShootFixMap.put(0.5, kShootFix05.get());
+            kShootFixMap.put(1.0, kShootFix1.get());
+            kShootFixMap.put(1.5, kShootFix15.get());
+            kShootFixMap.put(2.0, kShootFix2.get());
+            kShootFixMap.put(2.5, kShootFix25.get());
+            kShootFixMap.put(3.0, kShootFix3.get());
+            kShootFixMap.put(3.5, kShootFix35.get());
+            kShootFixMap.put(4.0, kShootFix4.get());
+
+            return kShootFixMap.get(relativeVelocity);
+        }
+
         private static final InterpolatingDoubleTreeMap kDeliveryMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kDelivery0 = new LoggedTunableNumber("Shooter/Delivery/0", 60, false);
         private static final LoggedTunableNumber kDelivery05 = new LoggedTunableNumber("Shooter/Delivery/0.5", 65, false);
@@ -109,6 +134,31 @@ public class PositionsConstants {
 
         public static Pose2d getDeliveryTarget() {
             return new Pose2d(kDeliveryTargetX.get(), kDeliveryTargetY.get(), Rotation2d.kZero);
+        }
+
+        private static final InterpolatingDoubleTreeMap kAngleFixMap = new InterpolatingDoubleTreeMap();
+        private static final LoggedTunableNumber kAngleFix0 = new LoggedTunableNumber ("Swerve/AngleFix/0",   0, true);
+        private static final LoggedTunableNumber kAngleFix05 = new LoggedTunableNumber("Swerve/AngleFix/0.5", 15, true);
+        private static final LoggedTunableNumber kAngleFix1 = new LoggedTunableNumber ("Swerve/AngleFix/1",   20, true);
+        private static final LoggedTunableNumber kAngleFix15 = new LoggedTunableNumber("Swerve/AngleFix/1.5", 25, true);
+        private static final LoggedTunableNumber kAngleFix2 = new LoggedTunableNumber ("Swerve/AngleFix/2",   30, true);
+        private static final LoggedTunableNumber kAngleFix25 = new LoggedTunableNumber("Swerve/AngleFix/2.5", 35, true);
+        private static final LoggedTunableNumber kAngleFix3 = new LoggedTunableNumber ("Swerve/AngleFix/3",   40, true);
+        private static final LoggedTunableNumber kAngleFix35 = new LoggedTunableNumber("Swerve/AngleFix/3.5", 45, true);
+        private static final LoggedTunableNumber kAngleFix4 = new LoggedTunableNumber ("Swerve/AngleFix/4",   50, true);
+
+        public static double getAngleFix(double relativeVelocity) {
+            kAngleFixMap.put(0.0, kAngleFix0.get());
+            kAngleFixMap.put(0.5, kAngleFix05.get());
+            kAngleFixMap.put(1.0, kAngleFix1.get());
+            kAngleFixMap.put(1.5, kAngleFix15.get());
+            kAngleFixMap.put(2.0, kAngleFix2.get());
+            kAngleFixMap.put(2.5, kAngleFix25.get());
+            kAngleFixMap.put(3.0, kAngleFix3.get());
+            kAngleFixMap.put(3.5, kAngleFix35.get());
+            kAngleFixMap.put(4.0, kAngleFix4.get());
+
+            return kAngleFixMap.get(relativeVelocity);
         }
     }
 }
