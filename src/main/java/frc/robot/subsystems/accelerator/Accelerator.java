@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooterindexer2.shooterindexer;
+package frc.robot.subsystems.accelerator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -6,16 +6,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterIndexer2 extends SubsystemBase implements
+public class Accelerator extends SubsystemBase implements
         ISubsystem.Resettable,
         ISubsystem.VelocityControlled,
         ISubsystem.Stoppable
 {
-    private ShooterIndexer2IO io;
-    private final ShooterIndexer2IOInputsAutoLogged inputs = new ShooterIndexer2IOInputsAutoLogged();
+    private AcceleratorIO io;
+    private final AcceleratorIOInputsAutoLogged inputs = new AcceleratorIOInputsAutoLogged();
     private boolean enabled;
 
-    public ShooterIndexer2(boolean enabled, ShooterIndexer2IO io) {
+    public Accelerator(boolean enabled, AcceleratorIO io) {
         this.enabled = enabled;
 
         if (enabled) {
@@ -31,7 +31,7 @@ public class ShooterIndexer2 extends SubsystemBase implements
 
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("Shooter Indexer 2", inputs);
+        Logger.processInputs("Accelerator", inputs);
     }
 
     public Command setVelocity(double velocity) {

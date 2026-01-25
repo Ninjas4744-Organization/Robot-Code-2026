@@ -5,14 +5,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.accelerator.Accelerator;
 import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climberangle.ClimberAngle;
+import frc.robot.subsystems.indexer.Indexer;
+import frc.robot.subsystems.indexer2.Indexer2;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.intakeangle.IntakeAngle;
-import frc.robot.subsystems.intakeindexer.IntakeIndexer;
 import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooterindexer.ShooterIndexer;
-import frc.robot.subsystems.shooterindexer2.shooterindexer.ShooterIndexer2;
 
 import java.util.List;
 import java.util.Map;
@@ -20,11 +20,11 @@ import java.util.Map;
 public class StateMachine extends StateMachineBase<States> {
     private SwerveSubsystem swerve;
     private Intake intake;
-    private Shooter shooter;
     private IntakeAngle intakeAngle;
-    private IntakeIndexer intakeIndexer;
-    private ShooterIndexer shooterIndexer;
-    private ShooterIndexer2 shooterIndexer2;
+    private Indexer indexer;
+    private Indexer2 indexer2;
+    private Shooter shooter;
+    private Accelerator accelerator;
     private Climber climber;
     private ClimberAngle climberAngle;
 
@@ -40,11 +40,11 @@ public class StateMachine extends StateMachineBase<States> {
     protected void defineGraph() {
         swerve = RobotContainer.getSwerve();
         intake = RobotContainer.getIntake();
-        shooter = RobotContainer.getShooter();
         intakeAngle = RobotContainer.getIntakeAngle();
-        intakeIndexer = RobotContainer.getIntakeIndexer();
-        shooterIndexer = RobotContainer.getShooterIndexer();
-        shooterIndexer2 = RobotContainer.getShooterIndexer2();
+        indexer = RobotContainer.getIndexer();
+        indexer2 = RobotContainer.getIndexer2();
+        shooter = RobotContainer.getShooter();
+        accelerator = RobotContainer.getAccelerator();
         climber = RobotContainer.getClimber();
         climberAngle = RobotContainer.getClimberAngle();
 
@@ -64,10 +64,10 @@ public class StateMachine extends StateMachineBase<States> {
             swerve.reset(),
             intake.reset(),
             intakeAngle.reset(),
-            intakeIndexer.reset(),
-            shooterIndexer.reset(),
-            shooterIndexer2.reset(),
+            indexer.reset(),
+            indexer2.reset(),
             shooter.reset(),
+            accelerator.reset(),
             climber.reset(),
             climberAngle.reset()
         ));
@@ -82,10 +82,10 @@ public class StateMachine extends StateMachineBase<States> {
         addStateEnd(States.RESET, Map.of(Commands.waitUntil(
             () -> intake.isReset()
             && intakeAngle.isReset()
-            && intakeIndexer.isReset()
-            && shooterIndexer.isReset()
-            && shooterIndexer2.isReset()
+            && indexer.isReset()
+            && indexer2.isReset()
             && shooter.isReset()
+            && accelerator.isReset()
             && climber.isReset()
             && climberAngle.isReset()
         ), States.IDLE));
@@ -97,13 +97,11 @@ public class StateMachine extends StateMachineBase<States> {
 
             Commands.waitUntil(intakeAngle::atGoal),
 
-            intake.setVelocity(PositionsConstants.Intake.kIntake.get()),
-            intakeIndexer.setVelocity(PositionsConstants.IntakeIndexer.kIntake.get())
+            intake.setVelocity(PositionsConstants.Intake.kIntake.get())
         ));
 
         addEdge(States.INTAKE, States.IDLE, Commands.sequence(
             intake.stop(),
-            intakeIndexer.stop(),
 
             intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
 
@@ -120,8 +118,9 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.DELIVERY_READY, States.DELIVERY, Commands.sequence(
-            shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get()),
-            shooterIndexer2.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
+            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
         addEdge(States.INTAKE, States.INTAKE_WHILE_DELIVERY_READY, Commands.sequence(
@@ -132,8 +131,9 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY, Commands.sequence(
-            shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get()),
-            shooterIndexer2.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
+            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
         addEdge(States.DELIVERY, States.INTAKE_WHILE_DELIVERY, Commands.sequence(
@@ -141,13 +141,11 @@ public class StateMachine extends StateMachineBase<States> {
 
             Commands.waitUntil(intakeAngle::atGoal),
 
-            intake.setVelocity(PositionsConstants.Intake.kIntake.get()),
-            intakeIndexer.setVelocity(PositionsConstants.IntakeIndexer.kIntake.get())
+            intake.setVelocity(PositionsConstants.Intake.kIntake.get())
         ));
 
         addEdge(States.INTAKE_WHILE_DELIVERY, States.DELIVERY, Commands.sequence(
             intake.stop(),
-            intakeIndexer.stop(),
 
             intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
 
@@ -156,20 +154,20 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(List.of(States.DELIVERY_READY, States.DELIVERY), States.IDLE, () -> Commands.sequence(
             swerve.stop(),
+            indexer.stop(),
+            indexer2.stop(),
             shooter.stop(),
-            shooterIndexer.stop(),
-            shooterIndexer2.stop()
+            accelerator.stop()
         ));
 
         addEdge(List.of(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY), States.IDLE, () -> Commands.sequence(
             swerve.stop(),
 
-
+            indexer.stop(),
+            indexer2.stop(),
             shooter.stop(),
-            shooterIndexer.stop(),
-            shooterIndexer2.stop(),
+            accelerator.stop(),
             intake.stop(),
-            intakeIndexer.stop(),
 
             intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
 
@@ -177,15 +175,17 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.IDLE, States.DUMP, Commands.sequence(
+            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
             shooter.setVelocity(PositionsConstants.Shooter.kDump.get()),
-            shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get()),
-            shooterIndexer2.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
+            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
         addEdge(States.DUMP, States.IDLE, Commands.sequence(
+            indexer.stop(),
+            indexer2.stop(),
             shooter.stop(),
-            shooterIndexer.stop(),
-            shooterIndexer2.stop()
+            accelerator.stop()
         ));
 
         addStateEnd(States.DELIVERY_READY, Map.of(Commands.none(), States.DELIVERY));
@@ -208,13 +208,13 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
             swerve.lock(),
-            shooterIndexer.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get()),
-            shooterIndexer2.setVelocity(PositionsConstants.ShooterIndexer.kShoot.get())
+            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
         addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
             intake.stop(),
-            intakeIndexer.stop(),
 
             intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
 
@@ -232,10 +232,11 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(List.of(States.SHOOT, States.SHOOT_READY), States.IDLE, () -> Commands.sequence(
-            shooterIndexer.stop(),
-            shooterIndexer2.stop(),
+            swerve.stop(),
+            indexer.stop(),
+            indexer2.stop(),
             shooter.stop(),
-            swerve.stop()
+            accelerator.stop()
         ));
 
         addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));

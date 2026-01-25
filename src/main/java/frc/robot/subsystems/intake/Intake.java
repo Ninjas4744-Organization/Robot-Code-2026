@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -10,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase implements
         ISubsystem.Resettable,
         ISubsystem.VelocityControlled,
+        ISubsystem.PercentControlled,
         ISubsystem.Stoppable
 {
     private IntakeIO io;
@@ -71,5 +71,21 @@ public class Intake extends SubsystemBase implements
             return Commands.none();
 
         return stop();
+    }
+
+    @Override
+    public Command setPercent(double percent) {
+        if (!enabled)
+            return Commands.none();
+
+        return Commands.runOnce(() -> io.setPercent(percent));
+    }
+
+    @Override
+    public double getOutput() {
+        if (!enabled)
+            return 0;
+
+        return inputs.Output;
     }
 }

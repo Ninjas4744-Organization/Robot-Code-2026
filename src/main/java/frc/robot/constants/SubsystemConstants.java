@@ -17,6 +17,7 @@ import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.constants.ControlConstants;
 import frc.lib.NinjasLib.controllers.constants.ControllerConstants;
 import frc.lib.NinjasLib.controllers.constants.RealControllerConstants;
+import frc.lib.NinjasLib.controllers.constants.RealControllerConstants.Base.SimpleControllerConstants;
 import frc.lib.NinjasLib.localization.vision.VisionConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveControllerConstants;
@@ -28,58 +29,14 @@ import java.io.IOException;
 import java.util.Map;
 
 public class SubsystemConstants {
-    public static final ControllerConstants kClimberAngle = new ControllerConstants();
-    static {
-        /* Base */
-        kClimberAngle.real.base.main.id = 41;
-        kClimberAngle.real.base.main.inverted = false;
-        kClimberAngle.real.base.currentLimit = 60;
-        kClimberAngle.real.base.isBrakeMode = true;
-
-        /* Control */
-        kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
-        kClimberAngle.real.control.gearRatio = 1;
-        kClimberAngle.real.control.conversionFactor = 1;
-        kClimberAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);
-
-        /* Soft Limits */
-        kClimberAngle.real.softLimits.min = Units.degreesToRadians(0);
-        kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
-
-        /* Simulation */
-        kClimberAngle.motorType = DCMotor.getKrakenX60(1);
-    }
-
-    public static final ControllerConstants kClimber = new ControllerConstants();
-    static {
-        /* Base */
-        kClimber.real.base.main.id = 40;
-        kClimber.real.base.main.inverted = false;
-        kClimber.real.base.currentLimit = 60;
-        kClimber.real.base.isBrakeMode = true;
-
-        /* Control */
-        kClimber.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kClimber.real.control.gearRatio = 2;
-
-        /* Limit Switch */
-        kClimber.real.hardLimit.id = 3;
-        kClimber.real.hardLimit.homePosition = PositionsConstants.Climber.kLeftClimb.get();
-
-        /* Simulation */
-        kClimber.motorType = DCMotor.getKrakenX60(1);
-    }
-
     public static final ControllerConstants kIntake = new ControllerConstants();
     static {
         /* Base */
         kIntake.real.base.main.id = 20;
-        kIntake.real.base.main.inverted = false;
         kIntake.real.base.currentLimit = 60;
-        kIntake.real.base.isBrakeMode = true;
 
         /* Control */
-        kIntake.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        // kIntake.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
         kIntake.real.control.gearRatio = 2;
 
         /* Simulation */
@@ -92,9 +49,7 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIntakeAngle.real.base.main.id = 21;
-        kIntakeAngle.real.base.main.inverted = false;
         kIntakeAngle.real.base.currentLimit = 60;
-        kIntakeAngle.real.base.isBrakeMode = true;
 
         /* Control */
         kIntakeAngle.real.control.controlConstants = ControlConstants.createProfiledPID(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
@@ -118,35 +73,56 @@ public class SubsystemConstants {
 
 
 
-    public static final ControllerConstants kIntakeIndexer = new ControllerConstants();
+    public static final ControllerConstants kIndexer = new ControllerConstants();
     static {
         /* Base */
-        kIntakeIndexer.real.base.main.id = 22;
-        kIntakeIndexer.real.base.main.inverted = false;
-        kIntakeIndexer.real.base.currentLimit = 60;
-        kIntakeIndexer.real.base.isBrakeMode = true;
+        kIndexer.real.base.main.id = 22;
+        kIndexer.real.base.main.inverted = true;
+        kIndexer.real.base.currentLimit = 60;
 
         /* Control */
-        kIntakeIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kIntakeIndexer.real.control.gearRatio = 2;
+        // kIntakeIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kIndexer.real.control.gearRatio = 2;
 
         /* Simulation */
-        kIntakeIndexer.motorType = DCMotor.getKrakenX60(1);
+        kIndexer.motorType = DCMotor.getKrakenX60(1);
     }
+
+
+
+    public static final ControllerConstants kIndexer2 = new ControllerConstants();
+    static {
+        /* Base */
+        kIndexer2.real.base.main.id = 23;
+        kIndexer2.real.base.main.inverted = true;
+        kIndexer2.real.base.currentLimit = 60;
+
+        /* Control */
+        // kIntakeIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kIndexer2.real.control.gearRatio = 2;
+
+        /* Simulation */
+        kIndexer2.motorType = DCMotor.getKrakenX60(1);
+    }
+
 
 
     public static final ControllerConstants kShooter = new ControllerConstants();
     static {
         /* Base */
         kShooter.real.base.main.id = 30;
-        kShooter.real.base.main.inverted = false;
+        kShooter.real.base.main.inverted = true;
+        kShooter.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
+        kShooter.real.base.followers[0].id = 31;
+        kShooter.real.base.followers[0].inverted = true;
         kShooter.real.base.currentLimit = 80;
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createTorqueCurrent(2, 1, 0.2);
+        kShooter.real.control.controlConstants = ControlConstants.createPID(0.5, 0, 0, 0);
+        kShooter.real.control.controlConstants.V = 0.135;
         kShooter.real.control.gearRatio = 1;
-        kShooter.real.control.velocityGoalTolerance = 60;
+        kShooter.real.control.velocityGoalTolerance = 5;
 
         /* Simulation */
         kShooter.motorType = DCMotor.getKrakenX60(2);
@@ -154,38 +130,61 @@ public class SubsystemConstants {
 
 
 
-    public static final ControllerConstants kShooterIndexer = new ControllerConstants();
+    public static final ControllerConstants kAccelerator = new ControllerConstants();
     static {
         /* Base */
-        kShooterIndexer.real.base.main.id = 31;
-        kShooterIndexer.real.base.main.inverted = false;
-        kShooterIndexer.real.base.currentLimit = 80;
-        kShooterIndexer.real.base.isBrakeMode = true;
+        kAccelerator.real.base.main.id = 32;
+        kAccelerator.real.base.currentLimit = 80;
 
         /* Control */
-        kShooterIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kShooterIndexer.real.control.gearRatio = 2;
+        kAccelerator.real.control.controlConstants = ControlConstants.createPID(0.4, 0, 0, 0);
+        kAccelerator.real.control.controlConstants.V = 0.135;
+        kAccelerator.real.control.gearRatio = 2;
 
         /* Simulation */
-        kShooterIndexer.motorType = DCMotor.getKrakenX60(1);
+        kAccelerator.motorType = DCMotor.getKrakenX60(1);
     }
 
 
 
-    public static final ControllerConstants kShooterIndexer2 = new ControllerConstants();
+    public static final ControllerConstants kClimber = new ControllerConstants();
     static {
         /* Base */
-        kShooterIndexer2.real.base.main.id = 32;
-        kShooterIndexer2.real.base.main.inverted = false;
-        kShooterIndexer2.real.base.currentLimit = 80;
-        kShooterIndexer2.real.base.isBrakeMode = true;
+        kClimber.real.base.main.id = 40;
+        kClimber.real.base.currentLimit = 60;
 
         /* Control */
-        kShooterIndexer2.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kShooterIndexer2.real.control.gearRatio = 1.5;
+        kClimber.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kClimber.real.control.gearRatio = 2;
+
+        /* Limit Switch */
+        kClimber.real.hardLimit.id = 3;
+        kClimber.real.hardLimit.homePosition = PositionsConstants.Climber.kLeftClimb.get();
 
         /* Simulation */
-        kShooterIndexer2.motorType = DCMotor.getKrakenX60(1);
+        kClimber.motorType = DCMotor.getKrakenX60(1);
+    }
+
+
+
+    public static final ControllerConstants kClimberAngle = new ControllerConstants();
+    static {
+        /* Base */
+        kClimberAngle.real.base.main.id = 41;
+        kClimberAngle.real.base.currentLimit = 60;
+
+        /* Control */
+        kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kClimberAngle.real.control.gearRatio = 1;
+        kClimberAngle.real.control.conversionFactor = 1;
+        kClimberAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);
+
+        /* Soft Limits */
+        kClimberAngle.real.softLimits.min = Units.degreesToRadians(0);
+        kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
+
+        /* Simulation */
+        kClimberAngle.motorType = DCMotor.getKrakenX60(1);
     }
 
 
@@ -240,7 +239,7 @@ public class SubsystemConstants {
                 i,
                 10 + i * 2,
                 11 + i * 2,
-                true,
+                false,
                 false,
                 6 + i,
                 false,
@@ -248,10 +247,10 @@ public class SubsystemConstants {
             );
         }
 
-        kSwerve.modules.moduleConstants[0].CANCoderOffset = 0.279541;
-        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.267334;
-        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.268799;
-        kSwerve.modules.moduleConstants[3].CANCoderOffset = -0.291260;
+        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.267334 - Units.degreesToRotations(90);//0.279541;
+        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.291260 - Units.degreesToRotations(90);//-0.267334;
+        kSwerve.modules.moduleConstants[2].CANCoderOffset = 0.279541 - Units.degreesToRotations(90);//-0.268799;
+        kSwerve.modules.moduleConstants[3].CANCoderOffset = -0.268799 - Units.degreesToRotations(90);//-0.291260;
 
         /* Gyro */
         kSwerve.gyro.gyroID = 45;

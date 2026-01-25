@@ -1,18 +1,18 @@
-package frc.robot.subsystems.intakeangle;
+package frc.robot.subsystems.indexer2;
 
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.robot.constants.SubsystemConstants;
 
-public class IntakeAngleIOController implements IntakeAngleIO {
+public class Indexer2IOController implements Indexer2IO {
     private Controller controller;
 
     @Override
     public void setup() {
-        controller = Controller.createController(Controller.ControllerType.TalonFX, SubsystemConstants.kIntakeAngle);
+        controller = Controller.createController(Controller.ControllerType.TalonFX, SubsystemConstants.kIndexer2);
     }
 
     @Override
-    public void updateInputs(IntakeAngleIOInputsAutoLogged inputs) {
+    public void updateInputs(Indexer2IOInputsAutoLogged inputs) {
         controller.updateInputs(inputs);
     }
 

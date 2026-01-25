@@ -22,12 +22,27 @@ public class ShooterIOController implements ShooterIO {
     }
 
     @Override
+    public void setPosition(double position) {
+        controller.setPosition(position);
+    }
+
+    @Override
     public void setVelocity(double velocity) {
         controller.setVelocity(velocity);
     }
 
     @Override
+    public void setPercent(double percent) {
+        controller.setPercent(percent);
+    }
+
+    @Override
     public void stopMotor() {
         controller.stop();
+    }
+
+    @Override
+    public void setEncoder(double position) {
+        controller.setEncoder(position);
     }
 }

@@ -27,6 +27,11 @@ public class ClimberIOController implements ClimberIO {
     }
 
     @Override
+    public void setVelocity(double velocity) {
+        controller.setVelocity(velocity);
+    }
+
+    @Override
     public void setPercent(double percent) {
         controller.setPercent(percent);
     }
@@ -34,5 +39,10 @@ public class ClimberIOController implements ClimberIO {
     @Override
     public void stopMotor() {
         controller.stop();
+    }
+
+    @Override
+    public void setEncoder(double position) {
+        controller.setEncoder(position);
     }
 }

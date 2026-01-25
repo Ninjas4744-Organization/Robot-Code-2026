@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooterindexer;
+package frc.robot.subsystems.indexer2;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -6,16 +6,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class ShooterIndexer extends SubsystemBase implements
+public class Indexer2 extends SubsystemBase implements
         ISubsystem.Resettable,
         ISubsystem.VelocityControlled,
+        ISubsystem.PercentControlled,
         ISubsystem.Stoppable
 {
-    private ShooterIndexerIO io;
-    private final ShooterIndexerIOInputsAutoLogged inputs = new ShooterIndexerIOInputsAutoLogged();
+    private Indexer2IO io;
+    private final Indexer2IOInputsAutoLogged inputs = new Indexer2IOInputsAutoLogged();
     private boolean enabled;
 
-    public ShooterIndexer(boolean enabled, ShooterIndexerIO io) {
+    public Indexer2(boolean enabled, Indexer2IO io) {
         this.enabled = enabled;
 
         if (enabled) {
@@ -31,7 +32,7 @@ public class ShooterIndexer extends SubsystemBase implements
 
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("Shooter Indexer", inputs);
+        Logger.processInputs("Indexer2", inputs);
     }
 
     public Command setVelocity(double velocity) {
@@ -69,5 +70,21 @@ public class ShooterIndexer extends SubsystemBase implements
             return Commands.none();
 
         return stop();
+    }
+
+    @Override
+    public Command setPercent(double percent) {
+        if (!enabled)
+            return Commands.none();
+
+        return Commands.runOnce(() -> io.setPercent(percent));
+    }
+
+    @Override
+    public double getOutput() {
+        if (!enabled)
+            return 0;
+
+        return inputs.Output;
     }
 }

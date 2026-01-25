@@ -5,9 +5,7 @@ import frc.lib.NinjasLib.subsystem_interfaces.IO;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeAngleIO extends
-    IO.BaseIO<IntakeAngleIOInputsAutoLogged>,
-    IO.PositionControlled,
-    IO.Encoder
+    IO.All<IntakeAngleIOInputsAutoLogged>
 {
     @AutoLog
     class IntakeAngleIOInputs extends Controller.ControllerIOInputs {

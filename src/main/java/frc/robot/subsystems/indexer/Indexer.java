@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intakeindexer;
+package frc.robot.subsystems.indexer;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -6,16 +6,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeIndexer extends SubsystemBase implements
+public class Indexer extends SubsystemBase implements
         ISubsystem.Resettable,
         ISubsystem.VelocityControlled,
+        ISubsystem.PercentControlled,
         ISubsystem.Stoppable
 {
-    private IntakeIndexerIO io;
-    private final IntakeIndexerIOInputsAutoLogged inputs = new IntakeIndexerIOInputsAutoLogged();
+    private IndexerIO io;
+    private final IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
     private boolean enabled;
 
-    public IntakeIndexer(boolean enabled, IntakeIndexerIO io) {
+    public Indexer(boolean enabled, IndexerIO io) {
         this.enabled = enabled;
 
         if (enabled) {
@@ -31,7 +32,7 @@ public class IntakeIndexer extends SubsystemBase implements
 
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("Intake Indexer", inputs);
+        Logger.processInputs("Indexer", inputs);
     }
 
     @Override
@@ -72,5 +73,21 @@ public class IntakeIndexer extends SubsystemBase implements
             return Commands.none();
 
         return stop();
+    }
+
+    @Override
+    public Command setPercent(double percent) {
+        if (!enabled)
+            return Commands.none();
+
+        return Commands.runOnce(() -> io.setPercent(percent));
+    }
+
+    @Override
+    public double getOutput() {
+        if (!enabled)
+            return 0;
+
+        return inputs.Output;
     }
 }

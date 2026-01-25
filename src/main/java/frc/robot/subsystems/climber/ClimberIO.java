@@ -5,10 +5,7 @@ import frc.lib.NinjasLib.subsystem_interfaces.IO;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface ClimberIO extends
-        IO.BaseIO<ClimberIOInputsAutoLogged>,
-        IO.PercentControlled,
-        IO.PositionControlled,
-        IO.Stoppable
+    IO.All<ClimberIOInputsAutoLogged>
 {
     @AutoLog
     class ClimberIOInputs extends Controller.ControllerIOInputs {

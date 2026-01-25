@@ -5,9 +5,7 @@ import frc.lib.NinjasLib.subsystem_interfaces.IO;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface IntakeIO extends
-        IO.BaseIO<IntakeIOInputsAutoLogged>,
-        IO.VelocityControlled,
-        IO.Stoppable
+    IO.All<IntakeIOInputsAutoLogged>
 {
     @AutoLog
     class IntakeIOInputs extends Controller.ControllerIOInputs {
