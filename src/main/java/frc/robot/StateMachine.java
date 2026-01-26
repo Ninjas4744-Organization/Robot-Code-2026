@@ -97,7 +97,8 @@ public class StateMachine extends StateMachineBase<States> {
 
             Commands.waitUntil(intakeAngle::atGoal),
 
-            intake.setVelocity(PositionsConstants.Intake.kIntake.get())
+            // should be setVelocity after we get phoenix pro
+            intake.setPercent(PositionsConstants.Intake.kIntake.get())
         ));
 
         addEdge(States.INTAKE, States.IDLE, Commands.sequence(
@@ -111,28 +112,32 @@ public class StateMachine extends StateMachineBase<States> {
 
     private void deliveryCommands() {
         addEdge(States.IDLE, States.DELIVERY_READY, Commands.sequence(
-            swerve.deliveryDrive(),
+//            swerve.deliveryDrive(),
             shooter.autoDeliveryVelocity(),
 
             Commands.waitUntil(shooter::atGoal)
         ));
 
         addEdge(States.DELIVERY_READY, States.DELIVERY, Commands.sequence(
-            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
-            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            // after dev bot this should close the intake
+            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
+            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
+            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
             accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
         addEdge(States.INTAKE, States.INTAKE_WHILE_DELIVERY_READY, Commands.sequence(
-            swerve.deliveryDrive(),
+//            swerve.deliveryDrive(),
             shooter.autoDeliveryVelocity(),
 
             Commands.waitUntil(shooter::atGoal)
         ));
 
         addEdge(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY, Commands.sequence(
-            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
-            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            // after dev bot this should close the intake
+            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
+            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
+            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
             accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
@@ -175,8 +180,10 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.IDLE, States.DUMP, Commands.sequence(
-            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
-            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+            // after dev bot this should close the intake
+            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
+            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
+            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
             shooter.setVelocity(PositionsConstants.Shooter.kDump.get()),
             accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
@@ -200,16 +207,19 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
-            swerve.autoDrive(),
+            // after dev bot this should close the intake
+            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
+//            swerve.autoDrive(),
             shooter.autoHubVelocity(),
 
-            Commands.waitUntil(() -> swerve.atGoal() && shooter.atGoal())
+            Commands.waitUntil(() -> shooter.atGoal())
+//            Commands.waitUntil(() -> swerve.atGoal() && shooter.atGoal())
         ));
 
         addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
-            swerve.lock(),
-            indexer.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
-            indexer2.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
+//            swerve.lock(),
+            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
+            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
             accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 

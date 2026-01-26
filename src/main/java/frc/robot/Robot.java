@@ -68,6 +68,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
+        robotContainer.reset();
         autonomousCommand = robotContainer.getAutonomousCommand();
 
         if (autonomousCommand != null) {
@@ -85,9 +86,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
-        if (autonomousCommand != null) {
-            autonomousCommand.cancel();
-        }
+        robotContainer.autoCommand.cancel();
+        robotContainer.autoSwerveCommand.cancel();
 
         robotContainer.reset();
     }
@@ -103,6 +103,13 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
         CommandScheduler.getInstance().cancelAll();
+
+        robotContainer.autoCommand.cancel();
+        robotContainer.autoSwerveCommand.cancel();
+        CommandScheduler.getInstance().schedule(RobotContainer.getShooter().stop());
+        CommandScheduler.getInstance().schedule(RobotContainer.getIndexer().stop());
+        CommandScheduler.getInstance().schedule(RobotContainer.getIndexer2().stop());
+        CommandScheduler.getInstance().schedule(RobotContainer.getAccelerator().stop());
     }
 
     @Override

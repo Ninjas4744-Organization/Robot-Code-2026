@@ -204,7 +204,7 @@ public class SubsystemConstants {
         );
 
         /* Limits */
-        kSwerve.limits.maxSpeed = 4.5;
+        kSwerve.limits.maxSpeed = 3.5;
         kSwerve.limits.maxAngularVelocity = 9.2;
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
@@ -214,13 +214,13 @@ public class SubsystemConstants {
 
         /* Modules */
         double wheelRadius = 0.048;
-        kSwerve.modules.openLoop = true;
+        kSwerve.modules.openLoop = false;
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
         if (!GeneralConstants.kRobotMode.isSim())
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(90, 1, 6);
+            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(8, 0, 0, 0);
         else
             kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(7, 0, 0);
 
@@ -280,8 +280,8 @@ public class SubsystemConstants {
     public static final SwerveControllerConstants kSwerveController = new SwerveControllerConstants();
     static {
         kSwerveController.swerveConstants = kSwerve;
-        kSwerveController.drivePIDConstants = ControlConstants.createPID(5, 0, 0, 0);
-        kSwerveController.rotationPIDConstants = ControlConstants.createProfiledPID(20, 0, 0, 0, 20, 100, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kSwerveController.drivePIDConstants = ControlConstants.createPID(2.5, 0, 0, 0);
+        kSwerveController.rotationPIDConstants = ControlConstants.createProfiledPID(8, 0, 0.2, 0, 0/*8*/, 0/*40*/, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
         kSwerveController.rotationPIDContinuousConnections = Pair.of(-Math.PI, Math.PI);
     }
 

@@ -21,11 +21,11 @@ public class PositionsConstants {
     }
 
     public static class Intake {
-        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 100, false);
+        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 0.35, false);
     }
 
     public static class Indexer {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 100, false);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 0.35, false);
     }
 
     public static class Indexer2 {
@@ -44,39 +44,37 @@ public class PositionsConstants {
 
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 47, true);
-        private static final LoggedTunableNumber kShoot05 = new LoggedTunableNumber("Shooter/Shoot/0.5", 47, true);
-        private static final LoggedTunableNumber kShoot1 = new LoggedTunableNumber("Shooter/Shoot/1", 47, true);
-        private static final LoggedTunableNumber kShoot15 = new LoggedTunableNumber("Shooter/Shoot/1.5", 47, true);
         private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot/2", 49, true);
         private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot/2.5", 52, true);
         private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot/3", 55, true);
         private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 60, true);
         private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 64, true);
+        private static final LoggedTunableNumber kShoot45 = new LoggedTunableNumber("Shooter/Shoot/4.5", 68, true);
+        private static final LoggedTunableNumber kShoot5 = new LoggedTunableNumber("Shooter/Shoot/5", 77, true);
 
         public static double getShootSpeed(double dist) {
             kShootMap.put(0.0, kShoot0.get());
-            kShootMap.put(0.5, kShoot05.get());
-            kShootMap.put(1.0, kShoot1.get());
-            kShootMap.put(1.5, kShoot15.get());
             kShootMap.put(2.0, kShoot2.get());
             kShootMap.put(2.5, kShoot25.get());
             kShootMap.put(3.0, kShoot3.get());
             kShootMap.put(3.5, kShoot35.get());
             kShootMap.put(4.0, kShoot4.get());
+            kShootMap.put(4.5, kShoot45.get());
+            kShootMap.put(5.0, kShoot5.get());
 
             return kShootMap.get(dist);
         }
 
         private static final InterpolatingDoubleTreeMap kShootFixMap = new InterpolatingDoubleTreeMap();
-        private static final LoggedTunableNumber kShootFix0 = new LoggedTunableNumber(" Shooter/ShootFix/0",   0 * 0, true);
+        private static final LoggedTunableNumber kShootFix0 = new LoggedTunableNumber( "Shooter/ShootFix/0",   0 * 0, true);
         private static final LoggedTunableNumber kShootFix05 = new LoggedTunableNumber("Shooter/ShootFix/0.5", 1 * 2 - 1, true);
-        private static final LoggedTunableNumber kShootFix1 = new LoggedTunableNumber(" Shooter/ShootFix/1",   2 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix1 = new LoggedTunableNumber( "Shooter/ShootFix/1",   2 * 2 - 1, true);
         private static final LoggedTunableNumber kShootFix15 = new LoggedTunableNumber("Shooter/ShootFix/1.5", 3 * 2 - 1, true);
-        private static final LoggedTunableNumber kShootFix2 = new LoggedTunableNumber(" Shooter/ShootFix/2",   4 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix2 = new LoggedTunableNumber( "Shooter/ShootFix/2",   4 * 2 - 1, true);
         private static final LoggedTunableNumber kShootFix25 = new LoggedTunableNumber("Shooter/ShootFix/2.5", 5 * 2 - 1, true);
-        private static final LoggedTunableNumber kShootFix3 = new LoggedTunableNumber(" Shooter/ShootFix/3",   6 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix3 = new LoggedTunableNumber( "Shooter/ShootFix/3",   6 * 2 - 1, true);
         private static final LoggedTunableNumber kShootFix35 = new LoggedTunableNumber("Shooter/ShootFix/3.5", 7 * 2 - 1, true);
-        private static final LoggedTunableNumber kShootFix4 = new LoggedTunableNumber(" Shooter/ShootFix/4",   8 * 2 - 1, true);
+        private static final LoggedTunableNumber kShootFix4 = new LoggedTunableNumber( "Shooter/ShootFix/4",   8 * 2 - 1, true);
 
         public static double getShootFix(double relativeVelocity) {
             kShootFixMap.put(0.0, kShootFix0.get());
@@ -137,15 +135,15 @@ public class PositionsConstants {
         }
 
         private static final InterpolatingDoubleTreeMap kAngleFixMap = new InterpolatingDoubleTreeMap();
-        private static final LoggedTunableNumber kAngleFix0 = new LoggedTunableNumber ("Swerve/AngleFix/0",   0, true);
-        private static final LoggedTunableNumber kAngleFix05 = new LoggedTunableNumber("Swerve/AngleFix/0.5", 15, true);
-        private static final LoggedTunableNumber kAngleFix1 = new LoggedTunableNumber ("Swerve/AngleFix/1",   20, true);
-        private static final LoggedTunableNumber kAngleFix15 = new LoggedTunableNumber("Swerve/AngleFix/1.5", 25, true);
-        private static final LoggedTunableNumber kAngleFix2 = new LoggedTunableNumber ("Swerve/AngleFix/2",   30, true);
-        private static final LoggedTunableNumber kAngleFix25 = new LoggedTunableNumber("Swerve/AngleFix/2.5", 35, true);
-        private static final LoggedTunableNumber kAngleFix3 = new LoggedTunableNumber ("Swerve/AngleFix/3",   40, true);
-        private static final LoggedTunableNumber kAngleFix35 = new LoggedTunableNumber("Swerve/AngleFix/3.5", 45, true);
-        private static final LoggedTunableNumber kAngleFix4 = new LoggedTunableNumber ("Swerve/AngleFix/4",   50, true);
+        private static final LoggedTunableNumber kAngleFix0 = new LoggedTunableNumber ("Swerve/AngleFix/0",   0/*00*/, true);
+        private static final LoggedTunableNumber kAngleFix05 = new LoggedTunableNumber("Swerve/AngleFix/0.5", 5/*15*/, true);
+        private static final LoggedTunableNumber kAngleFix1 = new LoggedTunableNumber ("Swerve/AngleFix/1",   15/*20*/, true);
+        private static final LoggedTunableNumber kAngleFix15 = new LoggedTunableNumber("Swerve/AngleFix/1.5", 20/*25*/, true);
+        private static final LoggedTunableNumber kAngleFix2 = new LoggedTunableNumber ("Swerve/AngleFix/2",   25/*30*/, true);
+        private static final LoggedTunableNumber kAngleFix25 = new LoggedTunableNumber("Swerve/AngleFix/2.5", 30/*35*/, true);
+        private static final LoggedTunableNumber kAngleFix3 = new LoggedTunableNumber ("Swerve/AngleFix/3",   35/*40*/, true);
+        private static final LoggedTunableNumber kAngleFix35 = new LoggedTunableNumber("Swerve/AngleFix/3.5", 40/*45*/, true);
+        private static final LoggedTunableNumber kAngleFix4 = new LoggedTunableNumber ("Swerve/AngleFix/4",   45/*50*/, true);
 
         public static double getAngleFix(double relativeVelocity) {
             kAngleFixMap.put(0.0, kAngleFix0.get());

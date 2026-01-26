@@ -88,15 +88,16 @@ public class SwerveSubsystem extends SubsystemBase implements
 
                 SwerveController.getInstance().setChannel("Lock");
             }),
-            Commands.run(() -> {
-                Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
-                SwerveController.getInstance().setControl(new SwerveInput(
-                    pid.getX(),
-                    pid.getY(),
-                    SwerveController.getInstance().lookAt(target.getRotation()),
-                    true
-                ), "Lock");
-            })
+//            Commands.run(() -> {
+//                Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
+//                SwerveController.getInstance().setControl(new SwerveInput(
+//                    pid.getX(),
+//                    pid.getY(),
+//                    SwerveController.getInstance().lookAt(target.getRotation()),
+//                    true
+//                ), "Lock");
+//            })
+            Swerve.getInstance().lockWheelsToX()
         ));
     }
 
