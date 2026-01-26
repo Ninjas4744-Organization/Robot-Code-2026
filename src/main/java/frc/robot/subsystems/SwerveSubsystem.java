@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -29,16 +30,17 @@ public class SwerveSubsystem extends SubsystemBase implements
     ISubsystem.Stoppable
 {
     private boolean enabled;
-    private DoubleSupplier leftX, leftY, rightX, rightY;
+    private DoubleSupplier driverLeftX, driverLeftY, driverRightX, driverRightY;
+    private SwerveInput autoInput;
     private BackgroundCommand backgroundCommand;
     private Pose2d target = new Pose2d();
 
-    public SwerveSubsystem(boolean enabled, boolean enabledMinimum, DoubleSupplier leftX, DoubleSupplier leftY, DoubleSupplier rightX, DoubleSupplier rightY) {
+    public SwerveSubsystem(boolean enabled, boolean enabledMinimum, DoubleSupplier driverLeftX, DoubleSupplier driverLeftY, DoubleSupplier driverRightX, DoubleSupplier driverRightY) {
         this.enabled = enabled;
-        this.leftX = leftX;
-        this.leftY = leftY;
-        this.rightX = rightX;
-        this.rightY = rightY;
+        this.driverLeftX = driverLeftX;
+        this.driverLeftY = driverLeftY;
+        this.driverRightX = driverRightX;
+        this.driverRightY = driverRightY;
 
         if (enabled) {
             Swerve.setInstance(new Swerve(SubsystemConstants.kSwerve));
@@ -65,10 +67,25 @@ public class SwerveSubsystem extends SubsystemBase implements
                 double angleFix = PositionsConstants.Swerve.getAngleFix(Math.abs(robotRelativeVelocity.getY())) * -Math.signum(robotRelativeVelocity.getY());
                 target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
 
+                double vx = 0, vy = 0;
+                if (DriverStation.isAutonomous()) {
+                    if (autoInput != null) {
+                        if (GeneralConstants.Swerve.kDriverFieldRelative) {
+                            vx = autoInput.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).vxMetersPerSecond;
+                            vy = autoInput.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).vyMetersPerSecond;
+                        } else {
+                            vx = autoInput.getAsRobotRelative(RobotState.getInstance().getRobotPose().getRotation()).vxMetersPerSecond;
+                            vy = autoInput.getAsRobotRelative(RobotState.getInstance().getRobotPose().getRotation()).vyMetersPerSecond;
+                        }
+                    }
+                } else {
+                    vx = -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed;
+                    vy = -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed;
+                }
+
                 SwerveController.getInstance().setControl(new SwerveInput(
-                    -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-                    -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-//                    -MathUtil.applyDeadband(rightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor * SubsystemConstants.kSwerve.limits.maxAngularVelocity,
+                    vx,
+                    vy,
                     SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Look Hub");
@@ -151,8 +168,8 @@ public class SwerveSubsystem extends SubsystemBase implements
                 target = new Pose2d(target.getX(), target.getY(), RobotState.getInstance().getTranslation(PositionsConstants.Swerve.getDeliveryTarget()).getAngle());
 
                 SwerveController.getInstance().setControl(new SwerveInput(
-                    -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-                    -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+                    -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+                    -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     SwerveController.getInstance().lookAt(target.getRotation()),
                     true
                 ), "Delivery");
@@ -169,6 +186,11 @@ public class SwerveSubsystem extends SubsystemBase implements
     @Override
     public Pose2d getGoal() {
         return target;
+    }
+
+    public void setAutoInput(ChassisSpeeds autoSpeeds) {
+        autoInput = new SwerveInput(autoSpeeds, false);
+        SwerveController.getInstance().setControl(autoInput, "Auto");
     }
 
     @Override
@@ -217,9 +239,9 @@ public class SwerveSubsystem extends SubsystemBase implements
 
         SwerveController.getInstance().setControl(SwerveController.getInstance().fromPercent(
             new SwerveInput(
-                -MathUtil.applyDeadband(leftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
-                -MathUtil.applyDeadband(leftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
-                -MathUtil.applyDeadband(rightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor,
+                -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
+                -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
+                -MathUtil.applyDeadband(driverRightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor,
                 GeneralConstants.Swerve.kDriverFieldRelative
             )), "Driver");
 

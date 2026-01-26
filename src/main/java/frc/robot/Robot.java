@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.constants.GeneralConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -86,9 +87,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
-        robotContainer.autoCommand.cancel();
-        robotContainer.autoSwerveCommand.cancel();
-
         robotContainer.reset();
     }
 
@@ -102,14 +100,17 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testInit() {
-        CommandScheduler.getInstance().cancelAll();
+//        CommandScheduler.getInstance().cancelAll();
 
-        robotContainer.autoCommand.cancel();
-        robotContainer.autoSwerveCommand.cancel();
-        CommandScheduler.getInstance().schedule(RobotContainer.getShooter().stop());
-        CommandScheduler.getInstance().schedule(RobotContainer.getIndexer().stop());
-        CommandScheduler.getInstance().schedule(RobotContainer.getIndexer2().stop());
-        CommandScheduler.getInstance().schedule(RobotContainer.getAccelerator().stop());
+        RobotState.getInstance().resetGyro(RobotContainer.getVision().getLastMegaTag1Pose().getRotation());
+
+        CommandScheduler.getInstance().schedule(Commands.sequence(
+            RobotContainer.getSwerve().reset(),
+            RobotContainer.getShooter().stop(),
+            RobotContainer.getIndexer().stop(),
+            RobotContainer.getIndexer2().stop(),
+            RobotContainer.getAccelerator().stop()
+        ));
     }
 
     @Override

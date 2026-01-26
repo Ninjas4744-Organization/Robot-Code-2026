@@ -7,6 +7,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Prepare Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Shoot"
           }
         },

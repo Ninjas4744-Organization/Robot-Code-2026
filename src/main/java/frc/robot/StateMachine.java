@@ -76,7 +76,14 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.STARTING_POSE, States.IDLE, Commands.sequence(
             swerve.reset(),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get()))
+            intake.stop(),
+            indexer.stop(),
+            indexer2.stop(),
+            shooter.stop(),
+            accelerator.stop(),
+            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
+
+            Commands.waitUntil(() -> intakeAngle.atGoal())
         ));
 
         addStateEnd(States.RESET, Map.of(Commands.waitUntil(

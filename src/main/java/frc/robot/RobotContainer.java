@@ -2,7 +2,6 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -17,11 +16,8 @@ import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.swerve.Swerve;
-import frc.lib.NinjasLib.swerve.SwerveController;
-import frc.lib.NinjasLib.swerve.SwerveInput;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
-import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -109,13 +105,40 @@ public class RobotContainer {
         visionSubsystem = new VisionSubsystem();
 
         configureAuto();
-
         configureBindings();
         configureTestBindings();
+
+        if (GeneralConstants.kRobotMode.isSim()) {
+            CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
+                if (Math.abs(shooter.getVelocity()) > 0.01) {
+                    if (balls.size() >= 8) {
+                        SimulatedArena.getInstance().removeProjectile(balls.get(0));
+                        balls.remove(0);
+                    }
+
+                    GamePieceProjectile ball = new RebuiltFuelOnFly(
+                        RobotState.getInstance().getRobotPose().getTranslation(),
+                        new Translation2d(),
+                        Swerve.getInstance().getChassisSpeeds(true),
+                        RobotState.getInstance().getRobotPose().getRotation(),
+                        Meters.of(0.25),
+                        MetersPerSecond.of(13.35 * Math.abs(shooter.getGoal()) / 100),
+                        Degrees.of(58)
+                    );
+
+                    balls.add(ball);
+                    SimulatedArena.getInstance().addGamePieceProjectile(ball);
+                }
+            }).andThen(Commands.waitSeconds(0.1)).repeatedly().ignoringDisable(true));
+        }
     }
 
     public static SwerveSubsystem getSwerve() {
         return swerveSubsystem;
+    }
+
+    public static VisionSubsystem getVision() {
+        return visionSubsystem;
     }
 
     public static Intake getIntake() {
@@ -150,53 +173,28 @@ public class RobotContainer {
         return climberAngle;
     }
 
-    Pose2d target = new Pose2d();
-    public Command autoCommand;
-    public Command autoSwerveCommand;
     private void configureAuto() {
         AutoBuilder.configure(
             RobotState.getInstance()::getRobotPose,
             RobotState.getInstance()::setRobotPose,
             () -> Swerve.getInstance().getChassisSpeeds(false),
-            chassisSpeeds -> SwerveController.getInstance().setControl(new SwerveInput(
-                chassisSpeeds.vxMetersPerSecond,
-                chassisSpeeds.vyMetersPerSecond,
-                SwerveController.getInstance().getLastInput().omegaRadiansPerSecond,
-                false),
-                "Auto"
-            ),
+            swerveSubsystem::setAutoInput,
             SubsystemConstants.kAutonomyConfig,
             SubsystemConstants.kSwerve.special.robotConfig,
             () -> false
         );
 
-        autoSwerveCommand = Commands.run(() -> {
-            Translation2d robotRelativeVelocity = new Translation2d(Swerve.getInstance().getChassisSpeeds(false).vxMetersPerSecond, Swerve.getInstance().getChassisSpeeds(false).vyMetersPerSecond);
-            double angleFix = PositionsConstants.Swerve.getAngleFix(Math.abs(robotRelativeVelocity.getY())) * -Math.signum(robotRelativeVelocity.getY());
-            target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
+        NamedCommands.registerCommand("Prepare Shoot", Commands.sequence(
+            swerveSubsystem.lookHub(),
+            shooter.autoHubVelocity()
+        ));
 
-            SwerveController.getInstance().setControl(new SwerveInput(
-                    SwerveController.getInstance().getLastInput().vxMetersPerSecond,
-                    SwerveController.getInstance().getLastInput().vyMetersPerSecond,
-                    SwerveController.getInstance().lookAt(target.getRotation()),
-                    GeneralConstants.Swerve.kDriverFieldRelative
-            ), "Auto");
-
-            Logger.recordOutput("Swerve/Angle Fix", angleFix);
-        });
-        autoCommand = Commands.sequence(
-            shooter.autoHubVelocity(),
-            Commands.runOnce(() -> {
-                SwerveController.getInstance().resetLookAt();
-            }),
-            new DetachedCommand(autoSwerveCommand),
-            Commands.waitUntil(() -> Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < PositionsConstants.Swerve.kHubAngleThreshold.get()),
-            Commands.waitUntil(() -> shooter.atGoal()),
+        NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
+            Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
             indexer.setPercent(0.3),
             indexer2.setPercent(0.3),
             accelerator.setVelocity(80)
-        );
-        NamedCommands.registerCommand("Shoot", new DetachedCommand(autoCommand));
+        )));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
     }
@@ -258,30 +256,7 @@ public class RobotContainer {
                     Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
                     indexer.setPercent(0.3),
                     indexer2.setPercent(0.3),
-                    accelerator.setVelocity(80),
-
-                    Commands.runOnce(() -> {
-                        if (GeneralConstants.kRobotMode.isSim()) {
-                            GamePieceProjectile ball = new RebuiltFuelOnFly(
-                                RobotState.getInstance().getRobotPose().getTranslation(),
-                                new Translation2d(),
-                                Swerve.getInstance().getChassisSpeeds(true),
-                                RobotState.getInstance().getRobotPose().getRotation(),
-                                Meters.of(0.25),
-//                                MetersPerSecond.of(24 * Math.abs(shooter.getVelocity()) / 100),
-                                MetersPerSecond.of(13.35 * Math.abs(shooter.getGoal()) / 100),
-                                Degrees.of(58)
-                            );
-
-                            balls.add(ball);
-                            SimulatedArena.getInstance().addGamePieceProjectile(ball);
-                        }
-                    }).andThen(Commands.waitSeconds(0.1)).repeatedly().raceWith(Commands.waitSeconds(1)).andThen(Commands.waitSeconds(1)).andThen(Commands.runOnce(() -> {
-                        if (GeneralConstants.kRobotMode.isSim()) {
-                            SimulatedArena.getInstance().clearGamePieces();
-                            balls.clear();
-                        }
-                    }))
+                    accelerator.setVelocity(80)
                 ));
             },
             () -> {
@@ -304,7 +279,7 @@ public class RobotContainer {
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
-//            Logger.recordOutput("Balls", SimulatedArena.getInstance().getGamePiecesArrayByType("RebuiltFuelOnFly"));
+
             Pose3d[] balls = new Pose3d[this.balls.size()];
             for (int i = 0; i < this.balls.size(); i++) {
                 balls[i] = this.balls.get(i).getPose3d();
