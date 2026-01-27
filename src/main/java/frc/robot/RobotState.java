@@ -5,6 +5,17 @@ import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.RobotStateWithSwerve;
 
 public class RobotState extends RobotStateWithSwerve<States> {
+    private static boolean shouldIntake = false;
+
+    public static boolean isShouldIntake() {
+        return shouldIntake;
+    }
+
+    public static void setShouldIntake(boolean shouldIntake) {
+        RobotState.shouldIntake = shouldIntake;
+    }
+
+
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
         robotState = States.UNKNOWN;

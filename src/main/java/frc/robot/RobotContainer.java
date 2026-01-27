@@ -74,7 +74,7 @@ public class RobotContainer {
         switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
                 intake = new Intake(true, new IntakeIOController());
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
+                intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
                 indexer = new Indexer(true, new IndexerIOController());
                 indexer2 =  new Indexer2(true, new Indexer2IOController());
                 shooter = new Shooter(true, new ShooterIOController());
@@ -222,6 +222,13 @@ public class RobotContainer {
 //        driverController.povUp().onTrue(Commands.runOnce(() -> ));
 
         driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
+
+        driverController.triangle().onTrue(notTest(Commands.runOnce(() -> {
+            RobotState.setShouldIntake(!RobotState.isShouldIntake());
+        })));
+
+
+        //TODO: Add the new states of dynamic shooting in here
 
         driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_DELIVERY_READY);
