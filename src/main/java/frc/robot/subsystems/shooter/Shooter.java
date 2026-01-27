@@ -1,6 +1,5 @@
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -110,9 +109,12 @@ public class Shooter extends SubsystemBase implements
             return Commands.none();
 
         return backgroundCommand.setNewTaskCommand(Commands.run(() -> {
-            Translation2d robotRelativeVelocity = new Translation2d(Swerve.getInstance().getChassisSpeeds(false).vxMetersPerSecond, Swerve.getInstance().getChassisSpeeds(false).vyMetersPerSecond);
-//            double shootFix = PositionsConstants.Shooter.getShootFix(Math.abs(robotRelativeVelocity.getX())) * -Math.signum(robotRelativeVelocity.getX());
-            double shootFix = PositionsConstants.Shooter.getShootFix(-robotRelativeVelocity.getX());
+            double relativeXVel = Swerve.getInstance().getSpeeds().vxMetersPerSecond;
+            double relativeXWantedVel = Swerve.getInstance().getWantedSpeeds().vxMetersPerSecond;
+
+            double shootFix = (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXWantedVel)) * -Math.signum(relativeXWantedVel)) * 0.8
+                    + (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXVel)) * -Math.signum(relativeXVel)) * 0.2;
+
             io.setVelocity(PositionsConstants.Shooter.getShootSpeed(FieldConstants.getDistToHub()) + shootFix);
 
             Logger.recordOutput("Shoot Fix", shootFix);

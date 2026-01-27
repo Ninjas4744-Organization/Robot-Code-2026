@@ -14,7 +14,7 @@ import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveController;
-import frc.lib.NinjasLib.swerve.SwerveInput;
+import frc.lib.NinjasLib.swerve.SwerveSpeeds;
 import frc.robot.RobotState;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
@@ -31,7 +31,7 @@ public class SwerveSubsystem extends SubsystemBase implements
 {
     private boolean enabled;
     private DoubleSupplier driverLeftX, driverLeftY, driverRightX, driverRightY;
-    private SwerveInput autoInput;
+    private SwerveSpeeds autoInput;
     private BackgroundCommand backgroundCommand;
     private Pose2d target = new Pose2d();
 
@@ -63,8 +63,12 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().resetLookAt();
             }),
             Commands.run(() -> {
-                Translation2d robotRelativeVelocity = new Translation2d(Swerve.getInstance().getChassisSpeeds(false).vxMetersPerSecond, Swerve.getInstance().getChassisSpeeds(false).vyMetersPerSecond);
-                double angleFix = PositionsConstants.Swerve.getAngleFix(Math.abs(robotRelativeVelocity.getY())) * -Math.signum(robotRelativeVelocity.getY());
+                double relativeYVel = Swerve.getInstance().getSpeeds().vyMetersPerSecond;
+                double relativeYWantedVel = Swerve.getInstance().getWantedSpeeds().vyMetersPerSecond;
+
+                double angleFix = (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYWantedVel)) * -Math.signum(relativeYWantedVel)) * 0.8
+                        + (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYVel)) * -Math.signum(relativeYVel)) * 0.2;
+
                 target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
 
                 double vx = 0, vy = 0;
@@ -83,7 +87,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                     vy = -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed;
                 }
 
-                SwerveController.getInstance().setControl(new SwerveInput(
+                SwerveController.getInstance().setControl(new SwerveSpeeds(
                     vx,
                     vy,
                     SwerveController.getInstance().lookAt(target.getRotation()),
@@ -145,7 +149,7 @@ public class SwerveSubsystem extends SubsystemBase implements
             }),
             Commands.run(() -> {
                 Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
-                SwerveController.getInstance().setControl(new SwerveInput(
+                SwerveController.getInstance().setControl(new SwerveSpeeds(
                     pid.getX(),
                     pid.getY(),
                     SwerveController.getInstance().lookAt(target.getRotation()),
@@ -167,7 +171,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                 target = RobotState.getInstance().getRobotPose();
                 target = new Pose2d(target.getX(), target.getY(), RobotState.getInstance().getTranslation(PositionsConstants.Swerve.getDeliveryTarget()).getAngle());
 
-                SwerveController.getInstance().setControl(new SwerveInput(
+                SwerveController.getInstance().setControl(new SwerveSpeeds(
                     -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     SwerveController.getInstance().lookAt(target.getRotation()),
@@ -189,7 +193,7 @@ public class SwerveSubsystem extends SubsystemBase implements
     }
 
     public void setAutoInput(ChassisSpeeds autoSpeeds) {
-        autoInput = new SwerveInput(autoSpeeds, false);
+        autoInput = new SwerveSpeeds(autoSpeeds, false);
         SwerveController.getInstance().setControl(autoInput, "Auto");
     }
 
@@ -203,11 +207,11 @@ public class SwerveSubsystem extends SubsystemBase implements
 
             if (DriverStation.isAutonomous()){
                 SwerveController.getInstance().setChannel("Auto");
-                SwerveController.getInstance().setControl(new SwerveInput(), "Auto");
+                SwerveController.getInstance().setControl(new SwerveSpeeds(), "Auto");
             }
             else{
                 SwerveController.getInstance().setChannel("Driver");
-                SwerveController.getInstance().setControl(new SwerveInput(), "Driver");
+                SwerveController.getInstance().setControl(new SwerveSpeeds(), "Driver");
             }
         });
     }
@@ -238,7 +242,7 @@ public class SwerveSubsystem extends SubsystemBase implements
             return;
 
         SwerveController.getInstance().setControl(SwerveController.getInstance().fromPercent(
-            new SwerveInput(
+            new SwerveSpeeds(
                 -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
                 -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor,
                 -MathUtil.applyDeadband(driverRightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor,

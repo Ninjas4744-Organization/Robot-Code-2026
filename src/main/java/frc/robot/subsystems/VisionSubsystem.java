@@ -67,7 +67,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     private boolean isPassedFilters(VisionOutput estimation) {
-        ChassisSpeeds speed = Swerve.getInstance().getChassisSpeeds(false);
+        ChassisSpeeds speed = Swerve.getInstance().getSpeeds();
 
         return Math.hypot(speed.vxMetersPerSecond, speed.vyMetersPerSecond) <= GeneralConstants.Vision.kMaxSpeedFilter
             && speed.omegaRadiansPerSecond <= GeneralConstants.Vision.kMaxAngularSpeedFilter
