@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -99,7 +100,6 @@ public class RobotContainer {
                 break;
         }
 
-//        swerveSubsystem = new SwerveSubsystem(true, false, () -> Math.signum(MathUtil.applyDeadband(driverController.getLeftX(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getLeftY(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getRightX(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getRightY(), 0.04)) / 4.42);
         swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
@@ -276,9 +276,11 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        Logger.recordOutput("Distance", FieldConstants.getDistToHub());
-        Logger.recordOutput("Speed", Swerve.getInstance().getSpeeds().getSpeed());
-        Logger.recordOutput("MegaTag 1", visionSubsystem.getLastMegaTag1Pose());
+        Logger.recordOutput("Distance To Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Robot Speed", Swerve.getInstance().getSpeeds().getSpeed());
+        Logger.recordOutput("MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
+        Logger.recordOutput("Look Ahead Target", new Pose3d(RobotState.getInstance().getHubTargetPose().getX(), RobotState.getInstance().getHubTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
+        Logger.recordOutput("Ball End Pose", new Pose3d(RobotState.getInstance().getBallEndPose().getX(), RobotState.getInstance().getBallEndPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();

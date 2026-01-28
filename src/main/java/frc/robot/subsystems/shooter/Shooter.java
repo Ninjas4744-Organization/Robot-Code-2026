@@ -5,9 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
-import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.RobotState;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -109,15 +107,17 @@ public class Shooter extends SubsystemBase implements
             return Commands.none();
 
         return backgroundCommand.setNewTaskCommand(Commands.run(() -> {
-            double relativeXVel = Swerve.getInstance().getSpeeds().vxMetersPerSecond;
-            double relativeXWantedVel = Swerve.getInstance().getWantedSpeeds().vxMetersPerSecond;
+//            double relativeXVel = Swerve.getInstance().getSpeeds().vxMetersPerSecond;
+//            double relativeXWantedVel = Swerve.getInstance().getWantedSpeeds().vxMetersPerSecond;
 
-            double shootFix = (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXWantedVel)) * -Math.signum(relativeXWantedVel)) * 0.8
-                    + (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXVel)) * -Math.signum(relativeXVel)) * 0.2;
+//            double shootFix = (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXWantedVel)) * -Math.signum(relativeXWantedVel)) * 0.8
+//                    + (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXVel)) * -Math.signum(relativeXVel)) * 0.2;
 
-            io.setVelocity(PositionsConstants.Shooter.getShootSpeed(FieldConstants.getDistToHub()) + shootFix);
+//            io.setVelocity(PositionsConstants.Shooter.getShootSpeed(FieldConstants.getDistToHub()) + shootFix);
 
-            Logger.recordOutput("Shoot Fix", shootFix);
+//            Logger.recordOutput("Shoot Fix", shootFix);
+
+            io.setVelocity(PositionsConstants.Shooter.getShootSpeed(RobotState.getInstance().getDistToHub()));
         }));
     }
 

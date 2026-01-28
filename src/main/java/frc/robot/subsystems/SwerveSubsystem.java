@@ -66,10 +66,12 @@ public class SwerveSubsystem extends SubsystemBase implements
                 double relativeYVel = Swerve.getInstance().getSpeeds().vyMetersPerSecond;
                 double relativeYWantedVel = Swerve.getInstance().getWantedSpeeds().vyMetersPerSecond;
 
-                double angleFix = (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYWantedVel)) * -Math.signum(relativeYWantedVel)) * 0.8
-                        + (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYVel)) * -Math.signum(relativeYVel)) * 0.2;
+//                double angleFix = (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYWantedVel)) * -Math.signum(relativeYWantedVel)) * 0.8
+//                        + (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYVel)) * -Math.signum(relativeYVel)) * 0.2;
 
-                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
+//                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
+
+                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), RobotState.getInstance().getAngleToHub());
 
                 double vx = 0, vy = 0;
                 if (DriverStation.isAutonomous()) {
@@ -94,7 +96,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Look Hub");
 
-                Logger.recordOutput("Swerve/Angle Fix", angleFix);
+//                Logger.recordOutput("Swerve/Angle Fix", angleFix);
             })
         ));
     }
