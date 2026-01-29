@@ -204,13 +204,13 @@ public class SubsystemConstants {
         );
 
         /* Limits */
-        kSwerve.limits.maxSpeed = 3.5;
-        kSwerve.limits.maxAngularVelocity = 9.2;
+        kSwerve.limits.maxSpeed = 4.42;
+        kSwerve.limits.maxAngularVelocity = 8.5;
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
         kSwerve.limits.accelerationLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = 80;
+        kSwerve.limits.maxSkidAcceleration = Double.MAX_VALUE;//80;
 
         /* Modules */
         double wheelRadius = 0.048;
@@ -219,8 +219,10 @@ public class SubsystemConstants {
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
-        if (!GeneralConstants.kRobotMode.isSim())
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(8, 0, 0, 0);
+        if (GeneralConstants.kRobotMode.isReal()) {
+            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(5, 0, 0, 0);
+            kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.5;
+        }
         else
             kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(7, 0, 0);
 
@@ -280,8 +282,8 @@ public class SubsystemConstants {
     public static final SwerveControllerConstants kSwerveController = new SwerveControllerConstants();
     static {
         kSwerveController.swerveConstants = kSwerve;
-        kSwerveController.drivePIDConstants = ControlConstants.createPID(1, 0, 0, 0);
-        kSwerveController.rotationPIDConstants = ControlConstants.createProfiledPID(8, 0, 0.2, 0, 0/*8*/, 0/*40*/, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kSwerveController.drivePIDConstants = ControlConstants.createPID(0.2, 0, 0, 0);
+        kSwerveController.rotationPIDConstants = ControlConstants.createProfiledPID(6.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
         kSwerveController.rotationPIDContinuousConnections = Pair.of(-Math.PI, Math.PI);
     }
 

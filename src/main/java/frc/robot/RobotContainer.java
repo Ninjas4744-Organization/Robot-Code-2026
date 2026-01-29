@@ -99,6 +99,7 @@ public class RobotContainer {
                 break;
         }
 
+//        swerveSubsystem = new SwerveSubsystem(true, false, () -> Math.signum(MathUtil.applyDeadband(driverController.getLeftX(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getLeftY(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getRightX(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getRightY(), 0.04)) / 4.42);
         swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
@@ -119,7 +120,7 @@ public class RobotContainer {
                     GamePieceProjectile ball = new RebuiltFuelOnFly(
                         RobotState.getInstance().getRobotPose().getTranslation(),
                         new Translation2d(),
-                        Swerve.getInstance().getChassisSpeeds(true),
+                        Swerve.getInstance().getSpeeds().getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()),
                         RobotState.getInstance().getRobotPose().getRotation(),
                         Meters.of(0.25),
                         MetersPerSecond.of(13.35 * Math.abs(shooter.getGoal()) / 100),
@@ -177,7 +178,7 @@ public class RobotContainer {
         AutoBuilder.configure(
             RobotState.getInstance()::getRobotPose,
             RobotState.getInstance()::setRobotPose,
-            () -> Swerve.getInstance().getChassisSpeeds(false),
+            Swerve.getInstance()::getSpeeds,
             swerveSubsystem::setAutoInput,
             SubsystemConstants.kAutonomyConfig,
             SubsystemConstants.kSwerve.special.robotConfig,
@@ -283,6 +284,8 @@ public class RobotContainer {
 
     public void periodic() {
         Logger.recordOutput("Distance", FieldConstants.getDistToHub());
+        Logger.recordOutput("Speed", Swerve.getInstance().getSpeeds().getSpeed());
+        Logger.recordOutput("MegaTag 1", visionSubsystem.getLastMegaTag1Pose());
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
