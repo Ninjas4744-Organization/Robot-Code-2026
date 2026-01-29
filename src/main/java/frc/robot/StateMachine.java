@@ -77,14 +77,11 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.STARTING_POSE, States.IDLE, Commands.sequence(
             swerve.reset(),
-            intake.stop(),
             indexer.stop(),
             indexer2.stop(),
             shooter.stop(),
             accelerator.stop(),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
-
-            Commands.waitUntil(() -> intakeAngle.atGoal())
+            closeIntake()
         ));
 
         addStateEnd(States.RESET, Map.of(Commands.waitUntil(
@@ -100,14 +97,7 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     private void intakeCommands() {
-        addEdge(States.IDLE, States.INTAKE, Commands.sequence(
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kOpen.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal),
-
-            // should be setVelocity after we get phoenix pro
-            intake.setPercent(PositionsConstants.Intake.kIntake.get())
-        ));
+        addEdge(States.IDLE, States.INTAKE, activateIntake());
 
         addEdge(States.INTAKE, States.IDLE, closeIntake());
     }
@@ -168,11 +158,7 @@ public class StateMachine extends StateMachineBase<States> {
             indexer2.stop(),
             shooter.stop(),
             accelerator.stop(),
-            intake.stop(),
-
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal)
+            closeIntake()
         ));
 
         addEdge(States.IDLE, States.DUMP, Commands.sequence(
@@ -199,15 +185,13 @@ public class StateMachine extends StateMachineBase<States> {
         //<editor-fold desc="*********************** SHOOT HEATED **********************">
         addEdge(States.IDLE, States.SHOOT_HEATED, Commands.sequence(
             shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
-
             Commands.waitUntil(shooter::atGoal)
         ));
 
-        addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, closeIntake());
+        addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, activateIntake());
 
         addEdge(States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
                 shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
-
                 Commands.waitUntil(shooter::atGoal)
         ));
         //</editor-fold>
@@ -249,6 +233,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.INTAKE_WHILE_SHOOT_DYNAMIC, () -> Commands.sequence(
+                activateIntake(),
                 shooter.autoHubVelocity(),
                 swerve.lookHub(),
                 activateIndexer()
@@ -268,7 +253,8 @@ public class StateMachine extends StateMachineBase<States> {
                         indexer.stop(),
                         indexer2.stop(),
                         shooter.stop(),
-                        accelerator.stop()
+                        accelerator.stop(),
+                        closeIntake()
                 )
         );
 
@@ -327,6 +313,7 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     //<editor-fold desc="**************** HELPER METHODS ************************">
+
     private Command closeIntake() {
         return Commands.sequence(
                 intake.stop(),
@@ -334,6 +321,16 @@ public class StateMachine extends StateMachineBase<States> {
                 intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
 
                 Commands.waitUntil(intakeAngle::atGoal)
+        );
+    }
+    private Command activateIntake() {
+        return Commands.sequence(
+                intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kOpen.get())),
+
+                Commands.waitUntil(intakeAngle::atGoal),
+
+                // should be setVelocity after we get phoenix pro
+                intake.setPercent(PositionsConstants.Intake.kIntake.get())
         );
     }
 
