@@ -228,18 +228,27 @@ public class RobotContainer {
             RobotState.setShouldIntake(!RobotState.isShouldIntake());
         })));
 
-
-        //TODO: Add the new states of dynamic shooting in here
-
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_DELIVERY_READY);
-            StateMachine.getInstance().changeRobotState(States.INTAKE);
+        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.SHOOT_HEATED);
         })));
 
-        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
+        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.DELIVERY_READY);
+            StateMachine.getInstance().changeRobotState(States.DELIVERY);
+        })));
+
+        driverController.circle().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.IDLE);
             StateMachine.getInstance().changeRobotState(States.SHOOT);
             StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
         })));
+
+        driverController.cross().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.IDLE);
+            StateMachine.getInstance().changeRobotState(States.SHOOT_DYNAMIC);
+            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+        })));
+
 
         driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
             // Climbing shit
