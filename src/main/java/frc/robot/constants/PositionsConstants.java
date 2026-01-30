@@ -44,13 +44,14 @@ public class PositionsConstants {
 
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 47, true);
-        private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot/2", 49, true);
-        private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot/2.5", 52, true);
-        private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot/3", 55, true);
-        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 60, true);
-        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 64, true);
-        private static final LoggedTunableNumber kShoot45 = new LoggedTunableNumber("Shooter/Shoot/4.5", 68, true);
-        private static final LoggedTunableNumber kShoot5 = new LoggedTunableNumber("Shooter/Shoot/5", 77, true);
+        private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot/2", 51, true);
+        private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot/2.5", 54, true);
+        private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot/3", 58, true);
+        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 62, true);
+        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 68, true);
+        private static final LoggedTunableNumber kShoot45 = new LoggedTunableNumber("Shooter/Shoot/4.5", 71, true);
+        private static final LoggedTunableNumber kShoot5 = new LoggedTunableNumber("Shooter/Shoot/5", 79, true);
+        private static final LoggedTunableNumber kShoot55 = new LoggedTunableNumber("Shooter/Shoot/5.5", 95, true);
 
         public static double getShootSpeed(double dist) {
             kShootMap.put(0.0, kShoot0.get());
@@ -61,6 +62,7 @@ public class PositionsConstants {
             kShootMap.put(4.0, kShoot4.get());
             kShootMap.put(4.5, kShoot45.get());
             kShootMap.put(5.0, kShoot5.get());
+            kShootMap.put(5.5, kShoot55.get());
 
             return kShootMap.get(dist);
         }
@@ -92,25 +94,35 @@ public class PositionsConstants {
 
         private static final InterpolatingDoubleTreeMap kAirTimeMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kAirTime0 = new LoggedTunableNumber( "Shooter/Air Time/0",   0, true);
-        private static final LoggedTunableNumber kAirTime05 = new LoggedTunableNumber("Shooter/Air Time/0.5", 0.5, true);
-        private static final LoggedTunableNumber kAirTime1 = new LoggedTunableNumber( "Shooter/Air Time/1",   0.5, true);
-        private static final LoggedTunableNumber kAirTime15 = new LoggedTunableNumber("Shooter/Air Time/1.5", 0.5, true);
-        private static final LoggedTunableNumber kAirTime2 = new LoggedTunableNumber( "Shooter/Air Time/2",   0.5, true);
-        private static final LoggedTunableNumber kAirTime25 = new LoggedTunableNumber("Shooter/Air Time/2.5", 0.5, true);
-        private static final LoggedTunableNumber kAirTime3 = new LoggedTunableNumber( "Shooter/Air Time/3",   0.5, true);
-        private static final LoggedTunableNumber kAirTime35 = new LoggedTunableNumber("Shooter/Air Time/3.5", 0.5, true);
-        private static final LoggedTunableNumber kAirTime4 = new LoggedTunableNumber( "Shooter/Air Time/4",   0.5, true);
+        private static final LoggedTunableNumber kAirTime2 = new LoggedTunableNumber("Shooter/Air Time/2", 0.77, true);
+        private static final LoggedTunableNumber kAirTime225 = new LoggedTunableNumber( "Shooter/Air Time/2.25",   0.81, true);
+        private static final LoggedTunableNumber kAirTime25 = new LoggedTunableNumber("Shooter/Air Time/2.5", 0.89, true);
+        private static final LoggedTunableNumber kAirTime275 = new LoggedTunableNumber( "Shooter/Air Time/2.75",   0.96, true);
+        private static final LoggedTunableNumber kAirTime3 = new LoggedTunableNumber("Shooter/Air Time/3", 0.91, true);
+        private static final LoggedTunableNumber kAirTime325 = new LoggedTunableNumber( "Shooter/Air Time/3.25",   0.93, true);
+        private static final LoggedTunableNumber kAirTime35 = new LoggedTunableNumber("Shooter/Air Time/3.5", 1.04, true);
+        private static final LoggedTunableNumber kAirTime375 = new LoggedTunableNumber( "Shooter/Air Time/3.75",   1, true);
+        private static final LoggedTunableNumber kAirTime4 = new LoggedTunableNumber( "Shooter/Air Time/4",   1.1, true);
+        private static final LoggedTunableNumber kAirTime425 = new LoggedTunableNumber( "Shooter/Air Time/4.25",   1.11, true);
+        private static final LoggedTunableNumber kAirTime45 = new LoggedTunableNumber( "Shooter/Air Time/4.5",   1.1, true);
+        private static final LoggedTunableNumber kAirTime475 = new LoggedTunableNumber( "Shooter/Air Time/4.75",   1.18, true);
+        private static final LoggedTunableNumber kAirTime5 = new LoggedTunableNumber( "Shooter/Air Time/5",   1.27, true);
 
         public static double getAirTime(double dist) {
-            kAirTimeMap.put(0.0, kAirTime0.get());
-            kAirTimeMap.put(0.5, kAirTime05.get());
-            kAirTimeMap.put(1.0, kAirTime1.get());
-            kAirTimeMap.put(1.5, kAirTime15.get());
-            kAirTimeMap.put(2.0, kAirTime2.get());
-            kAirTimeMap.put(2.5, kAirTime25.get());
-            kAirTimeMap.put(3.0, kAirTime3.get());
-            kAirTimeMap.put(3.5, kAirTime35.get());
-            kAirTimeMap.put(4.0, kAirTime4.get());
+            kAirTimeMap.put(0.0,  kAirTime0.get());
+            kAirTimeMap.put(2.0,  kAirTime2.get());
+            kAirTimeMap.put(2.25, kAirTime225.get());
+            kAirTimeMap.put(2.5,  kAirTime25.get());
+            kAirTimeMap.put(2.75, kAirTime275.get());
+            kAirTimeMap.put(3.0,  kAirTime3.get());
+            kAirTimeMap.put(3.25, kAirTime325.get());
+            kAirTimeMap.put(3.5,  kAirTime35.get());
+            kAirTimeMap.put(3.75, kAirTime375.get());
+            kAirTimeMap.put(4.0,  kAirTime4.get());
+            kAirTimeMap.put(4.25, kAirTime425.get());
+            kAirTimeMap.put(4.5,  kAirTime45.get());
+            kAirTimeMap.put(4.75, kAirTime475.get());
+            kAirTimeMap.put(5.0,  kAirTime5.get());
 
             return kAirTimeMap.get(dist);
         }
@@ -146,11 +158,15 @@ public class PositionsConstants {
     }
 
     public static class Swerve {
-        public static final LoggedTunableNumber kHubPositionThreshold = new LoggedTunableNumber("Swerve/Pos Thresh", 0.03, false);
-        public static final LoggedTunableNumber kHubAngleThreshold = new LoggedTunableNumber("Swerve/Angle Thresh", 2, false);
+        public static final LoggedTunableNumber kPositionThreshold = new LoggedTunableNumber("Swerve/Pos Thresh", 0.05, false);
+//        public static final LoggedTunableNumber kAngleThreshold = new LoggedTunableNumber("Swerve/Angle Thresh", 1, false);
+        public static final LoggedTunableNumber kAngleBaseThreshold = new LoggedTunableNumber("Swerve/Angle Base Threshold", 7.5, false);
+        public static final LoggedTunableNumber kAngleCoefficient = new LoggedTunableNumber("Swerve/Angle Coefficient", -1.2, false);
+        public static final LoggedTunableNumber kSpeedDifferenceThreshold = new LoggedTunableNumber("Swerve/Speed Diff Thresh", 0.3, false);
+        public static final LoggedTunableNumber kTargetMinThreshold = new LoggedTunableNumber("Swerve/Target Min Thresh", 0.4, false);
 
-        public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub Min Dist", 1.5, false);
-        public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 3, false);
+        public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub Min Dist", 2, false);
+        public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 4, false);
 
         private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 3, false);
         private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 3, false);

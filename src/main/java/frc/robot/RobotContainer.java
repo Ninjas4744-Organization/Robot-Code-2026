@@ -251,21 +251,45 @@ public class RobotContainer {
         driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
             () -> {
                 CommandScheduler.getInstance().schedule(Commands.sequence(
-//                    swerveSubsystem.lock(),
+                    Commands.runOnce(() -> {
+                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
+                        GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
+                    }),
                     swerveSubsystem.lookHub(),
                     shooter.autoHubVelocity(),
-                    Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
-                    indexer.setPercent(0.3),
-                    indexer2.setPercent(0.3),
-                    accelerator.setVelocity(80)
+                    Commands.run(() -> {
+                        if (shooter.atGoal() && swerveSubsystem.atGoal()) {
+                            CommandScheduler.getInstance().schedule(Commands.sequence(
+                                indexer.setPercent(0.3),
+                                indexer2.setPercent(0.3),
+                                accelerator.setVelocity(80)
+                            ));
+                        } else {
+                            CommandScheduler.getInstance().schedule(Commands.sequence(
+                                indexer.stop(),
+                                indexer2.stop(),
+                                accelerator.stop()
+                            ));
+                        }
+                    })
+//                    Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
+//                    indexer.setPercent(0.3),
+//                    indexer2.setPercent(0.3),
+//                    accelerator.setVelocity(80)
                 ));
             },
             () -> {
-                CommandScheduler.getInstance().schedule(swerveSubsystem.stop());
-                CommandScheduler.getInstance().schedule(indexer.stop());
-                CommandScheduler.getInstance().schedule(indexer2.stop());
-                CommandScheduler.getInstance().schedule(accelerator.stop());
-                CommandScheduler.getInstance().schedule(shooter.stop());
+                CommandScheduler.getInstance().schedule(Commands.sequence(
+                    Commands.runOnce(() -> {
+                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
+                        GeneralConstants.Swerve.kDriverSpeedFactor = 1;
+                    }),
+                    swerveSubsystem.stop(),
+                    indexer.stop(),
+                    indexer2.stop(),
+                    accelerator.stop(),
+                    shooter.stop()
+                ));
             }
         )));
     }
@@ -276,11 +300,13 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        Logger.recordOutput("Distance To Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Distance Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Distance Fake Hub", RobotState.getInstance().getDistToHub());
         Logger.recordOutput("Robot Speed", Swerve.getInstance().getSpeeds().getSpeed());
         Logger.recordOutput("MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
         Logger.recordOutput("Look Ahead Target", new Pose3d(RobotState.getInstance().getHubTargetPose().getX(), RobotState.getInstance().getHubTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
         Logger.recordOutput("Ball End Pose", new Pose3d(RobotState.getInstance().getBallEndPose().getX(), RobotState.getInstance().getBallEndPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
+        Logger.recordOutput("Shooting Ready", shooter.atGoal() && swerveSubsystem.atGoal());
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();

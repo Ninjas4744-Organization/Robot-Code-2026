@@ -47,10 +47,10 @@ public class GeneralConstants {
     public static final int kOperatorControllerPort = 1;
 
     public static class Swerve {
-        public static final double kDriverSpeedFactor = 1;
-        public static final double kDriverRotationSpeedFactor = 1;
-        public static final double kJoystickDeadband = 0.04;
-        public static final boolean kDriverFieldRelative = true;
+        public static double kDriverSpeedFactor = 1;
+        public static double kDriverRotationSpeedFactor = 1;
+        public static double kJoystickDeadband = 0.04;
+        public static boolean kDriverFieldRelative = true;
     }
 
     public static class Vision {

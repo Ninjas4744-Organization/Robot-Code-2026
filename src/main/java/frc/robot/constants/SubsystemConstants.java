@@ -119,8 +119,8 @@ public class SubsystemConstants {
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createPID(0.5, 0, 0, 0);
-        kShooter.real.control.controlConstants.V = 0.135;
+        kShooter.real.control.controlConstants = ControlConstants.createTorqueCurrent(5, 0, 6);
+//        kShooter.real.control.controlConstants.V = 0.135;
         kShooter.real.control.gearRatio = 1;
         kShooter.real.control.velocityGoalTolerance = 5;
 
@@ -210,7 +210,7 @@ public class SubsystemConstants {
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
         kSwerve.limits.accelerationLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = Double.MAX_VALUE;//80;
+        kSwerve.limits.maxSkidAcceleration = 80;
 
         /* Modules */
         double wheelRadius = 0.048;
@@ -220,8 +220,9 @@ public class SubsystemConstants {
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
         if (GeneralConstants.kRobotMode.isReal()) {
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(5, 0, 0, 0);
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.5;
+//            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(5, 0, 0, 0);
+//            kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.5;
+            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(90, 5, 3);
         }
         else
             kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(7, 0, 0);
