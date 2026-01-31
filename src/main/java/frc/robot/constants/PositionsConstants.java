@@ -38,9 +38,9 @@ public class PositionsConstants {
     }
 
     public static class Shooter {
-        public static final LoggedTunableNumber kShoot = new LoggedTunableNumber("Shooter/Shoot", 80, false);
-        public static final LoggedTunableNumber kDelivery = new LoggedTunableNumber("Shooter/Delivery", 60, false);
-        public static final LoggedTunableNumber kDump = new LoggedTunableNumber("Shooter/Dump", 40, false);
+        public static final LoggedTunableNumber kShoot = new LoggedTunableNumber("Shooter/Shoot", 100, false);
+        public static final LoggedTunableNumber kDelivery = new LoggedTunableNumber("Shooter/Delivery", 80, false);
+        public static final LoggedTunableNumber kDump = new LoggedTunableNumber("Shooter/Dump", 50, false);
 
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 47, true);

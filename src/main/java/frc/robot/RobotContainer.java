@@ -73,12 +73,12 @@ public class RobotContainer {
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
-                intake = new Intake(true, new IntakeIOController());
-                intakeAngle = new IntakeAngle(true, new IntakeAngleIOController());
-                indexer = new Indexer(true, new IndexerIOController());
-                indexer2 =  new Indexer2(true, new Indexer2IOController());
-                shooter = new Shooter(true, new ShooterIOController());
-                accelerator =  new Accelerator(true, new AcceleratorIOController());
+                intake = new Intake(false, new IntakeIOController());
+                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
+                indexer = new Indexer(false, new IndexerIOController());
+                indexer2 =  new Indexer2(false, new Indexer2IOController());
+                shooter = new Shooter(false, new ShooterIOController());
+                accelerator =  new Accelerator(false, new AcceleratorIOController());
                 climber = new Climber(false, new ClimberIOController());
                 climberAngle = new ClimberAngle(false, new ClimberAngleIOController());
 
@@ -224,37 +224,43 @@ public class RobotContainer {
 
         driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
 
-        driverController.triangle().onTrue(notTest(Commands.runOnce(() -> {
-            RobotState.setShouldIntake(!RobotState.isShouldIntake());
-        })));
+        driverController.triangle().onTrue(notTest(Commands.runOnce(() -> RobotState.setShouldIntake(!RobotState.isShouldIntake()))));
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.SHOOT_HEATED);
+            chooseBetween(States.INTAKE_WHILE_SHOOT_HEATED, States.SHOOT_HEATED);
         })));
 
         driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.DELIVERY_READY);
-            StateMachine.getInstance().changeRobotState(States.DELIVERY);
+            chooseBetween(States.INTAKE_WHILE_DELIVERY_READY, States.DELIVERY_READY);
+            chooseBetween(States.INTAKE_WHILE_DELIVERY, States.DELIVERY);
+            chooseBetween(States.INTAKE, States.IDLE);
         })));
 
         driverController.circle().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.IDLE);
-            StateMachine.getInstance().changeRobotState(States.SHOOT);
-            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+            chooseBetween(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY);
+            StateMachine.getInstance().changeRobotState(States.SHOOT); // Statically shooting shouldn't be able to intake as well
+            chooseBetween(States.INTAKE, States.IDLE);
         })));
 
         driverController.cross().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.IDLE);
-            StateMachine.getInstance().changeRobotState(States.SHOOT_DYNAMIC);
-            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+            chooseBetween(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY);
+            chooseBetween(States.INTAKE_WHILE_SHOOT_DYNAMIC, States.SHOOT_DYNAMIC);
+            chooseBetween(States.INTAKE, States.IDLE);
         })));
-
 
         driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
             // Climbing shit
         })));
 
-        driverController.square().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
+        driverController.square().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.DUMP);
+            if (RobotState.getInstance().getRobotState() != States.SHOOT_HEATED)
+                StateMachine.getInstance().changeRobotState(States.IDLE);
+        })));
+    }
+
+    private void chooseBetween(States actionWithIntake, States actionWithoutIntake) {
+        StateMachine.getInstance().chooseRobotStateToChange(actionWithIntake, actionWithoutIntake,  RobotState::isShouldIntake);
     }
 
     List<GamePieceProjectile> balls = new ArrayList<>();
@@ -265,17 +271,15 @@ public class RobotContainer {
         )));
 
         driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
-            () -> {
-                CommandScheduler.getInstance().schedule(Commands.sequence(
+            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
 //                    swerveSubsystem.lock(),
-                    swerveSubsystem.lookHub(),
-                    shooter.autoHubVelocity(),
-                    Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
-                    indexer.setPercent(0.3),
-                    indexer2.setPercent(0.3),
-                    accelerator.setVelocity(80)
-                ));
-            },
+                swerveSubsystem.lookHub(),
+                shooter.autoHubVelocity(),
+                Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
+                indexer.setPercent(0.3),
+                indexer2.setPercent(0.3),
+                accelerator.setVelocity(80)
+            )),
             () -> {
                 CommandScheduler.getInstance().schedule(swerveSubsystem.stop());
                 CommandScheduler.getInstance().schedule(indexer.stop());

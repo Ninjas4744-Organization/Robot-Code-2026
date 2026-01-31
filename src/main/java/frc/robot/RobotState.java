@@ -4,6 +4,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.RobotStateWithSwerve;
 
+import java.util.List;
+
 public class RobotState extends RobotStateWithSwerve<States> {
     private static boolean shouldIntake = false;
 
@@ -12,8 +14,12 @@ public class RobotState extends RobotStateWithSwerve<States> {
     }
 
     public static void setShouldIntake(boolean shouldIntake) {
-        RobotState.shouldIntake = shouldIntake;
         States robotState = RobotState.getInstance().robotState;
+        if (List.of(States.UNKNOWN, States.SHOOT).contains(
+                robotState
+        )) return;
+
+        RobotState.shouldIntake = shouldIntake;
 
         States stateToChange;
 
