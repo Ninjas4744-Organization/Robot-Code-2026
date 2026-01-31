@@ -115,7 +115,7 @@ public class SubsystemConstants {
         kShooter.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
         kShooter.real.base.followers[0].id = 31;
         kShooter.real.base.followers[0].inverted = true;
-        kShooter.real.base.currentLimit = 80;
+        kShooter.real.base.currentLimit = 90;
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */

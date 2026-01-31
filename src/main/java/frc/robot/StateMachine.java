@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.constants.PositionsConstants;
@@ -76,14 +77,11 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.STARTING_POSE, States.IDLE, Commands.sequence(
             swerve.reset(),
-            intake.stop(),
             indexer.stop(),
             indexer2.stop(),
             shooter.stop(),
             accelerator.stop(),
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
-
-            Commands.waitUntil(() -> intakeAngle.atGoal())
+            closeIntake()
         ));
 
         addStateEnd(States.RESET, Map.of(Commands.waitUntil(
@@ -99,164 +97,138 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     private void intakeCommands() {
-        addEdge(States.IDLE, States.INTAKE, Commands.sequence(
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kOpen.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal),
-
-            // should be setVelocity after we get phoenix pro
-            intake.setPercent(PositionsConstants.Intake.kIntake.get())
-        ));
-
-        addEdge(States.INTAKE, States.IDLE, Commands.sequence(
-            intake.stop(),
-
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal)
-        ));
+        addEdge(States.IDLE, States.INTAKE, activateIntake());
+        addEdge(States.INTAKE, States.IDLE, closeIntake());
     }
 
     private void deliveryCommands() {
         addEdge(States.IDLE, States.DELIVERY_READY, Commands.sequence(
-//            swerve.deliveryDrive(),
-            shooter.autoDeliveryVelocity(),
-
-            Commands.waitUntil(shooter::atGoal)
+                shooter.autoDeliveryVelocity(),
+                Commands.waitUntil(shooter::atGoal)
         ));
 
         addEdge(States.DELIVERY_READY, States.DELIVERY, Commands.sequence(
-            // after dev bot this should close the intake
-            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
-            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
+                activateIndexing()
         ));
 
         addEdge(States.INTAKE, States.INTAKE_WHILE_DELIVERY_READY, Commands.sequence(
-//            swerve.deliveryDrive(),
-            shooter.autoDeliveryVelocity(),
-
-            Commands.waitUntil(shooter::atGoal)
+                shooter.autoDeliveryVelocity(),
+                Commands.waitUntil(shooter::atGoal)
         ));
 
         addEdge(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY, Commands.sequence(
-            // after dev bot this should close the intake
-            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
-            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
+                activateIndexing()
         ));
 
         addEdge(States.DELIVERY, States.INTAKE_WHILE_DELIVERY, Commands.sequence(
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kOpen.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal),
-
-            intake.setVelocity(PositionsConstants.Intake.kIntake.get())
+                activateIntake()
         ));
 
-        addEdge(States.INTAKE_WHILE_DELIVERY, States.DELIVERY, Commands.sequence(
-            intake.stop(),
+        addEdge(States.INTAKE_WHILE_DELIVERY, States.DELIVERY, closeIntake());
+        addEdge(States.INTAKE_WHILE_DELIVERY, States.INTAKE, stopShooting());
 
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal)
-        ));
-
-        addEdge(List.of(States.DELIVERY_READY, States.DELIVERY), States.IDLE, () -> Commands.sequence(
-            swerve.stop(),
-            indexer.stop(),
-            indexer2.stop(),
-            shooter.stop(),
-            accelerator.stop()
-        ));
+        addEdge(List.of(States.DELIVERY_READY, States.DELIVERY), States.IDLE, this::stopShooting);
 
         addEdge(List.of(States.INTAKE_WHILE_DELIVERY_READY, States.INTAKE_WHILE_DELIVERY), States.IDLE, () -> Commands.sequence(
-            swerve.stop(),
-
-            indexer.stop(),
-            indexer2.stop(),
-            shooter.stop(),
-            accelerator.stop(),
-            intake.stop(),
-
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal)
+                stopShooting(),
+                closeIntake()
         ));
 
-        addEdge(States.IDLE, States.DUMP, Commands.sequence(
-            // after dev bot this should close the intake
-            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
-            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            shooter.setVelocity(PositionsConstants.Shooter.kDump.get()),
-            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
+        ///--- What about SHOOT_READY -> DUMP, Eitan?
+        addEdge(List.of(States.IDLE, States.SHOOT_READY), States.DUMP, () -> Commands.sequence(
+                activateIndexing(),
+                activateRegularShooting(PositionsConstants.Shooter.kDump.get())
         ));
 
-        addEdge(States.DUMP, States.IDLE, Commands.sequence(
-            indexer.stop(),
-            indexer2.stop(),
-            shooter.stop(),
-            accelerator.stop()
-        ));
+        addEdge(States.DUMP, States.IDLE, stopShooting());
+
 
         addStateEnd(States.DELIVERY_READY, Map.of(Commands.none(), States.DELIVERY));
         addStateEnd(States.INTAKE_WHILE_DELIVERY_READY, Map.of(Commands.none(), States.INTAKE_WHILE_DELIVERY));
     }
 
+
+
     private void shootingCommands() {
-        addEdge(States.IDLE, States.SHOOT_HEATED, Commands.sequence(
-            shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
+        //<editor-fold desc="*********************** SHOOT HEATED **********************">
+        addEdge(States.IDLE, States.SHOOT_HEATED, activateRegularShooting(PositionsConstants.Shooter.kShoot.get()));
 
-            Commands.waitUntil(shooter::atGoal)
-        ));
+        addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, activateIntake());
+        addEdge(States.INTAKE_WHILE_SHOOT_HEATED, States.SHOOT_HEATED, closeIntake());
 
+        addEdge(States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED, activateRegularShooting(PositionsConstants.Shooter.kShoot.get()));
+        addEdge(States.INTAKE_WHILE_SHOOT_HEATED, States.INTAKE, shooter.stop());
+        //</editor-fold>
+
+        //<editor-fold desc="************** SHOOT READY ******************************">
         addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
-            // after dev bot this should close the intake
-            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
-//            swerve.autoDrive(),
-            shooter.autoHubVelocity(),
-
-            Commands.waitUntil(() -> shooter.atGoal())
-//            Commands.waitUntil(() -> swerve.atGoal() && shooter.atGoal())
+                shooter.autoHubVelocity(),
+                Commands.waitUntil(() -> shooter.atGoal())
         ));
 
-        addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
-//            swerve.lock(),
-            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
+        addEdge(List.of(States.IDLE, States.SHOOT_HEATED, States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED), States.INTAKE_WHILE_SHOOT_READY, () -> Commands.sequence(
+                activateIntake(),
+                shooter.autoHubVelocity(),
+                Commands.waitUntil(() -> shooter.atGoal())
         ));
 
-        addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
-            intake.stop(),
+        addEdge(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY, activateIntake());
 
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
+        addEdge(States.INTAKE_WHILE_SHOOT_READY, States.INTAKE, shooter.stop());
+        addEdge(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY, closeIntake());
+        //</editor-fold>
 
-            Commands.waitUntil(intakeAngle::atGoal)
+        //<editor-fold desc="**************** SHOOT *****************">
+        addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.SHOOT, () -> Commands.sequence(
+                swerve.lock(),
+                activateIndexing(),
+                closeIntake()
         ));
 
-        addEdge(States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
-            shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
-
-            Commands.waitUntil(shooter::atGoal)
+        addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.SHOOT_DYNAMIC, () -> Commands.sequence(
+                shooter.autoHubVelocity(),
+                swerve.lookHub(),
+                activateIndexing(),
+                closeIntake()
         ));
 
-        addEdge(States.SHOOT_HEATED, States.IDLE, Commands.sequence(
-            shooter.stop()
+        addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.INTAKE_WHILE_SHOOT_DYNAMIC, () -> Commands.sequence(
+                activateIntake(),
+                shooter.autoHubVelocity(),
+                swerve.lookHub(),
+                activateIndexing()
         ));
 
-        addEdge(List.of(States.SHOOT, States.SHOOT_READY), States.IDLE, () -> Commands.sequence(
-            swerve.stop(),
-            indexer.stop(),
-            indexer2.stop(),
-            shooter.stop(),
-            accelerator.stop()
+        addEdge(States.SHOOT_DYNAMIC, States.INTAKE_WHILE_SHOOT_DYNAMIC, activateIntake());
+        addEdge(States.INTAKE_WHILE_SHOOT_DYNAMIC, States.SHOOT_DYNAMIC, closeIntake());
+
+
+        addEdge(States.INTAKE_WHILE_SHOOT_DYNAMIC, States.INTAKE, Commands.sequence(
+                shooter.stop()
         ));
 
-        addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));
+        addEdge(States.INTAKE_WHILE_SHOOT_DYNAMIC, States.SHOOT_DYNAMIC, Commands.sequence(
+                closeIntake()
+        ));
+        //</editor-fold>
+
+        //<editor-fold desc="*************** CLOSE *************************">
+        addEdge(List.of(States.SHOOT_HEATED,States.INTAKE_WHILE_SHOOT_HEATED), States.IDLE, () -> Commands.sequence(
+                closeIntake(),
+                shooter.stop()
+        ));
+
+        addEdge(List.of(States.SHOOT, States.SHOOT_DYNAMIC, States.INTAKE_WHILE_SHOOT_DYNAMIC, States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.IDLE, () -> Commands.sequence(
+                stopShooting(),
+                closeIntake()
+        ));
+
+        // Rare edge case - from INTAKE_WHILE_SHOOT -> SHOOT (While silently having intake on) -> INTAKE
+        addEdge(States.SHOOT, States.INTAKE, Commands.sequence(
+                stopShooting(),
+                activateIntake()
+        ));
+        //</editor-fold>
     }
 
     private void climbingCommands() {
@@ -308,4 +280,52 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.waitUntil(climber::atGoal)
         ));
     }
+
+
+
+    //<editor-fold desc="**************** HELPER METHODS ************************">
+    private Command closeIntake() {
+        return Commands.sequence(
+                intake.stop(),
+
+                intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
+
+                Commands.waitUntil(intakeAngle::atGoal)
+        );
+    }
+
+    private Command activateIntake() {
+        return Commands.sequence(
+                intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kOpen.get())),
+
+                Commands.waitUntil(intakeAngle::atGoal),
+
+                // should be setVelocity after we get phoenix pro
+                intake.setPercent(PositionsConstants.Intake.kIntake.get())
+        );
+    }
+    private Command activateIndexing() {
+        return Commands.sequence(
+                indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
+                indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
+                accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
+        );
+    }
+
+    private Command stopShooting() {
+        return Commands.sequence(
+                indexer.stop(),
+                indexer2.stop(),
+                shooter.stop(),
+                accelerator.stop()
+        );
+    }
+
+    private Command activateRegularShooting(double velocity) {
+        return Commands.sequence(
+                shooter.setVelocity(velocity),
+                Commands.waitUntil(shooter::atGoal)
+        );
+    }
+    //</editor-fold>
 }
