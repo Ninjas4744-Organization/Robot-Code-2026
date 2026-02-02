@@ -9,8 +9,10 @@ import frc.lib.NinjasLib.statemachine.RobotStateWithSwerve;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.PositionsConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class RobotState extends RobotStateWithSwerve<States> {
+
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
         robotState = States.UNKNOWN;
@@ -21,14 +23,20 @@ public class RobotState extends RobotStateWithSwerve<States> {
         return (RobotState) RobotStateBase.getInstance();
     }
 
-    private double feedforwardPercent = 0.7;
+    private double predictTime = 0.5;
     public Translation2d getHubTargetPose() {
         Translation2d target = FieldConstants.getHubPose().toPose2d().getTranslation();
         double distTarget = FieldConstants.getDistToHub();
 
-        Translation2d robotVel = Swerve.getInstance().getWantedSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(feedforwardPercent)
-            .plus(Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(1 - feedforwardPercent));
+//        Translation2d robotVel = Swerve.getInstance().getWantedSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(predictPercent)
+//            .plus(Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(1 - predictPercent));
+        Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation();
+//        Translation2d predictedRobotVel = robotVel.plus(RobotContainer.getRobotAcceleration().times(predictTime));
         double airTime = PositionsConstants.Shooter.getAirTime(distTarget);
+
+        Logger.recordOutput("Calc/Robot Vel", robotVel.getNorm());
+//        Logger.recordOutput("Calc/Robot Vel Pred", predictedRobotVel.getNorm());
+        Logger.recordOutput("Calc/Robot Acc", RobotContainer.getRobotAcceleration().getNorm());
 
         return target.minus(robotVel.times(airTime));
     }
@@ -37,11 +45,13 @@ public class RobotState extends RobotStateWithSwerve<States> {
         Translation2d target = FieldConstants.getHubPose().toPose2d().getTranslation();
         double distTarget = FieldConstants.getDistToHub();
 
-        Translation2d robotVel = Swerve.getInstance().getWantedSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(feedforwardPercent)
-            .plus(Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(1 - feedforwardPercent));
+//        Translation2d robotVel = Swerve.getInstance().getWantedSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(predictPercent)
+//            .plus(Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(1 - predictPercent));
+        Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation();
+        Translation2d predictedRobotVel = robotVel.plus(RobotContainer.getRobotAcceleration().times(predictTime));
         double airTime = PositionsConstants.Shooter.getAirTime(distTarget);
 
-        return target.plus(robotVel.times(airTime));
+        return target.plus(predictedRobotVel.times(airTime));
     }
 
     public double getDistToHub() {

@@ -40,7 +40,7 @@ public class Shooter extends SubsystemBase implements
         io.updateInputs(inputs);
         Logger.processInputs("Shooter", inputs);
 
-        Logger.recordOutput("Shooter Command", backgroundCommand.isRunning());
+        Logger.recordOutput("Shooter/Shooter Command", backgroundCommand.isRunning());
     }
 
     @Override

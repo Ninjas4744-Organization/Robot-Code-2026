@@ -58,7 +58,6 @@ import java.util.List;
 import static edu.wpi.first.units.Units.*;
 
 public class RobotContainer {
-    private LoggedCommandController driverController;
     private static SwerveSubsystem swerveSubsystem;
     private static VisionSubsystem visionSubsystem;
     private static Intake intake;
@@ -69,7 +68,13 @@ public class RobotContainer {
     private static Accelerator accelerator;
     private static Climber climber;
     private static ClimberAngle climberAngle;
+
+    private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
+    List<GamePieceProjectile> balls = new ArrayList<>();
+    private List<Translation2d> lastRobotVels = new  ArrayList<>();
+    private static Translation2d robotAcc = new Translation2d();
+    private final int robotVelsCount = 5;
 
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
@@ -241,7 +246,6 @@ public class RobotContainer {
         driverController.square().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
     }
 
-    List<GamePieceProjectile> balls = new ArrayList<>();
     private void configureTestBindings() {
         driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
             () -> CommandScheduler.getInstance().schedule(intake.setPercent(0.35)),
@@ -257,25 +261,20 @@ public class RobotContainer {
                     }),
                     swerveSubsystem.lookHub(),
                     shooter.autoHubVelocity(),
+                    accelerator.setVelocity(80),
                     Commands.run(() -> {
-                        if (shooter.atGoal() && swerveSubsystem.atGoal()) {
+                        if (shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal()) {
                             CommandScheduler.getInstance().schedule(Commands.sequence(
-                                indexer.setPercent(0.3),
-                                indexer2.setPercent(0.3),
-                                accelerator.setVelocity(80)
+                                indexer.setPercent(0),
+                                indexer2.setPercent(0.3)
                             ));
                         } else {
                             CommandScheduler.getInstance().schedule(Commands.sequence(
-                                indexer.stop(),
-                                indexer2.stop(),
-                                accelerator.stop()
+                                indexer.setPercent(0),
+                                indexer2.setPercent(-0.1)
                             ));
                         }
                     })
-//                    Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
-//                    indexer.setPercent(0.3),
-//                    indexer2.setPercent(0.3),
-//                    accelerator.setVelocity(80)
                 ));
             },
             () -> {
@@ -292,6 +291,13 @@ public class RobotContainer {
                 ));
             }
         )));
+
+        driverController.L1().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
+        driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.getInstance().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
+    }
+
+    public static Translation2d getRobotAcceleration() {
+        return robotAcc;
     }
 
     public void controllerPeriodic() {
@@ -300,13 +306,42 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        Logger.recordOutput("Distance Hub", FieldConstants.getDistToHub());
-        Logger.recordOutput("Distance Fake Hub", RobotState.getInstance().getDistToHub());
-        Logger.recordOutput("Robot Speed", Swerve.getInstance().getSpeeds().getSpeed());
-        Logger.recordOutput("MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
-        Logger.recordOutput("Look Ahead Target", new Pose3d(RobotState.getInstance().getHubTargetPose().getX(), RobotState.getInstance().getHubTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
-        Logger.recordOutput("Ball End Pose", new Pose3d(RobotState.getInstance().getBallEndPose().getX(), RobotState.getInstance().getBallEndPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
-        Logger.recordOutput("Shooting Ready", shooter.atGoal() && swerveSubsystem.atGoal());
+        Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).toTranslation();
+        lastRobotVels.add(robotVel);
+        if (lastRobotVels.size() > robotVelsCount)
+            lastRobotVels.remove(0);
+        if (lastRobotVels.size() >= 2) {
+            // Linear Regression Variables
+            double sumT = 0;
+            Translation2d sumP = new Translation2d();
+            Translation2d sumTP = new Translation2d();
+            double sumT2 = 0;
+            int n = lastRobotVels.size();
+
+            for (int i = 0; i < n; i++) {
+                sumT += i * 0.02;
+                sumP = sumP.plus(lastRobotVels.get(i));
+                sumTP = sumTP.plus(lastRobotVels.get(i).times(i * 0.02));
+                sumT2 += (i * 0.02) * (i * 0.02);
+            }
+
+            // Formula for slope (velocity):
+            // m = (n*sumTP - sumT*sumP) / (n*sumT2 - sumT^2)
+            double denominator = (n * sumT2 - (sumT * sumT));
+
+            // Avoid division by zero if timestamps are identical
+            robotAcc = (denominator == 0) ? new Translation2d() : (sumTP.times(n).minus(sumP.times(sumT))).div(denominator);
+        }
+
+        Logger.recordOutput("Robot/Distance Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Robot/Distance Fake Hub", RobotState.getInstance().getDistToHub());
+        Logger.recordOutput("Robot/Robot Speed", Swerve.getInstance().getSpeeds().getSpeed());
+        Logger.recordOutput("Robot/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
+        Logger.recordOutput("Robot/Look Ahead Target", new Pose3d(RobotState.getInstance().getHubTargetPose().getX(), RobotState.getInstance().getHubTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
+        Logger.recordOutput("Robot/Ball End Pose", new Pose3d(RobotState.getInstance().getBallEndPose().getX(), RobotState.getInstance().getBallEndPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
+        Logger.recordOutput("Robot/Shooting Ready", shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal());
+        Logger.recordOutput("Robot/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
+        Logger.recordOutput("Robot/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
@@ -315,7 +350,7 @@ public class RobotContainer {
             for (int i = 0; i < this.balls.size(); i++) {
                 balls[i] = this.balls.get(i).getPose3d();
             }
-            Logger.recordOutput("Balls", balls);
+            Logger.recordOutput("Robot/Balls", balls);
         }
     }
 

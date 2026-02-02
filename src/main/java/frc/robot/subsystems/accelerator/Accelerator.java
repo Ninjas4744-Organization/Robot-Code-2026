@@ -9,6 +9,7 @@ import org.littletonrobotics.junction.Logger;
 public class Accelerator extends SubsystemBase implements
         ISubsystem.Resettable,
         ISubsystem.VelocityControlled,
+        ISubsystem.GoalOriented<Double>,
         ISubsystem.Stoppable
 {
     private AcceleratorIO io;
@@ -69,5 +70,15 @@ public class Accelerator extends SubsystemBase implements
             return Commands.none();
 
         return stop();
+    }
+
+    @Override
+    public boolean atGoal() {
+        return inputs.AtGoal;
+    }
+
+    @Override
+    public Double getGoal() {
+        return inputs.Goal;
     }
 }

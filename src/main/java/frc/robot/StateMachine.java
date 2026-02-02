@@ -37,7 +37,7 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     @Override
-    protected void defineGraph() {
+    protected void define() {
         swerve = RobotContainer.getSwerve();
         intake = RobotContainer.getIntake();
         intakeAngle = RobotContainer.getIntakeAngle();
@@ -215,20 +215,34 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
             // after dev bot this should close the intake
-            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
+//            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
 //            swerve.autoDrive(),
+            swerve.slowForShoot(),
+            swerve.lookHub(),
             shooter.autoHubVelocity(),
+            accelerator.setVelocity(80),
+            indexer.setPercent(0/*-0.1*/),
+            indexer2.setPercent(-0.1),
 
-            Commands.waitUntil(() -> shooter.atGoal())
-//            Commands.waitUntil(() -> swerve.atGoal() && shooter.atGoal())
+            Commands.waitUntil(() -> shooter.atGoal() && swerve.atGoal() && accelerator.atGoal())
         ));
 
         addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
-//            swerve.lock(),
-            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
-            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
+//            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
+//            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
         ));
+
+        addStateCommand(States.SHOOT, Commands.either(
+            Commands.parallel(
+                indexer.setPercent(0/*0.3*/),
+                indexer2.setPercent(0.3)
+            ),
+            Commands.parallel(
+                indexer.setPercent(0/*-0.1*/),
+                indexer2.setPercent(-0.1)
+            ),
+            () -> shooter.atGoal() && swerve.atGoal() && accelerator.atGoal()
+        ).repeatedly());
 
         addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
             intake.stop(),
@@ -252,8 +266,8 @@ public class StateMachine extends StateMachineBase<States> {
             swerve.stop(),
             indexer.stop(),
             indexer2.stop(),
-            shooter.stop(),
-            accelerator.stop()
+            accelerator.stop(),
+            shooter.stop()
         ));
 
         addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));

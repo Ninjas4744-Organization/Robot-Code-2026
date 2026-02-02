@@ -18,8 +18,10 @@ import org.littletonrobotics.junction.Logger;
 
 public class VisionSubsystem extends SubsystemBase {
     private double odometryDrift = 0;
+    private Pose2d lastVisionPosePassed = new Pose2d();
     private Pose2d lastVisionPose = new Pose2d();
     private Pose2d lastMegaTag1Pose = new Pose2d();
+    private boolean enabled = true;
 
     public VisionSubsystem() {
         Vision.setInstance(new Vision(SubsystemConstants.kVision));
@@ -43,16 +45,17 @@ public class VisionSubsystem extends SubsystemBase {
             boolean passedFilters = isPassedFilters(estimation);
 
             lastMegaTag1Pose = estimation.robotPoseMegaTag1;
+            lastVisionPose = estimation.robotPose;
 
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose", estimation.robotPose);
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Passed Filters", passedFilters);
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Strength", strength.get(0, 0));
 
-            if (passedFilters || DriverStation.isDisabled()) {
+            if ((passedFilters || DriverStation.isDisabled()) && enabled) {
                 Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose (Passed Filters)", estimation.robotPose);
 
                 RobotState.getInstance().updateRobotPose(!DriverStation.isDisabled() ? estimation.robotPose : estimation.robotPoseMegaTag1, estimation.timestamp, strength);
-                lastVisionPose = estimation.robotPose;
+                lastVisionPosePassed = estimation.robotPose;
 
                 odometryDrift *= 1 - strength.get(0, 0);
             }
@@ -60,8 +63,9 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public Matrix<N3, N1> getVisionStrength(VisionOutput estimation) {
-        double a = 4;
-        double visionStrength = 1 / (1 + a * Math.pow(Math.max(odometryDrift, 0.1), -0.5) * estimation.closestTargetDist * estimation.closestTargetDist);
+        double a = 0.5;
+        double epsilon = 0.05;
+        double visionStrength = 1 / (1 + 1 / a / Math.max(Math.pow(odometryDrift + epsilon, 0.5), Math.pow(odometryDrift + epsilon, 2)) * Math.pow(estimation.closestTargetDist, 2));
 
         return VecBuilder.fill(visionStrength, visionStrength, visionStrength / 2);
     }
@@ -80,11 +84,19 @@ public class VisionSubsystem extends SubsystemBase {
         return odometryDrift;
     }
 
+    public Pose2d getLastVisionPosePassed() {
+        return lastVisionPosePassed;
+    }
+
     public Pose2d getLastVisionPose() {
         return lastVisionPose;
     }
 
     public Pose2d getLastMegaTag1Pose() {
         return lastMegaTag1Pose;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
