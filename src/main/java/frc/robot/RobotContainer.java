@@ -227,7 +227,7 @@ public class RobotContainer {
         driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false)));
 //        driverController.povUp().onTrue(Commands.runOnce(() -> ));
 
-        driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
+        driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE, true, false)));
 
         driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
             StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_DELIVERY_READY);
@@ -338,7 +338,6 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Robot Speed", Swerve.getInstance().getSpeeds().getSpeed());
         Logger.recordOutput("Robot/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
         Logger.recordOutput("Robot/Look Ahead Target", new Pose3d(RobotState.getInstance().getHubTargetPose().getX(), RobotState.getInstance().getHubTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
-        Logger.recordOutput("Robot/Ball End Pose", new Pose3d(RobotState.getInstance().getBallEndPose().getX(), RobotState.getInstance().getBallEndPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
         Logger.recordOutput("Robot/Shooting Ready", shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal());
         Logger.recordOutput("Robot/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
         Logger.recordOutput("Robot/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
@@ -359,7 +358,7 @@ public class RobotContainer {
     }
 
     public void reset() {
-        RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation());
+//        RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation());
         if (GeneralConstants.kRobotMode.isComp()) {
             StateMachine.getInstance().changeRobotState(States.STARTING_POSE, false, true);
             StateMachine.getInstance().changeRobotState(States.IDLE, true, false);

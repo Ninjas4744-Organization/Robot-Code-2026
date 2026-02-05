@@ -23,35 +23,23 @@ public class RobotState extends RobotStateWithSwerve<States> {
         return (RobotState) RobotStateBase.getInstance();
     }
 
-    private double predictTime = 0.5;
+    private final double predictTime = 0.5;
+    private final double iterations = 20;
     public Translation2d getHubTargetPose() {
-        Translation2d target = FieldConstants.getHubPose().toPose2d().getTranslation();
-        double distTarget = FieldConstants.getDistToHub();
-
-//        Translation2d robotVel = Swerve.getInstance().getWantedSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(predictPercent)
-//            .plus(Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(1 - predictPercent));
         Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation();
-//        Translation2d predictedRobotVel = robotVel.plus(RobotContainer.getRobotAcceleration().times(predictTime));
-        double airTime = PositionsConstants.Shooter.getAirTime(distTarget);
+        Translation2d originalTarget = FieldConstants.getHubPose().toPose2d().getTranslation();
+        Translation2d target = new Translation2d(originalTarget.getX(), originalTarget.getY());
 
-        Logger.recordOutput("Calc/Robot Vel", robotVel.getNorm());
-//        Logger.recordOutput("Calc/Robot Vel Pred", predictedRobotVel.getNorm());
-        Logger.recordOutput("Calc/Robot Acc", RobotContainer.getRobotAcceleration().getNorm());
+        for (int i = 0; i < iterations; i++) {
+            double distTarget = getDistance(new Pose2d(target, Rotation2d.kZero));
+            double airTime = PositionsConstants.Shooter.getAirTime(distTarget);
+            target = originalTarget.minus(robotVel.times(airTime));
 
-        return target.minus(robotVel.times(airTime));
-    }
+            if (i == 0)
+                Logger.recordOutput("Robot/Original Lookahead Target", new Pose2d(target, Rotation2d.kZero));
+        }
 
-    public Translation2d getBallEndPose() {
-        Translation2d target = FieldConstants.getHubPose().toPose2d().getTranslation();
-        double distTarget = FieldConstants.getDistToHub();
-
-//        Translation2d robotVel = Swerve.getInstance().getWantedSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(predictPercent)
-//            .plus(Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation().times(1 - predictPercent));
-        Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation();
-        Translation2d predictedRobotVel = robotVel.plus(RobotContainer.getRobotAcceleration().times(predictTime));
-        double airTime = PositionsConstants.Shooter.getAirTime(distTarget);
-
-        return target.plus(predictedRobotVel.times(airTime));
+        return target;
     }
 
     public double getDistToHub() {

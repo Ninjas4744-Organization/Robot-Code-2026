@@ -189,9 +189,9 @@ public class SwerveSubsystem extends SubsystemBase implements
     @Override
     public boolean atGoal() {
         return RobotState.getInstance().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get()
-//            && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < PositionsConstants.Swerve.kAngleThreshold.get()
             && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleBaseThreshold.get() + PositionsConstants.Swerve.kAngleCoefficient.get() * FieldConstants.getDistToHub())
-            && Math.abs(Swerve.getInstance().getWantedSpeeds().getSpeed() - Swerve.getInstance().getSpeeds().getSpeed()) < PositionsConstants.Swerve.kSpeedDifferenceThreshold.get();
+            && Math.abs(Swerve.getInstance().getWantedSpeeds().getSpeed() - Swerve.getInstance().getSpeeds().getSpeed()) < PositionsConstants.Swerve.kSpeedDifferenceThreshold.get()
+            && RobotState.getInstance().getDistToHub() > PositionsConstants.Swerve.kHubMinDist.get();
     }
 
     @Override
