@@ -204,11 +204,14 @@ public class SwerveSubsystem extends SubsystemBase implements
         SwerveController.getInstance().setControl(autoInput, "Auto");
     }
 
-    public Command slowForShoot() {
-        return Commands.runOnce(() -> {
-            SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
-            GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
-        });
+    public void slowForShoot() {
+        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
+        GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
+    }
+
+    public void unSlow() {
+        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
+        GeneralConstants.Swerve.kDriverSpeedFactor = 1;
     }
 
     @Override
@@ -218,9 +221,7 @@ public class SwerveSubsystem extends SubsystemBase implements
 
         return Commands.runOnce(() -> {
             backgroundCommand.stop();
-
-            SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
-            GeneralConstants.Swerve.kDriverSpeedFactor = 1;
+            unSlow();
 
             if (DriverStation.isAutonomous()){
                 SwerveController.getInstance().setChannel("Auto");

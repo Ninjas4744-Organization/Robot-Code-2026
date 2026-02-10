@@ -25,11 +25,13 @@ public class PositionsConstants {
     }
 
     public static class Indexer {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 0.7, false);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 30, false);
+        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index", -10, false);
     }
 
     public static class Indexer2 {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer2/Index", 100, false);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer2/Index", 30, false);
+        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer2/Index", -10, false);
     }
 
     public static class IntakeAngle {
@@ -161,30 +163,5 @@ public class PositionsConstants {
         public static Pose2d getDeliveryTarget() {
             return new Pose2d(kDeliveryTargetX.get(), kDeliveryTargetY.get(), Rotation2d.kZero);
         }
-
-//        private static final InterpolatingDoubleTreeMap kAngleFixMap = new InterpolatingDoubleTreeMap();
-//        private static final LoggedTunableNumber kAngleFix0 = new LoggedTunableNumber ("Swerve/AngleFix/0",   0, true);
-//        private static final LoggedTunableNumber kAngleFix05 = new LoggedTunableNumber("Swerve/AngleFix/0.5", 10, true);
-//        private static final LoggedTunableNumber kAngleFix1 = new LoggedTunableNumber ("Swerve/AngleFix/1",   20, true);
-//        private static final LoggedTunableNumber kAngleFix15 = new LoggedTunableNumber("Swerve/AngleFix/1.5", 30, true);
-//        private static final LoggedTunableNumber kAngleFix2 = new LoggedTunableNumber ("Swerve/AngleFix/2",   40, true);
-//        private static final LoggedTunableNumber kAngleFix25 = new LoggedTunableNumber("Swerve/AngleFix/2.5", 50, true);
-//        private static final LoggedTunableNumber kAngleFix3 = new LoggedTunableNumber ("Swerve/AngleFix/3",   60, true);
-//        private static final LoggedTunableNumber kAngleFix35 = new LoggedTunableNumber("Swerve/AngleFix/3.5", 70, true);
-//        private static final LoggedTunableNumber kAngleFix4 = new LoggedTunableNumber ("Swerve/AngleFix/4",   80, true);
-//
-//        public static double getAngleFix(double relativeVelocity) {
-//            kAngleFixMap.put(0.0, kAngleFix0.get());
-//            kAngleFixMap.put(0.5, kAngleFix05.get());
-//            kAngleFixMap.put(1.0, kAngleFix1.get());
-//            kAngleFixMap.put(1.5, kAngleFix15.get());
-//            kAngleFixMap.put(2.0, kAngleFix2.get());
-//            kAngleFixMap.put(2.5, kAngleFix25.get());
-//            kAngleFixMap.put(3.0, kAngleFix3.get());
-//            kAngleFixMap.put(3.5, kAngleFix35.get());
-//            kAngleFixMap.put(4.0, kAngleFix4.get());
-//
-//            return kAngleFixMap.get(relativeVelocity);
-//        }
     }
 }

@@ -112,11 +112,15 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
             activateShooting(),
+            indexer.setVelocity(PositionsConstants.Indexer.kIndexBack.get()),
+            indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get()),
             Commands.waitUntil(RobotState::isShootReady)
         ));
 
         addEdge(List.of(States.IDLE, States.SHOOT_HEATED, States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED), States.INTAKE_WHILE_SHOOT_READY, () -> Commands.sequence(
             activateShooting(),
+            indexer.setVelocity(PositionsConstants.Indexer.kIndexBack.get()),
+            indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get()),
             activateIntake(),
             Commands.waitUntil(RobotState::isShootReady)
         ));
@@ -136,6 +140,18 @@ public class StateMachine extends StateMachineBase<States> {
             indexer2.stop()
         ));
 
+        addStateCommand(States.SHOOT, Commands.either(
+            Commands.parallel(
+                indexer.setVelocity(PositionsConstants.Indexer.kIndex.get()),
+                indexer2.setVelocity(PositionsConstants.Indexer2.kIndex.get())
+            ),
+            Commands.parallel(
+                indexer.setVelocity(PositionsConstants.Indexer.kIndexBack.get()),
+                indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get())
+            ),
+            RobotState::isShootReady
+        ).repeatedly());
+
         addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE_WHILE_SHOOT_READY, Commands.sequence(
             indexer.stop(),
             indexer2.stop()
@@ -154,7 +170,7 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.setVelocity(PositionsConstants.Shooter.kDump.get()),
             accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
             indexer.setVelocity(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setVelocity(PositionsConstants.Indexer.kIndex.get())
+            indexer2.setVelocity(PositionsConstants.Indexer2.kIndex.get()),
             accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
@@ -164,79 +180,6 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.stop(),
             accelerator.stop()
         ));
-
-        addStateEnd(States.DELIVERY_READY, Map.of(Commands.none(), States.DELIVERY));
-        addStateEnd(States.INTAKE_WHILE_DELIVERY_READY, Map.of(Commands.none(), States.INTAKE_WHILE_DELIVERY));
-    }
-
-    private void shootingCommands() {
-        addEdge(States.IDLE, States.SHOOT_HEATED, Commands.sequence(
-            shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
-
-            Commands.waitUntil(shooter::atGoal)
-        ));
-
-        addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
-            // after dev bot this should close the intake
-//            intake.setPercent(PositionsConstants.Intake.kIntake.get()),
-//            swerve.autoDrive(),
-            swerve.slowForShoot(),
-            swerve.lookHub(),
-            shooter.autoHubVelocity(),
-            accelerator.setVelocity(80),
-            indexer.setPercent(0/*-0.1*/),
-            indexer2.setPercent(-0.1),
-
-            Commands.waitUntil(() -> shooter.atGoal() && swerve.atGoal() && accelerator.atGoal())
-        ));
-
-        addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
-//            indexer.setPercent(PositionsConstants.Indexer.kIndex.get()),
-//            indexer2.setPercent(PositionsConstants.Indexer.kIndex.get()),
-        ));
-
-        addStateCommand(States.SHOOT, Commands.either(
-            Commands.parallel(
-                indexer.setPercent(0/*0.3*/),
-                indexer2.setPercent(0.3)
-            ),
-            Commands.parallel(
-                indexer.setPercent(0/*-0.1*/),
-                indexer2.setPercent(-0.1)
-            ),
-            () -> shooter.atGoal() && swerve.atGoal() && accelerator.atGoal()
-        ).repeatedly());
-
-        addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
-            intake.stop(),
-
-            intakeAngle.setAngle(Rotation2d.fromDegrees(PositionsConstants.IntakeAngle.kClose.get())),
-
-            Commands.waitUntil(intakeAngle::atGoal)
-        ));
-        addEdge(States.DUMP, States.IDLE, stopShooting());
-
-//        addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));
-//        addStateEnd(States.INTAKE_WHILE_SHOOT_READY, Map.of(Commands.none(), States.INTAKE_WHILE_SHOOT));
-        addEdge(States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED, Commands.sequence(
-            shooter.setVelocity(PositionsConstants.Shooter.kShoot.get()),
-
-            Commands.waitUntil(shooter::atGoal)
-        ));
-
-        addEdge(States.SHOOT_HEATED, States.IDLE, Commands.sequence(
-            shooter.stop()
-        ));
-
-        addEdge(List.of(States.SHOOT, States.SHOOT_READY), States.IDLE, () -> Commands.sequence(
-            swerve.stop(),
-            indexer.stop(),
-            indexer2.stop(),
-            accelerator.stop(),
-            shooter.stop()
-        ));
-
-        addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));
     }
 
     private void climbingCommands() {
@@ -306,21 +249,25 @@ public class StateMachine extends StateMachineBase<States> {
 
                 switch (RobotState.getShootingState()) {
                     case LOCK:
+                        swerve.unSlow();
                         swerve.lock();
                         shooter.autoHubVelocity();
                         break;
 
                     case ON_MOVE:
+                        swerve.slowForShoot();
                         swerve.lookHub();
                         shooter.autoHubVelocity();
                         break;
 
                     case SNAP_RING:
+                        swerve.unSlow();
                         swerve.snapRing();
                         shooter.autoHubVelocity();
                         break;
 
                     case DELIVERY:
+                        swerve.unSlow();
                         swerve.delivery();
                         shooter.autoDeliveryVelocity();
                         break;
@@ -337,7 +284,8 @@ public class StateMachine extends StateMachineBase<States> {
             indexer.stop(),
             indexer2.stop(),
             accelerator.stop(),
-            shooter.stop()
+            shooter.stop(),
+            Commands.runOnce(swerve::unSlow)
         );
     }
 }
