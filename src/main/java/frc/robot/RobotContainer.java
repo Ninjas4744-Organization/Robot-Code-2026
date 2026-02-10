@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -57,7 +58,6 @@ import java.util.List;
 import static edu.wpi.first.units.Units.*;
 
 public class RobotContainer {
-    private LoggedCommandController driverController;
     private static SwerveSubsystem swerveSubsystem;
     private static VisionSubsystem visionSubsystem;
     private static Intake intake;
@@ -68,7 +68,13 @@ public class RobotContainer {
     private static Accelerator accelerator;
     private static Climber climber;
     private static ClimberAngle climberAngle;
+
+    private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
+    List<GamePieceProjectile> balls = new ArrayList<>();
+    private List<Translation2d> lastRobotVels = new  ArrayList<>();
+    private static Translation2d robotAcc = new Translation2d();
+    private final int robotVelsCount = 5;
 
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
@@ -99,7 +105,6 @@ public class RobotContainer {
                 break;
         }
 
-//        swerveSubsystem = new SwerveSubsystem(true, false, () -> Math.signum(MathUtil.applyDeadband(driverController.getLeftX(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getLeftY(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getRightX(), 0.04)) / 4.42, () -> Math.signum(MathUtil.applyDeadband(driverController.getRightY(), 0.04)) / 4.42);
         swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
@@ -248,7 +253,6 @@ public class RobotContainer {
         );
     }
 
-    List<GamePieceProjectile> balls = new ArrayList<>();
     private void configureTestBindings() {
         driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
             () -> CommandScheduler.getInstance().schedule(intake.setPercent(0.35)),
@@ -265,13 +269,50 @@ public class RobotContainer {
                 accelerator.setVelocity(80)
             )),
             () -> {
-                CommandScheduler.getInstance().schedule(swerveSubsystem.stop());
-                CommandScheduler.getInstance().schedule(indexer.stop());
-                CommandScheduler.getInstance().schedule(indexer2.stop());
-                CommandScheduler.getInstance().schedule(accelerator.stop());
-                CommandScheduler.getInstance().schedule(shooter.stop());
+                CommandScheduler.getInstance().schedule(Commands.sequence(
+                    Commands.runOnce(() -> {
+                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
+                        GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
+                    }),
+                    swerveSubsystem.lookHub(),
+                    shooter.autoHubVelocity(),
+                    accelerator.setVelocity(80),
+                    Commands.run(() -> {
+                        if (shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal()) {
+                            CommandScheduler.getInstance().schedule(Commands.sequence(
+                                indexer.setPercent(0),
+                                indexer2.setPercent(0.3)
+                            ));
+                        } else {
+                            CommandScheduler.getInstance().schedule(Commands.sequence(
+                                indexer.setPercent(0),
+                                indexer2.setPercent(-0.1)
+                            ));
+                        }
+                    })
+                ));
+            },
+            () -> {
+                CommandScheduler.getInstance().schedule(Commands.sequence(
+                    Commands.runOnce(() -> {
+                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
+                        GeneralConstants.Swerve.kDriverSpeedFactor = 1;
+                    }),
+                    swerveSubsystem.stop(),
+                    indexer.stop(),
+                    indexer2.stop(),
+                    accelerator.stop(),
+                    shooter.stop()
+                ));
             }
         )));
+
+        driverController.L1().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
+        driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.getInstance().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
+    }
+
+    public static Translation2d getRobotAcceleration() {
+        return robotAcc;
     }
 
     public void controllerPeriodic() {
@@ -280,9 +321,41 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        Logger.recordOutput("Distance", FieldConstants.getDistToHub());
-        Logger.recordOutput("Speed", Swerve.getInstance().getSpeeds().getSpeed());
-        Logger.recordOutput("MegaTag 1", visionSubsystem.getLastMegaTag1Pose());
+        Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).toTranslation();
+        lastRobotVels.add(robotVel);
+        if (lastRobotVels.size() > robotVelsCount)
+            lastRobotVels.remove(0);
+        if (lastRobotVels.size() >= 2) {
+            // Linear Regression Variables
+            double sumT = 0;
+            Translation2d sumP = new Translation2d();
+            Translation2d sumTP = new Translation2d();
+            double sumT2 = 0;
+            int n = lastRobotVels.size();
+
+            for (int i = 0; i < n; i++) {
+                sumT += i * 0.02;
+                sumP = sumP.plus(lastRobotVels.get(i));
+                sumTP = sumTP.plus(lastRobotVels.get(i).times(i * 0.02));
+                sumT2 += (i * 0.02) * (i * 0.02);
+            }
+
+            // Formula for slope (velocity):
+            // m = (n*sumTP - sumT*sumP) / (n*sumT2 - sumT^2)
+            double denominator = (n * sumT2 - (sumT * sumT));
+
+            // Avoid division by zero if timestamps are identical
+            robotAcc = (denominator == 0) ? new Translation2d() : (sumTP.times(n).minus(sumP.times(sumT))).div(denominator);
+        }
+
+        Logger.recordOutput("Robot/Distance Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Robot/Distance Fake Hub", RobotState.getInstance().getDistToHub());
+        Logger.recordOutput("Robot/Robot Speed", Swerve.getInstance().getSpeeds().getSpeed());
+        Logger.recordOutput("Robot/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
+        Logger.recordOutput("Robot/Look Ahead Target", new Pose3d(RobotState.getInstance().getHubTargetPose().getX(), RobotState.getInstance().getHubTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
+        Logger.recordOutput("Robot/Shooting Ready", shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal());
+        Logger.recordOutput("Robot/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
+        Logger.recordOutput("Robot/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
@@ -291,7 +364,7 @@ public class RobotContainer {
             for (int i = 0; i < this.balls.size(); i++) {
                 balls[i] = this.balls.get(i).getPose3d();
             }
-            Logger.recordOutput("Balls", balls);
+            Logger.recordOutput("Robot/Balls", balls);
         }
     }
 
@@ -300,7 +373,7 @@ public class RobotContainer {
     }
 
     public void reset() {
-        RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation());
+//        RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation());
         if (GeneralConstants.kRobotMode.isComp()) {
             StateMachine.getInstance().changeRobotState(States.STARTING_POSE, false, true);
             StateMachine.getInstance().changeRobotState(States.IDLE, true, false);

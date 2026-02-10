@@ -63,13 +63,18 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().resetLookAt();
             }),
             Commands.run(() -> {
-                double relativeYVel = Swerve.getInstance().getSpeeds().vyMetersPerSecond;
-                double relativeYWantedVel = Swerve.getInstance().getWantedSpeeds().vyMetersPerSecond;
+//                double relativeYVel = Swerve.getInstance().getSpeeds().vyMetersPerSecond;
+//                double relativeYWantedVel = Swerve.getInstance().getWantedSpeeds().vyMetersPerSecond;
 
-                double angleFix = (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYWantedVel)) * -Math.signum(relativeYWantedVel)) * 0.8
-                        + (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYVel)) * -Math.signum(relativeYVel)) * 0.2;
+//                double angleFix = (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYWantedVel)) * -Math.signum(relativeYWantedVel)) * 0.8
+//                        + (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYVel)) * -Math.signum(relativeYVel)) * 0.2;
 
-                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
+//                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
+
+                Rotation2d angleHub = RobotState.getInstance().getAngleToHub();
+                if (RobotState.getInstance().getDistToHub() < PositionsConstants.Swerve.kTargetMinThreshold.get())
+                    angleHub = FieldConstants.getTranslationToHub().getAngle();
+                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleHub);
 
                 double vx = 0, vy = 0;
                 if (DriverStation.isAutonomous()) {
@@ -94,7 +99,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Look Hub");
 
-                Logger.recordOutput("Swerve/Angle Fix", angleFix);
+//                Logger.recordOutput("Swerve/Angle Fix", angleFix);
             })
         ));
     }
@@ -183,8 +188,10 @@ public class SwerveSubsystem extends SubsystemBase implements
 
     @Override
     public boolean atGoal() {
-        return RobotState.getInstance().getDistance(target) < PositionsConstants.Swerve.kHubPositionThreshold.get()
-            && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < PositionsConstants.Swerve.kHubAngleThreshold.get();
+        return RobotState.getInstance().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get()
+            && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleBaseThreshold.get() + PositionsConstants.Swerve.kAngleCoefficient.get() * FieldConstants.getDistToHub())
+            && Math.abs(Swerve.getInstance().getWantedSpeeds().getSpeed() - Swerve.getInstance().getSpeeds().getSpeed()) < PositionsConstants.Swerve.kSpeedDifferenceThreshold.get()
+            && RobotState.getInstance().getDistToHub() > PositionsConstants.Swerve.kHubMinDist.get();
     }
 
     @Override
@@ -197,6 +204,16 @@ public class SwerveSubsystem extends SubsystemBase implements
         SwerveController.getInstance().setControl(autoInput, "Auto");
     }
 
+    public void slowForShoot() {
+        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
+        GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
+    }
+
+    public void unSlow() {
+        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
+        GeneralConstants.Swerve.kDriverSpeedFactor = 1;
+    }
+
     @Override
     public Command stop() {
         if (!enabled)
@@ -204,6 +221,7 @@ public class SwerveSubsystem extends SubsystemBase implements
 
         return Commands.runOnce(() -> {
             backgroundCommand.stop();
+            unSlow();
 
             if (DriverStation.isAutonomous()){
                 SwerveController.getInstance().setChannel("Auto");
@@ -254,5 +272,6 @@ public class SwerveSubsystem extends SubsystemBase implements
         Logger.recordOutput("Swerve/Auto Command", backgroundCommand.isRunning());
         Logger.recordOutput("Swerve/Target", target);
         Logger.recordOutput("Swerve/Delivery Target", PositionsConstants.Swerve.getDeliveryTarget());
+        Logger.recordOutput("Swerve/At Goal", atGoal());
     }
 }

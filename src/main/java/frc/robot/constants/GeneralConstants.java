@@ -47,18 +47,18 @@ public class GeneralConstants {
     public static final int kOperatorControllerPort = 1;
 
     public static class Swerve {
-        public static final double kDriverSpeedFactor = 1;
-        public static final double kDriverRotationSpeedFactor = 1;
-        public static final double kJoystickDeadband = 0.04;
-        public static final boolean kDriverFieldRelative = true;
+        public static double kDriverSpeedFactor = 1;
+        public static double kDriverRotationSpeedFactor = 1;
+        public static double kJoystickDeadband = 0.022;
+        public static boolean kDriverFieldRelative = true;
     }
 
     public static class Vision {
         public static final double kMaxDistanceFilter = 5;
         public static final double kMinDistanceFilter = 0.6;
-        public static final double kMaxSpeedFilter = 3;
-        public static final double kMaxAngularSpeedFilter = 4.8;
+        public static final double kMaxSpeedFilter = 2;
+        public static final double kMaxAngularSpeedFilter = 2;
         public static final double kMaxAmbiguityFilter = 0.2;
-        public static final double kOdometryDriftPerMeter = 0.02;
+        public static final double kOdometryDriftPerMeter = 0.0177;
     }
 }

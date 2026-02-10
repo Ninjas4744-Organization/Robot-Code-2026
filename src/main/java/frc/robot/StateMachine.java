@@ -112,11 +112,15 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
             activateShooting(),
+            indexer.setVelocity(PositionsConstants.Indexer.kIndexBack.get()),
+            indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get()),
             Commands.waitUntil(RobotState::isShootReady)
         ));
 
         addEdge(List.of(States.IDLE, States.SHOOT_HEATED, States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED), States.INTAKE_WHILE_SHOOT_READY, () -> Commands.sequence(
             activateShooting(),
+            indexer.setVelocity(PositionsConstants.Indexer.kIndexBack.get()),
+            indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get()),
             activateIntake(),
             Commands.waitUntil(RobotState::isShootReady)
         ));
@@ -136,6 +140,18 @@ public class StateMachine extends StateMachineBase<States> {
             indexer2.stop()
         ));
 
+        addStateCommand(States.SHOOT, Commands.either(
+            Commands.parallel(
+                indexer.setVelocity(PositionsConstants.Indexer.kIndex.get()),
+                indexer2.setVelocity(PositionsConstants.Indexer2.kIndex.get())
+            ),
+            Commands.parallel(
+                indexer.setVelocity(PositionsConstants.Indexer.kIndexBack.get()),
+                indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get())
+            ),
+            RobotState::isShootReady
+        ).repeatedly());
+
         addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE_WHILE_SHOOT_READY, Commands.sequence(
             indexer.stop(),
             indexer2.stop()
@@ -154,12 +170,16 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.setVelocity(PositionsConstants.Shooter.kDump.get()),
             accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get()),
             indexer.setVelocity(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setVelocity(PositionsConstants.Indexer.kIndex.get())
+            indexer2.setVelocity(PositionsConstants.Indexer2.kIndex.get()),
+            accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get())
         ));
-        addEdge(States.DUMP, States.IDLE, stopShooting());
 
-//        addStateEnd(States.SHOOT_READY, Map.of(Commands.none(), States.SHOOT));
-//        addStateEnd(States.INTAKE_WHILE_SHOOT_READY, Map.of(Commands.none(), States.INTAKE_WHILE_SHOOT));
+        addEdge(States.DUMP, States.IDLE, Commands.sequence(
+            indexer.stop(),
+            indexer2.stop(),
+            shooter.stop(),
+            accelerator.stop()
+        ));
     }
 
     private void climbingCommands() {
@@ -229,21 +249,25 @@ public class StateMachine extends StateMachineBase<States> {
 
                 switch (RobotState.getShootingState()) {
                     case LOCK:
+                        swerve.unSlow();
                         swerve.lock();
                         shooter.autoHubVelocity();
                         break;
 
                     case ON_MOVE:
+                        swerve.slowForShoot();
                         swerve.lookHub();
                         shooter.autoHubVelocity();
                         break;
 
                     case SNAP_RING:
+                        swerve.unSlow();
                         swerve.snapRing();
                         shooter.autoHubVelocity();
                         break;
 
                     case DELIVERY:
+                        swerve.unSlow();
                         swerve.delivery();
                         shooter.autoDeliveryVelocity();
                         break;
@@ -260,7 +284,8 @@ public class StateMachine extends StateMachineBase<States> {
             indexer.stop(),
             indexer2.stop(),
             accelerator.stop(),
-            shooter.stop()
+            shooter.stop(),
+            Commands.runOnce(swerve::unSlow)
         );
     }
 }

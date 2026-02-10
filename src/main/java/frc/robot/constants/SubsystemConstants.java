@@ -79,7 +79,7 @@ public class SubsystemConstants {
         kIndexer.real.base.main.id = 22;
         kIndexer.real.base.main.inverted = true;
         kIndexer.real.base.currentLimit = 60;
-
+        kIndexer.real.base.isBrakeMode = true;
         /* Control */
         // kIntakeIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
         kIndexer.real.control.gearRatio = 2;
@@ -96,7 +96,7 @@ public class SubsystemConstants {
         kIndexer2.real.base.main.id = 23;
         kIndexer2.real.base.main.inverted = true;
         kIndexer2.real.base.currentLimit = 60;
-
+        kIndexer2.real.base.isBrakeMode = true;
         /* Control */
         // kIntakeIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
         kIndexer2.real.control.gearRatio = 2;
@@ -119,10 +119,9 @@ public class SubsystemConstants {
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createPID(0.5, 0, 0, 0);
-        kShooter.real.control.controlConstants.V = 0.135;
-        kShooter.real.control.gearRatio = 1;
-        kShooter.real.control.velocityGoalTolerance = 5;
+        kShooter.real.control.controlConstants = ControlConstants.createPID(0.3, 0, 0,0);
+        kShooter.real.control.controlConstants.V = 0.13;
+        kShooter.real.control.velocityGoalTolerance = 3;
 
         /* Simulation */
         kShooter.motorType = DCMotor.getKrakenX60(2);
@@ -135,11 +134,12 @@ public class SubsystemConstants {
         /* Base */
         kAccelerator.real.base.main.id = 32;
         kAccelerator.real.base.currentLimit = 80;
+        kAccelerator.real.base.isBrakeMode = false;
 
         /* Control */
         kAccelerator.real.control.controlConstants = ControlConstants.createPID(0.4, 0, 0, 0);
-        kAccelerator.real.control.controlConstants.V = 0.135;
-        kAccelerator.real.control.gearRatio = 2;
+        kAccelerator.real.control.controlConstants.V = 0.13;
+        kAccelerator.real.control.velocityGoalTolerance = 10;
 
         /* Simulation */
         kAccelerator.motorType = DCMotor.getKrakenX60(1);
@@ -210,7 +210,7 @@ public class SubsystemConstants {
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
         kSwerve.limits.accelerationLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = Double.MAX_VALUE;//80;
+        kSwerve.limits.maxSkidAcceleration = 80;
 
         /* Modules */
         double wheelRadius = 0.048;
@@ -220,8 +220,9 @@ public class SubsystemConstants {
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
         if (GeneralConstants.kRobotMode.isReal()) {
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(5, 0, 0, 0);
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.5;
+//            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(5, 0, 0, 0);
+//            kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.5;
+            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(90, 5, 3);
         }
         else
             kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(7, 0, 0);

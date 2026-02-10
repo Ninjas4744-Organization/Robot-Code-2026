@@ -7,10 +7,10 @@ import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
 public class Accelerator extends SubsystemBase implements
-    ISubsystem.Resettable,
-    ISubsystem.VelocityControlled,
-    ISubsystem.GoalOriented<Double>,
-    ISubsystem.Stoppable
+        ISubsystem.Resettable,
+        ISubsystem.VelocityControlled,
+        ISubsystem.GoalOriented<Double>,
+        ISubsystem.Stoppable
 {
     private AcceleratorIO io;
     private final AcceleratorIOInputsAutoLogged inputs = new AcceleratorIOInputsAutoLogged();
