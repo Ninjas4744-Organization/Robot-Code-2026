@@ -53,11 +53,11 @@ public class SwerveSubsystem extends SubsystemBase implements
         }
     }
 
-    public Command lookHub() {
+    public void lookHub() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return backgroundCommand.setNewTaskCommand(Commands.sequence(
+        backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> {
                 SwerveController.getInstance().setChannel("Look Hub");
                 SwerveController.getInstance().resetLookAt();
@@ -99,11 +99,11 @@ public class SwerveSubsystem extends SubsystemBase implements
         ));
     }
 
-    public Command lock() {
+    public void lock() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return backgroundCommand.setNewTaskCommand(Commands.sequence(
+        backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> {
                 target = RobotState.getInstance().getRobotPose();
 
@@ -122,11 +122,11 @@ public class SwerveSubsystem extends SubsystemBase implements
         ));
     }
 
-    public Command autoDrive() {
+    public void snapRing() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return backgroundCommand.setNewTaskCommand(Commands.sequence(
+        backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> {
                 double dist = FieldConstants.getDistToHub();
                 Pose2d robot = RobotState.getInstance().getRobotPose();
@@ -159,11 +159,11 @@ public class SwerveSubsystem extends SubsystemBase implements
         ));
     }
 
-    public Command deliveryDrive() {
+    public void delivery() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return backgroundCommand.setNewTaskCommand(Commands.sequence(
+        backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> {
                 SwerveController.getInstance().setChannel("Delivery");
             }),

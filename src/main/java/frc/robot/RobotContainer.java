@@ -73,12 +73,12 @@ public class RobotContainer {
     public RobotContainer() {
         switch (GeneralConstants.kRobotMode) {
             case WORKSHOP, COMP, SIM, SIM_COMP:
-                intake = new Intake(true, new IntakeIOController());
+                intake = new Intake(false, new IntakeIOController());
                 intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
-                indexer = new Indexer(true, new IndexerIOController());
-                indexer2 =  new Indexer2(true, new Indexer2IOController());
-                shooter = new Shooter(true, new ShooterIOController());
-                accelerator =  new Accelerator(true, new AcceleratorIOController());
+                indexer = new Indexer(false, new IndexerIOController());
+                indexer2 =  new Indexer2(false, new Indexer2IOController());
+                shooter = new Shooter(false, new ShooterIOController());
+                accelerator =  new Accelerator(false, new AcceleratorIOController());
                 climber = new Climber(false, new ClimberIOController());
                 climberAngle = new ClimberAngle(false, new ClimberAngleIOController());
 
@@ -186,8 +186,8 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Prepare Shoot", Commands.sequence(
-            swerveSubsystem.lookHub(),
-            shooter.autoHubVelocity()
+            Commands.runOnce(() -> swerveSubsystem.lookHub()),
+            Commands.runOnce(() -> shooter.autoHubVelocity())
         ));
 
         NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
@@ -198,6 +198,38 @@ public class RobotContainer {
         )));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
+    }
+
+    private void configureBindings() {
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation())));
+        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
+        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false)));
+        driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
+
+        driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE, true, false)));
+
+        driverController.R1().onTrue(notTest(intake()));
+
+        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.SHOOT);
+            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+        })));
+
+        driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
+            // Climbing shit
+        })));
+    }
+
+    private Command intake() {
+        return Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(switch (RobotState.getInstance().getRobotState()) {
+                case IDLE -> States.INTAKE;
+                case SHOOT_HEATED -> States.INTAKE_WHILE_SHOOT_HEATED;
+                case SHOOT_READY -> States.INTAKE_WHILE_SHOOT_READY;
+                case SHOOT -> States.SHOOT;
+                default -> RobotState.getInstance().getRobotState();
+            });
+        });
     }
 
     private Command inTest(Command command) {
@@ -216,31 +248,6 @@ public class RobotContainer {
         );
     }
 
-    private void configureBindings() {
-        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation())));
-        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
-        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false)));
-//        driverController.povUp().onTrue(Commands.runOnce(() -> ));
-
-        driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
-
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_DELIVERY_READY);
-            StateMachine.getInstance().changeRobotState(States.INTAKE);
-        })));
-
-        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.SHOOT);
-            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
-        })));
-
-        driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
-            // Climbing shit
-        })));
-
-        driverController.square().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
-    }
-
     List<GamePieceProjectile> balls = new ArrayList<>();
     private void configureTestBindings() {
         driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
@@ -249,17 +256,14 @@ public class RobotContainer {
         )));
 
         driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
-            () -> {
-                CommandScheduler.getInstance().schedule(Commands.sequence(
-//                    swerveSubsystem.lock(),
-                    swerveSubsystem.lookHub(),
-                    shooter.autoHubVelocity(),
-                    Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
-                    indexer.setPercent(0.3),
-                    indexer2.setPercent(0.3),
-                    accelerator.setVelocity(80)
-                ));
-            },
+            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
+                Commands.runOnce(() -> swerveSubsystem.lookHub()),
+                Commands.runOnce(() -> shooter.autoHubVelocity()),
+                Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
+                indexer.setPercent(0.3),
+                indexer2.setPercent(0.3),
+                accelerator.setVelocity(80)
+            )),
             () -> {
                 CommandScheduler.getInstance().schedule(swerveSubsystem.stop());
                 CommandScheduler.getInstance().schedule(indexer.stop());
