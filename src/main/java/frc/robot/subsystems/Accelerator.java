@@ -1,9 +1,14 @@
-package frc.robot.subsystems.accelerator;
+package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
+import frc.lib.NinjasLib.controllers.Controller;
+import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
+import frc.lib.NinjasLib.subsystem.IO;
+import frc.lib.NinjasLib.subsystem.ISubsystem;
+import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Accelerator extends SubsystemBase implements
@@ -12,15 +17,18 @@ public class Accelerator extends SubsystemBase implements
         ISubsystem.GoalOriented<Double>,
         ISubsystem.Stoppable
 {
-    private AcceleratorIO io;
-    private final AcceleratorIOInputsAutoLogged inputs = new AcceleratorIOInputsAutoLogged();
+    private IO.All<ControllerIOInputsAutoLogged> io;
+    private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
 
-    public Accelerator(boolean enabled, AcceleratorIO io) {
+    public Accelerator(boolean enabled) {
         this.enabled = enabled;
 
         if (enabled) {
-            this.io = io;
+            if (!GeneralConstants.kRobotMode.isReplay())
+                this.io = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kAccelerator);
+            else
+                this.io = new IO.All<>(){};
             io.setup();
         }
     }
@@ -35,11 +43,17 @@ public class Accelerator extends SubsystemBase implements
         Logger.processInputs("Accelerator", inputs);
     }
 
-    public Command setVelocity(double velocity) {
+    @Override
+    public void setVelocity(double velocity) {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return Commands.runOnce(() -> io.setVelocity(velocity));
+        io.setVelocity(velocity);
+    }
+
+    @Override
+    public Command setVelocityCmd(double velocity) {
+        return Commands.runOnce(() -> setVelocity(velocity));
     }
 
     @Override
@@ -50,11 +64,17 @@ public class Accelerator extends SubsystemBase implements
         return inputs.Velocity;
     }
 
-    public Command stop() {
+    @Override
+    public void stop() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return Commands.runOnce(io::stopMotor);
+        io.stopMotor();
+    }
+
+    @Override
+    public Command stopCmd() {
+        return Commands.runOnce(this::stop);
     }
 
     @Override
@@ -65,11 +85,9 @@ public class Accelerator extends SubsystemBase implements
         return Math.abs(inputs.Velocity) < 5;
     }
 
+    @Override
     public Command reset() {
-        if (!enabled)
-            return Commands.none();
-
-        return stop();
+        return stopCmd();
     }
 
     @Override

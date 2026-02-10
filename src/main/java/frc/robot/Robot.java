@@ -106,10 +106,10 @@ public class Robot extends LoggedRobot {
 
         CommandScheduler.getInstance().schedule(Commands.sequence(
             RobotContainer.getSwerve().reset(),
-            RobotContainer.getShooter().stop(),
-            RobotContainer.getIndexer().stop(),
-            RobotContainer.getIndexer2().stop(),
-            RobotContainer.getAccelerator().stop()
+            RobotContainer.getShooter().stopCmd(),
+            RobotContainer.getIndexer().stopCmd(),
+            RobotContainer.getIndexer2().stopCmd(),
+            RobotContainer.getAccelerator().stopCmd()
         ));
     }
 

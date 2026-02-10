@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
@@ -20,32 +19,7 @@ import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.subsystems.accelerator.Accelerator;
-import frc.robot.subsystems.accelerator.AcceleratorIO;
-import frc.robot.subsystems.accelerator.AcceleratorIOController;
-import frc.robot.subsystems.climber.Climber;
-import frc.robot.subsystems.climber.ClimberIO;
-import frc.robot.subsystems.climber.ClimberIOController;
-import frc.robot.subsystems.climberangle.ClimberAngle;
-import frc.robot.subsystems.climberangle.ClimberAngleIO;
-import frc.robot.subsystems.climberangle.ClimberAngleIOController;
-import frc.robot.subsystems.indexer.Indexer;
-import frc.robot.subsystems.indexer.IndexerIO;
-import frc.robot.subsystems.indexer.IndexerIOController;
-import frc.robot.subsystems.indexer2.Indexer2;
-import frc.robot.subsystems.indexer2.Indexer2IO;
-import frc.robot.subsystems.indexer2.Indexer2IOController;
-import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.intake.IntakeIO;
-import frc.robot.subsystems.intake.IntakeIOController;
-import frc.robot.subsystems.intakeangle.IntakeAngle;
-import frc.robot.subsystems.intakeangle.IntakeAngleIO;
-import frc.robot.subsystems.intakeangle.IntakeAngleIOController;
-import frc.robot.subsystems.shooter.Shooter;
-import frc.robot.subsystems.shooter.ShooterIO;
-import frc.robot.subsystems.shooter.ShooterIOController;
+import frc.robot.subsystems.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
 import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
@@ -61,7 +35,7 @@ public class RobotContainer {
     private static SwerveSubsystem swerveSubsystem;
     private static VisionSubsystem visionSubsystem;
     private static Intake intake;
-    private static IntakeAngle intakeAngle;
+    private static IntakeOpen intakeOpen;
     private static Indexer indexer;
     private static Indexer2 indexer2;
     private static Shooter shooter;
@@ -77,33 +51,19 @@ public class RobotContainer {
     private final int robotVelsCount = 5;
 
     public RobotContainer() {
-        switch (GeneralConstants.kRobotMode) {
-            case WORKSHOP, COMP, SIM, SIM_COMP:
-                intake = new Intake(false, new IntakeIOController());
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIOController());
-                indexer = new Indexer(false, new IndexerIOController());
-                indexer2 =  new Indexer2(false, new Indexer2IOController());
-                shooter = new Shooter(false, new ShooterIOController());
-                accelerator =  new Accelerator(false, new AcceleratorIOController());
-                climber = new Climber(false, new ClimberIOController());
-                climberAngle = new ClimberAngle(false, new ClimberAngleIOController());
+        intake = new Intake(true);
+        intakeOpen = new IntakeOpen(true);
+        indexer = new Indexer(true);
+        indexer2 = new Indexer2(true);
+        shooter = new Shooter(true);
+        accelerator = new Accelerator(true);
+        climber = new Climber(true);
+        climberAngle = new ClimberAngle(true);
 
-                driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
-                break;
-
-            case REPLAY, REPLAY_COMP:
-                intake = new Intake(true, new IntakeIO() {});
-                intakeAngle = new IntakeAngle(false, new IntakeAngleIO() {});
-                indexer = new Indexer(true, new IndexerIO() {});
-                indexer2 =  new Indexer2(true, new Indexer2IO() {});
-                shooter = new Shooter(true, new ShooterIO() {});
-                accelerator =  new Accelerator(true, new AcceleratorIO() {});
-                climber = new Climber(false, new ClimberIO() {});
-                climberAngle = new ClimberAngle(false, new ClimberAngleIO() {});
-
-                driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
-                break;
-        }
+        if (!GeneralConstants.kRobotMode.isReplay())
+            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
+        else
+            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
 
         swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
         RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
@@ -151,8 +111,8 @@ public class RobotContainer {
         return intake;
     }
 
-    public static IntakeAngle getIntakeAngle() {
-        return intakeAngle;
+    public static IntakeOpen getIntakeAngle() {
+        return intakeOpen;
     }
 
     public static Indexer getIndexer() {
@@ -190,17 +150,8 @@ public class RobotContainer {
             () -> false
         );
 
-        NamedCommands.registerCommand("Prepare Shoot", Commands.sequence(
-            Commands.runOnce(() -> swerveSubsystem.lookHub()),
-            Commands.runOnce(() -> shooter.autoHubVelocity())
-        ));
-
-        NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
-            Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
-            indexer.setPercent(0.3),
-            indexer2.setPercent(0.3),
-            accelerator.setVelocity(80)
-        )));
+        NamedCommands.registerCommand("Prepare Shoot", StateMachine.getInstance().changeRobotStateCommand(States.SHOOT_READY));
+        NamedCommands.registerCommand("Shoot", StateMachine.getInstance().changeRobotStateCommand(States.SHOOT));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
     }
@@ -254,58 +205,57 @@ public class RobotContainer {
     }
 
     private void configureTestBindings() {
-        driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
-            () -> CommandScheduler.getInstance().schedule(intake.setPercent(0.35)),
-            () -> CommandScheduler.getInstance().schedule(intake.stop())
-        )));
-
-        driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
-            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
-                Commands.runOnce(() -> swerveSubsystem.lookHub()),
-                Commands.runOnce(() -> shooter.autoHubVelocity()),
-                Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
-                indexer.setPercent(0.3),
-                indexer2.setPercent(0.3),
-                accelerator.setVelocity(80)
-            )),
-            () -> {
-                CommandScheduler.getInstance().schedule(Commands.sequence(
-                    Commands.runOnce(() -> {
-                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
-                        GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
-                    }),
-                    swerveSubsystem.lookHub(),
-                    shooter.autoHubVelocity(),
-                    accelerator.setVelocity(80),
-                    Commands.run(() -> {
-                        if (shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal()) {
-                            CommandScheduler.getInstance().schedule(Commands.sequence(
-                                indexer.setPercent(0),
-                                indexer2.setPercent(0.3)
-                            ));
-                        } else {
-                            CommandScheduler.getInstance().schedule(Commands.sequence(
-                                indexer.setPercent(0),
-                                indexer2.setPercent(-0.1)
-                            ));
-                        }
-                    })
-                ));
-            },
-            () -> {
-                CommandScheduler.getInstance().schedule(Commands.sequence(
-                    Commands.runOnce(() -> {
-                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
-                        GeneralConstants.Swerve.kDriverSpeedFactor = 1;
-                    }),
-                    swerveSubsystem.stop(),
-                    indexer.stop(),
-                    indexer2.stop(),
-                    accelerator.stop(),
-                    shooter.stop()
-                ));
-            }
-        )));
+//        driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
+//            () -> intake.setVelocity(0.35),
+//            () -> intake.stop()
+//        )));
+//
+//        driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
+//            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
+//                Commands.runOnce(() -> swerveSubsystem.lookHub()),
+//                Commands.runOnce(() -> shooter.autoHubVelocity()),
+//                Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
+//                indexer.setPercentCmd(0.3),
+//                indexer2.setPercentCmd(0.3),
+//                accelerator.setVelocityCmd(80)
+//            )),
+//            () ->
+//                CommandScheduler.getInstance().schedule(Commands.sequence(
+//                    Commands.runOnce(() -> {
+//                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
+//                        GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
+//                    }),
+//                    Commands.runOnce(() -> swerveSubsystem.lookHub()),
+//                    Commands.runOnce(() -> shooter.autoHubVelocity()),
+//                    Commands.runOnce(() -> accelerator.setVelocity(80)),
+//                    Commands.run(() -> {
+//                        if (shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal()) {
+//                            CommandScheduler.getInstance().schedule(Commands.sequence(
+//                                indexer.setPercentCmd(0),
+//                                indexer2.setPercentCmd(0.3)
+//                            ));
+//                        } else {
+//                            CommandScheduler.getInstance().schedule(Commands.sequence(
+//                                indexer.setPercentCmd(0),
+//                                indexer2.setPercentCmd(-0.1)
+//                            ));
+//                        }
+//                    })
+//                ));,
+//            () -> {
+//                CommandScheduler.getInstance().schedule(Commands.sequence(
+//                    Commands.runOnce(() -> {
+//                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
+//                        GeneralConstants.Swerve.kDriverSpeedFactor = 1;
+//                    }),
+//                    swerveSubsystem.stop(),
+//                    indexer.stopCmd(),
+//                    indexer2.stopCmd(),
+//                    accelerator.stopCmd(),
+//                    shooter.stopCmd()
+//                ));
+//            }
+//        )));
 
         driverController.L1().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
         driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.getInstance().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));

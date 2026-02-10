@@ -1,8 +1,6 @@
 package frc.robot.constants;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -16,7 +14,6 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.constants.ControlConstants;
 import frc.lib.NinjasLib.controllers.constants.ControllerConstants;
-import frc.lib.NinjasLib.controllers.constants.RealControllerConstants;
 import frc.lib.NinjasLib.controllers.constants.RealControllerConstants.Base.SimpleControllerConstants;
 import frc.lib.NinjasLib.localization.vision.VisionConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveConstants;
@@ -36,7 +33,7 @@ public class SubsystemConstants {
         kIntake.real.base.currentLimit = 60;
 
         /* Control */
-        // kIntake.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+         kIntake.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
         kIntake.real.control.gearRatio = 2;
 
         /* Simulation */
@@ -45,30 +42,23 @@ public class SubsystemConstants {
 
 
 
-    public static final ControllerConstants kIntakeAngle = new ControllerConstants();
+    public static final ControllerConstants kIntakeOpen = new ControllerConstants();
     static {
         /* Base */
-        kIntakeAngle.real.base.main.id = 21;
-        kIntakeAngle.real.base.currentLimit = 60;
+        kIntakeOpen.real.base.main.id = 21;
+        kIntakeOpen.real.base.currentLimit = 60;
 
         /* Control */
-        kIntakeAngle.real.control.controlConstants = ControlConstants.createProfiledPID(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
-        kIntakeAngle.real.control.gearRatio = 1;
-        kIntakeAngle.real.control.conversionFactor = 1;
-        kIntakeAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);
+        kIntakeOpen.real.control.controlConstants = ControlConstants.createProfiledPID(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kIntakeOpen.real.control.gearRatio = 1;
+        kIntakeOpen.real.control.conversionFactor = 1;
+        kIntakeOpen.real.control.positionGoalTolerance = 0.02;
 
         /* Soft Limits */
-        kIntakeAngle.real.softLimits.min = Units.degreesToRadians(-90);
-        kIntakeAngle.real.softLimits.max = Units.degreesToRadians(90);
-
-        /* CANCoder */
-        kIntakeAngle.real.canCoder.enable = true;
-        kIntakeAngle.real.canCoder.id = 23;
-        kIntakeAngle.real.canCoder.mode = RealControllerConstants.CANCoder.CANCoderMode.Normal;
-        kIntakeAngle.real.canCoder.config = new CANcoderConfiguration().withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(0.5));
+        kIntakeOpen.real.softLimits.max = 0.5;
 
         /* Simulation */
-        kIntakeAngle.motorType = DCMotor.getKrakenX60(1);
+        kIntakeOpen.motorType = DCMotor.getKrakenX60(1);
     }
 
 
@@ -79,9 +69,9 @@ public class SubsystemConstants {
         kIndexer.real.base.main.id = 22;
         kIndexer.real.base.main.inverted = true;
         kIndexer.real.base.currentLimit = 60;
-        kIndexer.real.base.isBrakeMode = true;
+
         /* Control */
-        // kIntakeIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
         kIndexer.real.control.gearRatio = 2;
 
         /* Simulation */
@@ -96,9 +86,9 @@ public class SubsystemConstants {
         kIndexer2.real.base.main.id = 23;
         kIndexer2.real.base.main.inverted = true;
         kIndexer2.real.base.currentLimit = 60;
-        kIndexer2.real.base.isBrakeMode = true;
+
         /* Control */
-        // kIntakeIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
+        kIndexer2.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
         kIndexer2.real.control.gearRatio = 2;
 
         /* Simulation */
@@ -162,7 +152,7 @@ public class SubsystemConstants {
         kClimber.real.hardLimit.homePosition = PositionsConstants.Climber.kLeftClimb.get();
 
         /* Simulation */
-        kClimber.motorType = DCMotor.getKrakenX60(1);
+        kClimber.motorType = DCMotor.getKrakenX60(2);
     }
 
 
@@ -184,7 +174,7 @@ public class SubsystemConstants {
         kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
 
         /* Simulation */
-        kClimberAngle.motorType = DCMotor.getKrakenX60(1);
+        kClimberAngle.motorType = DCMotor.getKrakenX60(2);
     }
 
 
@@ -220,8 +210,6 @@ public class SubsystemConstants {
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
         if (GeneralConstants.kRobotMode.isReal()) {
-//            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(5, 0, 0, 0);
-//            kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.5;
             kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(90, 5, 3);
         }
         else

@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
-import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
+import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveController;
 import frc.lib.NinjasLib.swerve.SwerveSpeeds;
@@ -215,23 +215,26 @@ public class SwerveSubsystem extends SubsystemBase implements
     }
 
     @Override
-    public Command stop() {
+    public void stop() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return Commands.runOnce(() -> {
-            backgroundCommand.stop();
-            unSlow();
+        backgroundCommand.stop();
+        unSlow();
 
-            if (DriverStation.isAutonomous()){
-                SwerveController.getInstance().setChannel("Auto");
-                SwerveController.getInstance().setControl(new SwerveSpeeds(), "Auto");
-            }
-            else{
-                SwerveController.getInstance().setChannel("Driver");
-                SwerveController.getInstance().setControl(new SwerveSpeeds(), "Driver");
-            }
-        });
+        if (DriverStation.isAutonomous()){
+            SwerveController.getInstance().setChannel("Auto");
+            SwerveController.getInstance().setControl(new SwerveSpeeds(), "Auto");
+        }
+        else{
+            SwerveController.getInstance().setChannel("Driver");
+            SwerveController.getInstance().setControl(new SwerveSpeeds(), "Driver");
+        }
+    }
+
+    @Override
+    public Command stopCmd() {
+        return Commands.runOnce(this::stop);
     }
 
     @Override
@@ -249,7 +252,7 @@ public class SwerveSubsystem extends SubsystemBase implements
             return Commands.none();
 
         return Commands.sequence(
-            stop(),
+            stopCmd(),
             Commands.runOnce(() -> Swerve.getInstance().resetModulesToAbsolute())
         );
     }

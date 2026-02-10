@@ -1,12 +1,17 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
-import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
+import frc.lib.NinjasLib.controllers.Controller;
+import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
+import frc.lib.NinjasLib.subsystem.IO;
+import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.robot.RobotState;
+import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
+import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase implements
@@ -15,16 +20,19 @@ public class Shooter extends SubsystemBase implements
         ISubsystem.GoalOriented<Double>,
         ISubsystem.Stoppable
 {
-    private ShooterIO io;
-    private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
+    private IO.All<ControllerIOInputsAutoLogged> io;
+    private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
     private BackgroundCommand backgroundCommand;
 
-    public Shooter(boolean enabled, ShooterIO io) {
+    public Shooter(boolean enabled) {
         this.enabled = enabled;
 
         if (enabled) {
-            this.io = io;
+            if (!GeneralConstants.kRobotMode.isReplay())
+                this.io = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kShooter);
+            else
+                this.io = new IO.All<>(){};
             io.setup();
 
             backgroundCommand = new BackgroundCommand();
@@ -44,11 +52,16 @@ public class Shooter extends SubsystemBase implements
     }
 
     @Override
-    public Command setVelocity(double velocity) {
+    public void setVelocity(double velocity) {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return Commands.runOnce(() -> io.setVelocity(velocity));
+        io.setVelocity(velocity);
+    }
+
+    @Override
+    public Command setVelocityCmd(double velocity) {
+        return Commands.runOnce(() -> setVelocity(velocity));
     }
 
     @Override
@@ -76,14 +89,17 @@ public class Shooter extends SubsystemBase implements
     }
 
     @Override
-    public Command stop() {
+    public void stop() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return Commands.runOnce(() -> {
-            backgroundCommand.stop();
-            io.stopMotor();
-        });
+        backgroundCommand.stop();
+        io.stopMotor();
+    }
+
+    @Override
+    public Command stopCmd() {
+        return Commands.runOnce(this::stop);
     }
 
     @Override
@@ -99,7 +115,7 @@ public class Shooter extends SubsystemBase implements
         if (!enabled)
             return Commands.none();
 
-        return stop();
+        return stopCmd();
     }
 
     public void autoHubVelocity() {
@@ -107,16 +123,6 @@ public class Shooter extends SubsystemBase implements
             return;
 
         backgroundCommand.setNewTask(Commands.run(() -> {
-//            double relativeXVel = Swerve.getInstance().getSpeeds().vxMetersPerSecond;
-//            double relativeXWantedVel = Swerve.getInstance().getWantedSpeeds().vxMetersPerSecond;
-
-//            double shootFix = (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXWantedVel)) * -Math.signum(relativeXWantedVel)) * 0.8
-//                    + (PositionsConstants.Shooter.getShootFix(Math.abs(relativeXVel)) * -Math.signum(relativeXVel)) * 0.2;
-
-//            io.setVelocity(PositionsConstants.Shooter.getShootSpeed(FieldConstants.getDistToHub()) + shootFix);
-
-//            Logger.recordOutput("Shoot Fix", shootFix);
-
             io.setVelocity(PositionsConstants.Shooter.getShootSpeed(RobotState.getInstance().getDistToHub()));
         }));
     }

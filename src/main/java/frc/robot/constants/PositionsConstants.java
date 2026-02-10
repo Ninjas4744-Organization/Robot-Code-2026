@@ -21,7 +21,7 @@ public class PositionsConstants {
     }
 
     public static class Intake {
-        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 0.35, false);
+        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 35, false);
     }
 
     public static class Indexer {
@@ -34,9 +34,9 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer2/Index", -10, false);
     }
 
-    public static class IntakeAngle {
-        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Angle/Close", 90, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Angle/Open", -90, false);
+    public static class IntakeOpen {
+        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Open/Close", 0, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Open/Open", 0.5, false);
     }
 
     public static class Shooter {
