@@ -186,8 +186,8 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Prepare Shoot", Commands.sequence(
-            swerveSubsystem.lookHub(),
-            shooter.autoHubVelocity()
+            Commands.runOnce(() -> swerveSubsystem.lookHub()),
+            Commands.runOnce(() -> shooter.autoHubVelocity())
         ));
 
         NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
@@ -198,6 +198,38 @@ public class RobotContainer {
         )));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
+    }
+
+    private void configureBindings() {
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation())));
+        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
+        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false)));
+        driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
+
+        driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE, true, false)));
+
+        driverController.R1().onTrue(notTest(intake()));
+
+        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.SHOOT);
+            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+        })));
+
+        driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
+            // Climbing shit
+        })));
+    }
+
+    private Command intake() {
+        return Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(switch (RobotState.getInstance().getRobotState()) {
+                case IDLE -> States.INTAKE;
+                case SHOOT_HEATED -> States.INTAKE_WHILE_SHOOT_HEATED;
+                case SHOOT_READY -> States.INTAKE_WHILE_SHOOT_READY;
+                case SHOOT -> States.SHOOT;
+                default -> RobotState.getInstance().getRobotState();
+            });
+        });
     }
 
     private Command inTest(Command command) {
@@ -216,53 +248,6 @@ public class RobotContainer {
         );
     }
 
-    private void configureBindings() {
-        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation())));
-        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
-        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false)));
-//        driverController.povUp().onTrue(Commands.runOnce(() -> ));
-
-        driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
-
-        driverController.triangle().onTrue(notTest(Commands.runOnce(() -> RobotState.setShouldIntake(!RobotState.isShouldIntake()))));
-
-        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            chooseBetween(States.INTAKE_WHILE_SHOOT_HEATED, States.SHOOT_HEATED);
-        })));
-
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
-            chooseBetween(States.INTAKE_WHILE_DELIVERY_READY, States.DELIVERY_READY);
-            chooseBetween(States.INTAKE_WHILE_DELIVERY, States.DELIVERY);
-            chooseBetween(States.INTAKE, States.IDLE);
-        })));
-
-        driverController.circle().onTrue(notTest(Commands.runOnce(() -> {
-            chooseBetween(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY);
-            StateMachine.getInstance().changeRobotState(States.SHOOT); // Statically shooting shouldn't be able to intake as well
-            chooseBetween(States.INTAKE, States.IDLE);
-        })));
-
-        driverController.cross().onTrue(notTest(Commands.runOnce(() -> {
-            chooseBetween(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY);
-            chooseBetween(States.INTAKE_WHILE_SHOOT_DYNAMIC, States.SHOOT_DYNAMIC);
-            chooseBetween(States.INTAKE, States.IDLE);
-        })));
-
-        driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
-            // Climbing shit
-        })));
-
-        driverController.square().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.DUMP);
-            if (RobotState.getInstance().getRobotState() != States.SHOOT_HEATED)
-                StateMachine.getInstance().changeRobotState(States.IDLE);
-        })));
-    }
-
-    private void chooseBetween(States actionWithIntake, States actionWithoutIntake) {
-        StateMachine.getInstance().chooseRobotStateToChange(actionWithIntake, actionWithoutIntake,  RobotState::isShouldIntake);
-    }
-
     List<GamePieceProjectile> balls = new ArrayList<>();
     private void configureTestBindings() {
         driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
@@ -272,9 +257,8 @@ public class RobotContainer {
 
         driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
             () -> CommandScheduler.getInstance().schedule(Commands.sequence(
-//                    swerveSubsystem.lock(),
-                swerveSubsystem.lookHub(),
-                shooter.autoHubVelocity(),
+                Commands.runOnce(() -> swerveSubsystem.lookHub()),
+                Commands.runOnce(() -> shooter.autoHubVelocity()),
                 Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
                 indexer.setPercent(0.3),
                 indexer2.setPercent(0.3),

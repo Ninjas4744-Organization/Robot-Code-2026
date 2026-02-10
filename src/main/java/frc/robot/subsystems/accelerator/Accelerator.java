@@ -7,9 +7,10 @@ import frc.lib.NinjasLib.subsystem_interfaces.ISubsystem;
 import org.littletonrobotics.junction.Logger;
 
 public class Accelerator extends SubsystemBase implements
-        ISubsystem.Resettable,
-        ISubsystem.VelocityControlled,
-        ISubsystem.Stoppable
+    ISubsystem.Resettable,
+    ISubsystem.VelocityControlled,
+    ISubsystem.GoalOriented<Double>,
+    ISubsystem.Stoppable
 {
     private AcceleratorIO io;
     private final AcceleratorIOInputsAutoLogged inputs = new AcceleratorIOInputsAutoLogged();
@@ -69,5 +70,21 @@ public class Accelerator extends SubsystemBase implements
             return Commands.none();
 
         return stop();
+    }
+
+    @Override
+    public boolean atGoal() {
+        if (!enabled)
+            return true;
+
+        return inputs.AtGoal;
+    }
+
+    @Override
+    public Double getGoal() {
+        if (!enabled)
+            return 0.0;
+
+        return inputs.Goal;
     }
 }
