@@ -1,6 +1,7 @@
 package frc.robot;
 
 public enum States {
+    //General
     UNKNOWN,
     STARTING_POSE,
     IDLE,
@@ -9,18 +10,14 @@ public enum States {
     //Intake
     INTAKE,
 
-    //Dump & Delivery
-    DUMP,
-    DELIVERY_READY,
-    INTAKE_WHILE_DELIVERY_READY,
-    INTAKE_WHILE_DELIVERY,
-    DELIVERY,
-
     //Shooting
     SHOOT_HEATED,
-    INTAKE_WHILE_SHOOT_HEATED,
     SHOOT_READY,
     SHOOT,
+    INTAKE_WHILE_SHOOT_HEATED,
+    INTAKE_WHILE_SHOOT_READY,
+    INTAKE_WHILE_SHOOT,
+    DUMP,
 
     //Climbing
     CLIMB_DOWN,
@@ -28,5 +25,12 @@ public enum States {
     CLIMB1_AUTO,
     CLIMB1,
     CLIMB2,
-    CLIMB3
+    CLIMB3;
+
+    public enum ShootingStates {
+        LOCK,
+        ON_MOVE,
+        SNAP_RING,
+        DELIVERY
+    }
 }

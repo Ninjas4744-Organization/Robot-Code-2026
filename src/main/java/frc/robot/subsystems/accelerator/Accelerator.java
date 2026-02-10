@@ -74,11 +74,17 @@ public class Accelerator extends SubsystemBase implements
 
     @Override
     public boolean atGoal() {
+        if (!enabled)
+            return true;
+
         return inputs.AtGoal;
     }
 
     @Override
     public Double getGoal() {
+        if (!enabled)
+            return 0.0;
+
         return inputs.Goal;
     }
 }

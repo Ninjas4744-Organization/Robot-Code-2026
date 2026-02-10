@@ -102,11 +102,11 @@ public class Shooter extends SubsystemBase implements
         return stop();
     }
 
-    public Command autoHubVelocity() {
+    public void autoHubVelocity() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return backgroundCommand.setNewTaskCommand(Commands.run(() -> {
+        backgroundCommand.setNewTask(Commands.run(() -> {
 //            double relativeXVel = Swerve.getInstance().getSpeeds().vxMetersPerSecond;
 //            double relativeXWantedVel = Swerve.getInstance().getWantedSpeeds().vxMetersPerSecond;
 
@@ -121,11 +121,11 @@ public class Shooter extends SubsystemBase implements
         }));
     }
 
-    public Command autoDeliveryVelocity() {
+    public void autoDeliveryVelocity() {
         if (!enabled)
-            return Commands.none();
+            return;
 
-        return backgroundCommand.setNewTaskCommand(Commands.run(() -> {
+        backgroundCommand.setNewTask(Commands.run(() -> {
             double dist = RobotState.getInstance().getDistance(PositionsConstants.Swerve.getDeliveryTarget());
             io.setVelocity(PositionsConstants.Shooter.getDeliverySpeed(dist));
         }));
