@@ -2,7 +2,6 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
@@ -56,6 +55,7 @@ public class StateMachine extends StateMachineBase<States> {
 
     private void resetCommands() {
         addOmniEdge(States.RESET, () -> Commands.parallel(
+            Commands.runOnce(shootCommand::stop),
             swerve.reset(),
             intake.reset(),
             intakeOpen.reset(),
@@ -118,10 +118,14 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY, activateIntake());
-        addEdge(States.INTAKE_WHILE_SHOOT_READY, States.INTAKE, stopCmdShooting());
+        addEdge(States.INTAKE_WHILE_SHOOT_READY, States.INTAKE, stopShooting());
         addEdge(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY, closeIntake());
 
         addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.SHOOT, () -> Commands.sequence(
+            Commands.runOnce(() -> {
+               if (RobotState.getShootingMode() == States.ShootingMode.SNAP_RING)
+                   RobotState.setShootingMode(States.ShootingMode.LOCK);
+            }),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
             indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
             closeIntake()
@@ -154,7 +158,7 @@ public class StateMachine extends StateMachineBase<States> {
             States.SHOOT,
             States.SHOOT_READY,
             States.INTAKE_WHILE_SHOOT_READY), States.IDLE, () -> Commands.sequence(
-            stopCmdShooting(),
+            stopShooting(),
             closeIntake()
         ));
 
@@ -231,47 +235,54 @@ public class StateMachine extends StateMachineBase<States> {
         );
     }
 
-    States.ShootingStates lastShootingState = null;
+    States.ShootingMode lastShootMode = null;
     private Command activateShooting() {
-        return shootCommand.setNewTaskCommand(Commands.run(() -> {
-            if (RobotState.getShootingState() != lastShootingState) {
-                CommandScheduler.getInstance().schedule(
-                    accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get())
-                );
-
-                switch (RobotState.getShootingState()) {
-                    case LOCK:
-                        swerve.unSlow();
-                        swerve.lock();
-                        shooter.autoHubVelocity();
-                        break;
-
-                    case ON_MOVE:
-                        swerve.slowForShoot();
-                        swerve.lookHub();
-                        shooter.autoHubVelocity();
-                        break;
-
-                    case SNAP_RING:
-                        swerve.unSlow();
-                        swerve.snapRing();
-                        shooter.autoHubVelocity();
-                        break;
-
-                    case DELIVERY:
-                        swerve.unSlow();
-                        swerve.delivery();
-                        shooter.autoDeliveryVelocity();
-                        break;
+        return shootCommand.setNewTaskCommand(Commands.sequence(
+            Commands.runOnce(() -> {
+                accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get());
+                shootSwitch();
+                lastShootMode = RobotState.getShootingMode();
+            }),
+            Commands.run(() -> {
+                if (RobotState.getShootingMode() != lastShootMode) {
+                    shootSwitch();
+                    lastShootMode = RobotState.getShootingMode();
                 }
-
-                lastShootingState = RobotState.getShootingState();
-            }
-        }));
+            })
+        ));
     }
 
-    private Command stopCmdShooting() {
+    private void shootSwitch() {
+        switch (RobotState.getShootingMode()) {
+            case LOCK:
+                swerve.unSlow();
+                swerve.lock();
+                shooter.autoHubVelocity();
+                break;
+
+            case ON_MOVE:
+                swerve.slowForShoot();
+                swerve.lookHub();
+                shooter.autoHubVelocity();
+                break;
+
+            case SNAP_RING:
+                swerve.unSlow();
+                swerve.snapRing();
+                shooter.autoHubVelocity();
+                break;
+
+            case DELIVERY:
+                swerve.unSlow();
+                swerve.delivery();
+                shooter.autoDeliveryVelocity();
+                break;
+        }
+    }
+
+    private Command stopShooting() {
         return Commands.parallel(
+            Commands.runOnce(shootCommand::stop),
             swerve.stopCmd(),
             indexer.stopCmd(),
             indexer2.stopCmd(),

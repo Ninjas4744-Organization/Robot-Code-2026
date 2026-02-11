@@ -72,7 +72,7 @@ public class SwerveSubsystem extends SubsystemBase implements
 //                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
 
                 Rotation2d angleHub = RobotState.getInstance().getAngleToHub();
-                if (RobotState.getInstance().getDistToHub() < PositionsConstants.Swerve.kTargetMinThreshold.get())
+                if (RobotState.getInstance().getLookaheadTargetDist() < PositionsConstants.Swerve.kTargetMinThreshold.get())
                     angleHub = FieldConstants.getTranslationToHub().getAngle();
                 target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleHub);
 
@@ -191,7 +191,7 @@ public class SwerveSubsystem extends SubsystemBase implements
         return RobotState.getInstance().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get()
             && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleBaseThreshold.get() + PositionsConstants.Swerve.kAngleCoefficient.get() * FieldConstants.getDistToHub())
             && Math.abs(Swerve.getInstance().getWantedSpeeds().getSpeed() - Swerve.getInstance().getSpeeds().getSpeed()) < PositionsConstants.Swerve.kSpeedDifferenceThreshold.get()
-            && RobotState.getInstance().getDistToHub() > PositionsConstants.Swerve.kHubMinDist.get();
+            && RobotState.getInstance().getLookaheadTargetDist() > PositionsConstants.Swerve.kHubMinDist.get();
     }
 
     @Override

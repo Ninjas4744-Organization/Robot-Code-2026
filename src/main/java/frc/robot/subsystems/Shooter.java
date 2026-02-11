@@ -123,7 +123,7 @@ public class Shooter extends SubsystemBase implements
             return;
 
         backgroundCommand.setNewTask(Commands.run(() -> {
-            io.setVelocity(PositionsConstants.Shooter.getShootSpeed(RobotState.getInstance().getDistToHub()));
+            io.setVelocity(PositionsConstants.Shooter.getShootSpeed(RobotState.getInstance().getLookaheadTargetDist()));
         }));
     }
 

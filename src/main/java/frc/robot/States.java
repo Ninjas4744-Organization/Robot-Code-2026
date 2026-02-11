@@ -27,7 +27,7 @@ public enum States {
     CLIMB2,
     CLIMB3;
 
-    public enum ShootingStates {
+    public enum ShootingMode {
         LOCK,
         ON_MOVE,
         SNAP_RING,

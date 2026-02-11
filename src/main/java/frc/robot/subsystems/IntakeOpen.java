@@ -41,14 +41,14 @@ public class IntakeOpen extends SubsystemBase implements
 
     @Override
     public boolean isReset() {
-        return !enabled || inputs.AtGoal;
+        return !enabled || inputs.LimitSwitch || GeneralConstants.kRobotMode.isSim();
     }
 
     @Override
     public Command reset() {
         if (!enabled) return Commands.none();
         return Commands.runOnce(() -> io.setPercent(-0.4))
-            .andThen(Commands.waitUntil(() -> inputs.LimitSwitch))
+            .andThen(Commands.waitUntil(this::isReset))
             .finallyDo(io::stopMotor);
     }
 

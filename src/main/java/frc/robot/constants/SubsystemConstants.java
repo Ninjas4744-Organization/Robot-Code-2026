@@ -10,6 +10,7 @@ import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.constants.ControlConstants;
@@ -37,7 +38,8 @@ public class SubsystemConstants {
         kIntake.real.control.gearRatio = 2;
 
         /* Simulation */
-        kIntake.motorType = DCMotor.getKrakenX60(1);
+        kIntake.simMotor = DCMotor.getKrakenX60(1);
+        kIntake.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (50 * 2 * Math.PI / 0.5));
     }
 
 
@@ -50,15 +52,14 @@ public class SubsystemConstants {
 
         /* Control */
         kIntakeOpen.real.control.controlConstants = ControlConstants.createProfiledPID(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
-        kIntakeOpen.real.control.gearRatio = 1;
-        kIntakeOpen.real.control.conversionFactor = 1;
         kIntakeOpen.real.control.positionGoalTolerance = 0.02;
 
         /* Soft Limits */
         kIntakeOpen.real.softLimits.max = 0.5;
 
         /* Simulation */
-        kIntakeOpen.motorType = DCMotor.getKrakenX60(1);
+        kIntakeOpen.simMotor = DCMotor.getKrakenX60(1);
+        kIntakeOpen.simSystem = LinearSystemId.createElevatorSystem(kIntakeOpen.simMotor, 3, 0.02, kIntakeOpen.real.control.gearRatio);
     }
 
 
@@ -75,7 +76,8 @@ public class SubsystemConstants {
         kIndexer.real.control.gearRatio = 2;
 
         /* Simulation */
-        kIndexer.motorType = DCMotor.getKrakenX60(1);
+        kIndexer.simMotor = DCMotor.getKrakenX60(1);
+        kIndexer.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (50 * 2 * Math.PI / 0.5));
     }
 
 
@@ -92,7 +94,8 @@ public class SubsystemConstants {
         kIndexer2.real.control.gearRatio = 2;
 
         /* Simulation */
-        kIndexer2.motorType = DCMotor.getKrakenX60(1);
+        kIndexer2.simMotor = DCMotor.getKrakenX60(1);
+        kIndexer2.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (50 * 2 * Math.PI / 0.5));
     }
 
 
@@ -114,7 +117,8 @@ public class SubsystemConstants {
         kShooter.real.control.velocityGoalTolerance = 3;
 
         /* Simulation */
-        kShooter.motorType = DCMotor.getKrakenX60(2);
+        kShooter.simMotor = DCMotor.getKrakenX60(2);
+        kShooter.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100 * 2 * Math.PI / 0.5));
     }
 
 
@@ -132,7 +136,8 @@ public class SubsystemConstants {
         kAccelerator.real.control.velocityGoalTolerance = 10;
 
         /* Simulation */
-        kAccelerator.motorType = DCMotor.getKrakenX60(1);
+        kAccelerator.simMotor = DCMotor.getKrakenX60(1);
+        kAccelerator.simSystem = LinearSystemId.createDCMotorSystem(0.12, 0.02);
     }
 
 
@@ -152,7 +157,8 @@ public class SubsystemConstants {
         kClimber.real.hardLimit.homePosition = PositionsConstants.Climber.kLeftClimb.get();
 
         /* Simulation */
-        kClimber.motorType = DCMotor.getKrakenX60(2);
+        kClimber.simMotor = DCMotor.getKrakenX60(2);
+        kClimber.simSystem = LinearSystemId.createElevatorSystem(kClimber.simMotor, 8, 0.04, kClimber.real.control.gearRatio);
     }
 
 
@@ -174,7 +180,8 @@ public class SubsystemConstants {
         kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
 
         /* Simulation */
-        kClimberAngle.motorType = DCMotor.getKrakenX60(2);
+        kClimberAngle.simMotor = DCMotor.getKrakenX60(2);
+        kClimberAngle.simSystem = LinearSystemId.createSingleJointedArmSystem(kClimberAngle.simMotor, 1, kClimberAngle.real.control.gearRatio);
     }
 
 
@@ -200,20 +207,17 @@ public class SubsystemConstants {
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
         kSwerve.limits.accelerationLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = 80;
+        kSwerve.limits.maxSkidAcceleration = 7.5;
+        kSwerve.limits.maxForwardAcceleration = 10;
 
         /* Modules */
         double wheelRadius = 0.048;
-        kSwerve.modules.openLoop = false;
+        kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
-        if (GeneralConstants.kRobotMode.isReal()) {
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(90, 5, 3);
-        }
-        else
-            kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(7, 0, 0);
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(90, 5, 3);
 
         kSwerve.modules.steerMotorConstants = new ControllerConstants();
         kSwerve.modules.steerMotorConstants.real.base.currentLimit = 60;

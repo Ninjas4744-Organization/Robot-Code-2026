@@ -1,8 +1,6 @@
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.RobotStateWithSwerve;
@@ -12,12 +10,15 @@ import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotState extends RobotStateWithSwerve<States> {
-    private static States.ShootingStates shootingState = States.ShootingStates.LOCK;
+    private static States.ShootingMode shootingMode;
 
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
         robotState = States.UNKNOWN;
         setRobotState(States.UNKNOWN);
+
+        shootingMode = States.ShootingMode.LOCK;
+        setShootingMode(States.ShootingMode.LOCK);
     }
 
     public static RobotState getInstance() {
@@ -26,29 +27,29 @@ public class RobotState extends RobotStateWithSwerve<States> {
 
     private final double predictTime = 0.5;
     private final double iterations = 20;
-    public Translation2d getHubTargetPose() {
+    public Pose3d getLookaheadTargetPose() {
         Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation();
-        Translation2d originalTarget = FieldConstants.getHubPose().toPose2d().getTranslation();
+        Pose3d originalTarget = FieldConstants.getHubPose();
         Translation2d target = new Translation2d(originalTarget.getX(), originalTarget.getY());
 
         for (int i = 0; i < iterations; i++) {
             double distTarget = getDistance(new Pose2d(target, Rotation2d.kZero));
             double airTime = PositionsConstants.Shooter.getAirTime(distTarget);
-            target = originalTarget.minus(robotVel.times(airTime));
+            target = originalTarget.toPose2d().getTranslation().minus(robotVel.times(airTime));
 
             if (i == 0)
-                Logger.recordOutput("Robot/Original Lookahead Target", new Pose2d(target, Rotation2d.kZero));
+                Logger.recordOutput("Robot/Shooting/Original Lookahead Target", new Pose3d(new Translation3d(target.getX(), target.getY(), originalTarget.getZ()), originalTarget.getRotation()));
         }
 
-        return target;
+        return new Pose3d(new Translation3d(target.getX(), target.getY(), originalTarget.getZ()), originalTarget.getRotation());
     }
 
-    public double getDistToHub() {
-        return getDistance(new Pose2d(getHubTargetPose(), Rotation2d.kZero));
+    public double getLookaheadTargetDist() {
+        return getDistance(getLookaheadTargetPose().toPose2d());
     }
 
     public Rotation2d getAngleToHub() {
-        return getTranslation(new Pose2d(getHubTargetPose(), Rotation2d.kZero)).getAngle();
+        return getTranslation(getLookaheadTargetPose().toPose2d()).getAngle();
     }
 
     public static boolean isIntake() {
@@ -64,11 +65,12 @@ public class RobotState extends RobotStateWithSwerve<States> {
             && RobotContainer.getAccelerator().atGoal();
     }
 
-    public static States.ShootingStates getShootingState() {
-        return shootingState;
+    public static States.ShootingMode getShootingMode() {
+        return shootingMode;
     }
 
-    public static void setShootingState(States.ShootingStates shootingState) {
-        RobotState.shootingState = shootingState;
+    public static void setShootingMode(States.ShootingMode shootingMode) {
+        Logger.recordOutput("Robot/Shooting/Shoot Mode", shootingMode.name());
+        RobotState.shootingMode = shootingMode;
     }
 }
