@@ -22,6 +22,7 @@ public class StateMachine extends StateMachineBase<States> {
     private Accelerator accelerator;
     private Climber climber;
     private ClimberAngle climberAngle;
+    private Leds leds;
 
     private BackgroundCommand shootCommand = new BackgroundCommand();
 
@@ -44,6 +45,7 @@ public class StateMachine extends StateMachineBase<States> {
         accelerator = RobotContainer.getAccelerator();
         climber = RobotContainer.getClimber();
         climberAngle = RobotContainer.getClimberAngle();
+        leds = RobotContainer.getLeds();
 
         resetCommands();
 
@@ -172,6 +174,11 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.stopCmd(),
             accelerator.stopCmd()
         ));
+
+        //TODO: Don't stop shooting if delievery
+        addStateEnd(States.SHOOT, Map.of(Commands.waitUntil(() ->
+                RobotState.getInstance().isHubAboutToBeInactive(2)
+        ), States.IDLE));
     }
 
     private void climbingCommands() {

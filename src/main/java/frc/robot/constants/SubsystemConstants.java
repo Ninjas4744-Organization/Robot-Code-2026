@@ -37,7 +37,7 @@ public class SubsystemConstants {
         kIntake.real.control.gearRatio = 2;
 
         /* Simulation */
-        kIntake.motorType = DCMotor.getKrakenX60(1);
+        kIntake.simMotor = DCMotor.getKrakenX60(1);
     }
 
 
@@ -58,7 +58,7 @@ public class SubsystemConstants {
         kIntakeOpen.real.softLimits.max = 0.5;
 
         /* Simulation */
-        kIntakeOpen.motorType = DCMotor.getKrakenX60(1);
+        kIntakeOpen.simMotor = DCMotor.getKrakenX60(1);
     }
 
 
@@ -75,7 +75,7 @@ public class SubsystemConstants {
         kIndexer.real.control.gearRatio = 2;
 
         /* Simulation */
-        kIndexer.motorType = DCMotor.getKrakenX60(1);
+        kIndexer.simMotor = DCMotor.getKrakenX60(1);
     }
 
 
@@ -92,7 +92,7 @@ public class SubsystemConstants {
         kIndexer2.real.control.gearRatio = 2;
 
         /* Simulation */
-        kIndexer2.motorType = DCMotor.getKrakenX60(1);
+        kIndexer2.simMotor = DCMotor.getKrakenX60(1);
     }
 
 
@@ -114,7 +114,7 @@ public class SubsystemConstants {
         kShooter.real.control.velocityGoalTolerance = 3;
 
         /* Simulation */
-        kShooter.motorType = DCMotor.getKrakenX60(2);
+        kShooter.simMotor = DCMotor.getKrakenX60(2);
     }
 
 
@@ -132,7 +132,7 @@ public class SubsystemConstants {
         kAccelerator.real.control.velocityGoalTolerance = 10;
 
         /* Simulation */
-        kAccelerator.motorType = DCMotor.getKrakenX60(1);
+        kAccelerator.simMotor = DCMotor.getKrakenX60(1);
     }
 
 
@@ -152,7 +152,7 @@ public class SubsystemConstants {
         kClimber.real.hardLimit.homePosition = PositionsConstants.Climber.kLeftClimb.get();
 
         /* Simulation */
-        kClimber.motorType = DCMotor.getKrakenX60(2);
+        kClimber.simMotor = DCMotor.getKrakenX60(2);
     }
 
 
@@ -174,7 +174,7 @@ public class SubsystemConstants {
         kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
 
         /* Simulation */
-        kClimberAngle.motorType = DCMotor.getKrakenX60(2);
+        kClimberAngle.simMotor = DCMotor.getKrakenX60(2);
     }
 
 

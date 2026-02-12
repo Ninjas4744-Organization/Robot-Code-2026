@@ -42,6 +42,7 @@ public class RobotContainer {
     private static Accelerator accelerator;
     private static Climber climber;
     private static ClimberAngle climberAngle;
+    private static Leds leds;
 
     private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
@@ -52,13 +53,14 @@ public class RobotContainer {
 
     public RobotContainer() {
         intake = new Intake(true);
-        intakeOpen = new IntakeOpen(true);
+        intakeOpen = new IntakeOpen(false);
         indexer = new Indexer(true);
         indexer2 = new Indexer2(true);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
-        climber = new Climber(true);
-        climberAngle = new ClimberAngle(true);
+        climber = new Climber(false);
+        climberAngle = new ClimberAngle(false);
+        leds = new Leds();
 
         if (!GeneralConstants.kRobotMode.isReplay())
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
@@ -137,6 +139,10 @@ public class RobotContainer {
 
     public static ClimberAngle getClimberAngle() {
         return climberAngle;
+    }
+
+    public static Leds getLeds() {
+        return leds;
     }
 
     private void configureAuto() {
