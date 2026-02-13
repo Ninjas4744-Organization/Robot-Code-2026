@@ -64,13 +64,13 @@ public class RobotState extends RobotStateWithSwerve<States> {
     }
 
     public static boolean isShootReady() {
-        boolean isHeated = RobotContainer.getSwerve().atGoal()
-                && RobotContainer.getShooter().atGoal()
-                && RobotContainer.getAccelerator().atGoal();
+        boolean isReady = RobotContainer.getSwerve().atGoal()
+            && RobotContainer.getShooter().atGoal()
+            && RobotContainer.getAccelerator().atGoal();
 
         return RobotState.getShootingState() == States.ShootingStates.DELIVERY ?
-                RobotState.getInstance().getRobotPose().getY() - PositionsConstants.Swerve.getDeliveryTarget().getY() <= PositionsConstants.Shooter.kMaxYOffsetThatCanDeliever.get() && isHeated :
-                isHeated;
+            Math.abs(RobotState.getInstance().getRobotPose().getY() - PositionsConstants.Swerve.getDeliveryTarget().getY()) < PositionsConstants.Shooter.kDeliveryYThreshold.get() && isReady
+            : isReady;
     }
 
     public static States.ShootingStates getShootingState() {

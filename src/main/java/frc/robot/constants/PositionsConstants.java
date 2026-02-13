@@ -44,7 +44,7 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kDelivery = new LoggedTunableNumber("Shooter/Delivery", 80, false);
         public static final LoggedTunableNumber kDump = new LoggedTunableNumber("Shooter/Dump", 50, false);
 
-        public static final LoggedTunableNumber kMaxYOffsetThatCanDeliever = new LoggedTunableNumber("Shooter/MaxDelieveryOffset", 5, false);
+        public static final LoggedTunableNumber kDeliveryYThreshold = new LoggedTunableNumber("Shooter/MaxDelieveryOffset", 5, false);
 
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 44, true);
