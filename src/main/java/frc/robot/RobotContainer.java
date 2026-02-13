@@ -277,9 +277,6 @@ public class RobotContainer {
     }
 
     public void periodic() {
-//        if (DriverStation.isEnabled())
-//            SwerveController.getInstance().setControl(new SwerveSpeeds(0, -4.2, 0, true), "Driver");
-
         SwerveSpeeds robotVel = Swerve.getInstance().getSpeeds();
         accelerationCalculator.calculate(robotVel.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).toTranslation());
 
@@ -296,6 +293,9 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
         Logger.recordOutput("Robot/Vision/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
         Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
+
+        if (RobotState.getInstance().getDistance(visionSubsystem.getLastMegaTag1Pose()) <= 1)
+            RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getLastMegaTag1Pose().getRotation().times(0.1)));
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
