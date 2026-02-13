@@ -119,15 +119,19 @@ public class PositionsConstants {
         }
 
         private static final InterpolatingDoubleTreeMap kDeliveryMap = new InterpolatingDoubleTreeMap();
-        private static final LoggedTunableNumber kDelivery0 = new LoggedTunableNumber("Shooter/Delivery/0", 60, false);
-        private static final LoggedTunableNumber kDelivery05 = new LoggedTunableNumber("Shooter/Delivery/0.5", 65, false);
-        private static final LoggedTunableNumber kDelivery1 = new LoggedTunableNumber("Shooter/Delivery/1", 70, false);
-        private static final LoggedTunableNumber kDelivery15 = new LoggedTunableNumber("Shooter/Delivery/1.5", 75, false);
-        private static final LoggedTunableNumber kDelivery2 = new LoggedTunableNumber("Shooter/Delivery/2", 80, false);
-        private static final LoggedTunableNumber kDelivery25 = new LoggedTunableNumber("Shooter/Delivery/2.5", 85, false);
-        private static final LoggedTunableNumber kDelivery3 = new LoggedTunableNumber("Shooter/Delivery/3", 90, false);
-        private static final LoggedTunableNumber kDelivery35 = new LoggedTunableNumber("Shooter/Delivery/3.5", 95, false);
-        private static final LoggedTunableNumber kDelivery4 = new LoggedTunableNumber("Shooter/Delivery/4", 100, false);
+        private static final LoggedTunableNumber kDelivery0 = new LoggedTunableNumber("Shooter/Delivery/0", 22, false);
+        private static final LoggedTunableNumber kDelivery05 = new LoggedTunableNumber("Shooter/Delivery/0.5", 25, false);
+        private static final LoggedTunableNumber kDelivery1 = new LoggedTunableNumber("Shooter/Delivery/1", 28, false);
+        private static final LoggedTunableNumber kDelivery15 = new LoggedTunableNumber("Shooter/Delivery/1.5", 31, false);
+        private static final LoggedTunableNumber kDelivery2 = new LoggedTunableNumber("Shooter/Delivery/2", 34, false);
+        private static final LoggedTunableNumber kDelivery25 = new LoggedTunableNumber("Shooter/Delivery/2.5", 37, false);
+        private static final LoggedTunableNumber kDelivery3 = new LoggedTunableNumber("Shooter/Delivery/3", 40, false);
+        private static final LoggedTunableNumber kDelivery35 = new LoggedTunableNumber("Shooter/Delivery/3.5", 43, false);
+        private static final LoggedTunableNumber kDelivery4 = new LoggedTunableNumber("Shooter/Delivery/4", 46, false);
+        private static final LoggedTunableNumber kDelivery45 = new LoggedTunableNumber("Shooter/Delivery/4.5", 49, false);
+        private static final LoggedTunableNumber kDelivery5 = new LoggedTunableNumber("Shooter/Delivery/5", 52, false);
+        private static final LoggedTunableNumber kDelivery55 = new LoggedTunableNumber("Shooter/Delivery/5.5", 55, false);
+        private static final LoggedTunableNumber kDelivery6 = new LoggedTunableNumber("Shooter/Delivery/6", 58, false);
 
         public static double getDeliverySpeed(double dist) {
             kDeliveryMap.put(0.0, kDelivery0.get());
@@ -139,6 +143,10 @@ public class PositionsConstants {
             kDeliveryMap.put(3.0, kDelivery3.get());
             kDeliveryMap.put(3.5, kDelivery35.get());
             kDeliveryMap.put(4.0, kDelivery4.get());
+            kDeliveryMap.put(4.5, kDelivery45.get());
+            kDeliveryMap.put(5.0, kDelivery5.get());
+            kDeliveryMap.put(5.5, kDelivery55.get());
+            kDeliveryMap.put(6.0, kDelivery6.get());
 
             return kDeliveryMap.get(dist);
         }

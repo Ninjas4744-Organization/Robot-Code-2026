@@ -137,7 +137,7 @@ public class SubsystemConstants {
 
         /* Simulation */
         kAccelerator.simMotor = DCMotor.getKrakenX60(1);
-        kAccelerator.simSystem = LinearSystemId.createDCMotorSystem(0.12, 0.02);
+        kAccelerator.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100 * 2 * Math.PI / 0.5));
     }
 
 

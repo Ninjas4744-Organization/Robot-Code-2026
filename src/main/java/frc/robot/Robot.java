@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,6 +19,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private final RobotContainer robotContainer;
+    public static double teleopStartTime;
 
     public Robot() {
         // Record metadata
@@ -87,6 +89,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
+        teleopStartTime = RobotController.getFPGATime();
         robotContainer.reset();
     }
 
