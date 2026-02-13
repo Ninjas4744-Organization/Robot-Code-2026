@@ -1,9 +1,11 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
+import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.subsystems.*;
@@ -21,6 +23,7 @@ public class StateMachine extends StateMachineBase<States> {
     private Accelerator accelerator;
     private Climber climber;
     private ClimberAngle climberAngle;
+    private Leds leds;
 
     private BackgroundCommand shootCommand = new BackgroundCommand();
 
@@ -43,6 +46,7 @@ public class StateMachine extends StateMachineBase<States> {
         accelerator = RobotContainer.getAccelerator();
         climber = RobotContainer.getClimber();
         climberAngle = RobotContainer.getClimberAngle();
+        leds = RobotContainer.getLeds();
 
         resetCommands();
 
@@ -54,7 +58,7 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     private void resetCommands() {
-        addOmniEdge(States.RESET, () -> Commands.parallel(
+        addOmniEdge(States.RESET, () -> new DetachedCommand(Commands.parallel(
             Commands.runOnce(shootCommand::stop),
             swerve.reset(),
             intake.reset(),
@@ -65,7 +69,7 @@ public class StateMachine extends StateMachineBase<States> {
             accelerator.reset(),
             climber.reset(),
             climberAngle.reset()
-        ));
+        )));
 
         addEdge(States.RESET, States.IDLE);
 
@@ -136,17 +140,23 @@ public class StateMachine extends StateMachineBase<States> {
             indexer2.stopCmd()
         ));
 
-        addStateCommand(States.SHOOT, Commands.either(
-            Commands.parallel(
-                indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-                indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndex.get())
-            ),
-            Commands.parallel(
-                indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
-                indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
-            ),
-            RobotState::isShootReady
-        ).repeatedly());
+        addStateCommand(States.SHOOT, Commands.run(() -> {
+            if (RobotState.isShootReady()) {
+                indexer.setVelocity(PositionsConstants.Indexer.kIndex.get());
+                indexer2.setVelocity(PositionsConstants.Indexer2.kIndex.get());
+            } else {
+                indexer.setVelocity(PositionsConstants.Indexer.kIndexBack.get());
+                indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get());
+            }
+
+            if (RobotState.isHubAboutToChange(3)) {
+                leds.blink(Color.kRed, 0.3);
+            }
+        }).finallyDo(() -> {
+            indexer.stop();
+            indexer2.stop();
+            leds.stop();
+        }));
 
         addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE_WHILE_SHOOT_READY, Commands.sequence(
             indexer.stopCmd(),
@@ -175,6 +185,10 @@ public class StateMachine extends StateMachineBase<States> {
             indexer2.stopCmd(),
             shooter.stopCmd(),
             accelerator.stopCmd()
+        ));
+
+        addStateEnd(States.SHOOT, Map.of(
+            Commands.waitUntil(() -> RobotState.isHubAboutToChange(3)), States.IDLE
         ));
     }
 

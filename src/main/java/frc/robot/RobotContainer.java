@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.NinjasLib.DerivativeCalculator2d;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
@@ -44,6 +45,7 @@ public class RobotContainer {
     private static Accelerator accelerator;
     private static Climber climber;
     private static ClimberAngle climberAngle;
+    private static Leds leds;
 
     private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
@@ -60,6 +62,7 @@ public class RobotContainer {
         accelerator = new Accelerator(true);
         climber = new Climber(true);
         climberAngle = new ClimberAngle(true);
+        leds = new Leds(true);
 
         if (!GeneralConstants.kRobotMode.isReplay())
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
@@ -74,6 +77,13 @@ public class RobotContainer {
         configureAuto();
         configureBindings();
         configureTestBindings();
+
+        new Trigger(RobotState::isHubActive)
+            .onTrue(Commands.runOnce(() -> {
+                RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
+            })).onFalse(Commands.runOnce(() -> {
+                RobotState.setShootingMode(States.ShootingMode.DELIVERY);
+            }));
 
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
@@ -100,45 +110,17 @@ public class RobotContainer {
         }
     }
 
-    public static SwerveSubsystem getSwerve() {
-        return swerveSubsystem;
-    }
-
-    public static VisionSubsystem getVision() {
-        return visionSubsystem;
-    }
-
-    public static Intake getIntake() {
-        return intake;
-    }
-
-    public static IntakeOpen getIntakeAngle() {
-        return intakeOpen;
-    }
-
-    public static Indexer getIndexer() {
-        return indexer;
-    }
-
-    public static Indexer2 getIndexer2() {
-        return indexer2;
-    }
-
-    public static Shooter getShooter() {
-        return shooter;
-    }
-
-    public static Accelerator getAccelerator() {
-        return accelerator;
-    }
-
-    public static Climber getClimber() {
-        return climber;
-    }
-
-    public static ClimberAngle getClimberAngle() {
-        return climberAngle;
-    }
+    public static SwerveSubsystem getSwerve() { return swerveSubsystem; }
+    public static VisionSubsystem getVision() { return visionSubsystem; }
+    public static Intake getIntake() { return intake; }
+    public static IntakeOpen getIntakeAngle() { return intakeOpen; }
+    public static Indexer getIndexer() { return indexer; }
+    public static Indexer2 getIndexer2() { return indexer2; }
+    public static Shooter getShooter() { return shooter; }
+    public static Accelerator getAccelerator() { return accelerator; }
+    public static Climber getClimber() { return climber; }
+    public static ClimberAngle getClimberAngle() { return climberAngle; }
+    public static Leds getLeds() { return leds; }
 
     private void configureAuto() {
         AutoBuilder.configure(
@@ -285,14 +267,17 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Shooting/Lookahead Target", new Pose3d(RobotState.getInstance().getLookaheadTargetPose().getX(), RobotState.getInstance().getLookaheadTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
         Logger.recordOutput("Robot/Shooting/Shooting Ready", RobotState.isShootReady());
 
-        Logger.recordOutput("Robot/Robot Speed", robotVel.getSpeed());
-        Logger.recordOutput("Robot/Robot Acceleration 2d", getRobotAcceleration());
-        Logger.recordOutput("Robot/Robot Acceleration", getRobotAcceleration().getNorm());
-        Logger.recordOutput("Robot/Robot Predicted Velocity", new SwerveSpeeds(robotVel.getAsFieldRelative().toTranslation().plus(getRobotAcceleration().times(0.2)), robotVel.omegaRadiansPerSecond, true));
+        Logger.recordOutput("Robot/Speed/Robot Speed", robotVel.getSpeed());
+        Logger.recordOutput("Robot/Speed/Robot Acceleration 2d", getRobotAcceleration());
+        Logger.recordOutput("Robot/Speed/Robot Acceleration", getRobotAcceleration().getNorm());
+        Logger.recordOutput("Robot/Speed/Robot Predicted Velocity", new SwerveSpeeds(robotVel.getAsFieldRelative().toTranslation().plus(getRobotAcceleration().times(0.2)), robotVel.omegaRadiansPerSecond, true));
 
         Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
         Logger.recordOutput("Robot/Vision/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
         Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
+
+        Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
+        Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
 
         if (RobotState.getInstance().getDistance(visionSubsystem.getLastMegaTag1Pose()) <= 1)
             RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getLastMegaTag1Pose().getRotation().times(0.1)));
