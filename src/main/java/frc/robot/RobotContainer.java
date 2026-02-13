@@ -10,12 +10,14 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.DerivativeCalculator2d;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.swerve.Swerve;
+import frc.lib.NinjasLib.swerve.SwerveSpeeds;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
@@ -46,10 +48,9 @@ public class RobotContainer {
 
     private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
+
     List<GamePieceProjectile> balls = new ArrayList<>();
-    private List<Translation2d> lastRobotVels = new  ArrayList<>();
-    private static Translation2d robotAcc = new Translation2d();
-    private final int robotVelsCount = 5;
+    private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(5);
 
     public RobotContainer() {
         intake = new Intake(true);
@@ -79,7 +80,7 @@ public class RobotContainer {
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
                 if (Math.abs(shooter.getVelocity()) > 0.01) {
-                    if (balls.size() >= 8) {
+                    if (balls.size() >= 15) {
                         SimulatedArena.getInstance().removeProjectile(balls.get(0));
                         balls.remove(0);
                     }
@@ -89,9 +90,9 @@ public class RobotContainer {
                         new Translation2d(),
                         Swerve.getInstance().getSpeeds().getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()),
                         RobotState.getInstance().getRobotPose().getRotation(),
-                        Meters.of(0.25),
-                        MetersPerSecond.of(13.35 * Math.abs(shooter.getGoal()) / 100),
-                        Degrees.of(58)
+                        Meters.of(0.481),
+                        MetersPerSecond.of(13.25 * Math.abs(shooter.getGoal()) / 100),
+                        Degrees.of(60)
                     );
 
                     balls.add(ball);
@@ -176,6 +177,11 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotState(States.SHOOT);
             StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
         })));
+
+        driverController.cross().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE)));
+        driverController.circle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.SNAP_RING)));
+        driverController.triangle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.LOCK)));
+        driverController.square().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.DELIVERY)));
 
         driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
             // Climbing shit
@@ -268,7 +274,7 @@ public class RobotContainer {
     }
 
     public static Translation2d getRobotAcceleration() {
-        return robotAcc;
+        return accelerationCalculator.get();
     }
 
     public void controllerPeriodic() {
@@ -277,41 +283,25 @@ public class RobotContainer {
     }
 
     public void periodic() {
-        Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).toTranslation();
-        lastRobotVels.add(robotVel);
-        if (lastRobotVels.size() > robotVelsCount)
-            lastRobotVels.remove(0);
-        if (lastRobotVels.size() >= 2) {
-            // Linear Regression Variables
-            double sumT = 0;
-            Translation2d sumP = new Translation2d();
-            Translation2d sumTP = new Translation2d();
-            double sumT2 = 0;
-            int n = lastRobotVels.size();
+        SwerveSpeeds robotVel = Swerve.getInstance().getSpeeds();
+        accelerationCalculator.calculate(robotVel.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).toTranslation());
 
-            for (int i = 0; i < n; i++) {
-                sumT += i * 0.02;
-                sumP = sumP.plus(lastRobotVels.get(i));
-                sumTP = sumTP.plus(lastRobotVels.get(i).times(i * 0.02));
-                sumT2 += (i * 0.02) * (i * 0.02);
-            }
+        Logger.recordOutput("Robot/Shooting/Distance Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Robot/Shooting/Distance Lookahead Hub", RobotState.getInstance().getLookaheadTargetDist());
+        Logger.recordOutput("Robot/Shooting/Lookahead Target", new Pose3d(RobotState.getInstance().getLookaheadTargetPose().getX(), RobotState.getInstance().getLookaheadTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
+        Logger.recordOutput("Robot/Shooting/Shooting Ready", RobotState.isShootReady());
 
-            // Formula for slope (velocity):
-            // m = (n*sumTP - sumT*sumP) / (n*sumT2 - sumT^2)
-            double denominator = (n * sumT2 - (sumT * sumT));
+        Logger.recordOutput("Robot/Robot Speed", robotVel.getSpeed());
+        Logger.recordOutput("Robot/Robot Acceleration 2d", getRobotAcceleration());
+        Logger.recordOutput("Robot/Robot Acceleration", getRobotAcceleration().getNorm());
+        Logger.recordOutput("Robot/Robot Predicted Velocity", new SwerveSpeeds(robotVel.getAsFieldRelative().toTranslation().plus(getRobotAcceleration().times(0.2)), robotVel.omegaRadiansPerSecond, true));
 
-            // Avoid division by zero if timestamps are identical
-            robotAcc = (denominator == 0) ? new Translation2d() : (sumTP.times(n).minus(sumP.times(sumT))).div(denominator);
-        }
+        Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
+        Logger.recordOutput("Robot/Vision/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
+        Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
 
-        Logger.recordOutput("Robot/Distance Hub", FieldConstants.getDistToHub());
-        Logger.recordOutput("Robot/Distance Fake Hub", RobotState.getInstance().getDistToHub());
-        Logger.recordOutput("Robot/Robot Speed", Swerve.getInstance().getSpeeds().getSpeed());
-        Logger.recordOutput("Robot/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
-        Logger.recordOutput("Robot/Look Ahead Target", new Pose3d(RobotState.getInstance().getHubTargetPose().getX(), RobotState.getInstance().getHubTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
-        Logger.recordOutput("Robot/Shooting Ready", shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal());
-        Logger.recordOutput("Robot/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
-        Logger.recordOutput("Robot/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
+        if (RobotState.getInstance().getDistance(visionSubsystem.getLastMegaTag1Pose()) <= 1)
+            RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getLastMegaTag1Pose().getRotation().times(0.1)));
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
@@ -320,7 +310,7 @@ public class RobotContainer {
             for (int i = 0; i < this.balls.size(); i++) {
                 balls[i] = this.balls.get(i).getPose3d();
             }
-            Logger.recordOutput("Robot/Balls", balls);
+            Logger.recordOutput("Robot/Shooting/Balls", balls);
         }
     }
 

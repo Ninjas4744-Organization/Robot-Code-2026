@@ -54,12 +54,14 @@ public class ClimberAngle extends SubsystemBase implements
 
     @Override
     public boolean isReset() {
-        return !enabled || Math.abs(inputs.Output) < 0.1;
+        return !enabled || inputs.LimitSwitch || GeneralConstants.kRobotMode.isSim();
     }
 
     @Override
     public Command reset() {
-        return stopCmd();
+        return Commands.runOnce(() -> io.setPercent(-0.4))
+            .andThen(Commands.waitUntil(this::isReset))
+            .finallyDo(this::stop);
     }
 
     @Override
