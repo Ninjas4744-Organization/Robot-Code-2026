@@ -7,8 +7,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
+import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.subsystems.*;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,12 @@ public class StateMachine extends StateMachineBase<States> {
 
     public static StateMachine getInstance() {
         return (StateMachine) StateMachineBase.getInstance();
+    }
+
+    public void periodic() {
+        super.periodic();
+
+        Logger.recordOutput("StateMachine/Shoot Command", shootCommand.isRunning());
     }
 
     @Override
@@ -122,8 +130,11 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY, activateIntake());
+        addEdge(States.SHOOT, States.INTAKE_WHILE_SHOOT, activateIntake());
         addEdge(States.INTAKE_WHILE_SHOOT_READY, States.INTAKE, stopShooting());
         addEdge(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY, closeIntake());
+        addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE, stopShooting());
+        addEdge(States.INTAKE_WHILE_SHOOT, States.SHOOT, closeIntake());
 
         addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.SHOOT, () -> Commands.sequence(
             Commands.runOnce(() -> {
@@ -135,9 +146,28 @@ public class StateMachine extends StateMachineBase<States> {
             closeIntake()
         ));
 
+        addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.INTAKE_WHILE_SHOOT, () -> Commands.sequence(
+            Commands.runOnce(() -> {
+                if (RobotState.getShootingMode() == States.ShootingMode.SNAP_RING)
+                    RobotState.setShootingMode(States.ShootingMode.LOCK);
+            }),
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
+            indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
+            activateIntake()
+        ));
+
         addEdge(States.SHOOT, States.SHOOT_READY, Commands.sequence(
-            indexer.stopCmd(),
-            indexer2.stopCmd()
+            activateShooting(),
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
+            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
+            Commands.waitUntil(RobotState::isShootReady)
+        ));
+
+        addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE_WHILE_SHOOT_READY, Commands.sequence(
+            activateShooting(),
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
+            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
+            Commands.waitUntil(RobotState::isShootReady)
         ));
 
         addStateCommand(States.SHOOT, Commands.run(() -> {
@@ -149,7 +179,7 @@ public class StateMachine extends StateMachineBase<States> {
                 indexer2.setVelocity(PositionsConstants.Indexer2.kIndexBack.get());
             }
 
-            if (RobotState.isHubAboutToChange(3)) {
+            if (GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3)) {
                 leds.blink(Color.kRed, 0.3);
             }
         }).finallyDo(() -> {
@@ -158,16 +188,12 @@ public class StateMachine extends StateMachineBase<States> {
             leds.stop();
         }));
 
-        addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE_WHILE_SHOOT_READY, Commands.sequence(
-            indexer.stopCmd(),
-            indexer2.stopCmd()
-        ));
-
         addEdge(List.of(States.SHOOT_HEATED,
-            States.INTAKE_WHILE_SHOOT_HEATED,
-            States.SHOOT,
             States.SHOOT_READY,
-            States.INTAKE_WHILE_SHOOT_READY), States.IDLE, () -> Commands.sequence(
+            States.SHOOT,
+            States.INTAKE_WHILE_SHOOT_HEATED,
+            States.INTAKE_WHILE_SHOOT_READY,
+            States.INTAKE_WHILE_SHOOT), States.IDLE, () -> Commands.sequence(
             stopShooting(),
             closeIntake()
         ));
@@ -188,7 +214,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addStateEnd(States.SHOOT, Map.of(
-            Commands.waitUntil(() -> RobotState.isHubAboutToChange(3)), States.IDLE
+            Commands.waitUntil(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3)), States.IDLE
         ));
     }
 
@@ -236,20 +262,20 @@ public class StateMachine extends StateMachineBase<States> {
     private Command closeIntake() {
         return Commands.sequence(
             intake.stopCmd(),
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
-            Commands.waitUntil(intakeOpen::atGoal)
+            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get())
+//            Commands.waitUntil(intakeOpen::atGoal)
         );
     }
 
     private Command activateIntake() {
         return Commands.sequence(
             intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
-            Commands.waitUntil(intakeOpen::atGoal),
+//            Commands.waitUntil(intakeOpen::atGoal),
             intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get())
         );
     }
 
-    States.ShootingMode lastShootMode = null;
+    private States.ShootingMode lastShootMode = null;
     private Command activateShooting() {
         return shootCommand.setNewTaskCommand(Commands.sequence(
             Commands.runOnce(() -> {
@@ -259,7 +285,11 @@ public class StateMachine extends StateMachineBase<States> {
             }),
             Commands.run(() -> {
                 if (RobotState.getShootingMode() != lastShootMode) {
-                    shootSwitch();
+                    if (getCurrentState() == States.SHOOT)
+                        changeRobotState(States.SHOOT_READY);
+                    else if (getCurrentState() == States.INTAKE_WHILE_SHOOT)
+                        changeRobotState(States.INTAKE_WHILE_SHOOT_READY);
+
                     lastShootMode = RobotState.getShootingMode();
                 }
             })
@@ -301,8 +331,7 @@ public class StateMachine extends StateMachineBase<States> {
             indexer.stopCmd(),
             indexer2.stopCmd(),
             accelerator.stopCmd(),
-            shooter.stopCmd(),
-            Commands.runOnce(swerve::unSlow)
+            shooter.stopCmd()
         );
     }
 }

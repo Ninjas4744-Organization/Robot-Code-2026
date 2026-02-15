@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.RobotStateWithSwerve;
 import frc.lib.NinjasLib.swerve.Swerve;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
@@ -23,8 +22,8 @@ public class RobotState extends RobotStateWithSwerve<States> {
         robotState = States.UNKNOWN;
         setRobotState(States.UNKNOWN);
 
-        shootingMode = States.ShootingMode.LOCK;
-        setShootingMode(States.ShootingMode.LOCK);
+        shootingMode = States.ShootingMode.ON_MOVE;
+        setShootingMode(States.ShootingMode.ON_MOVE);
     }
 
     public static RobotState getInstance() {
@@ -33,9 +32,8 @@ public class RobotState extends RobotStateWithSwerve<States> {
 
 //    private final double predictTime = 0.5;
     private final double iterations = 20;
-    public Pose3d getLookaheadTargetPose() {
+    public Pose3d getLookaheadTargetPose(Pose3d originalTarget) {
         Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation();
-        Pose3d originalTarget = FieldConstants.getHubPose();
         Translation2d target = new Translation2d(originalTarget.getX(), originalTarget.getY());
 
         for (int i = 0; i < iterations; i++) {
@@ -50,12 +48,12 @@ public class RobotState extends RobotStateWithSwerve<States> {
         return new Pose3d(new Translation3d(target.getX(), target.getY(), originalTarget.getZ()), originalTarget.getRotation());
     }
 
-    public double getLookaheadTargetDist() {
-        return getDistance(getLookaheadTargetPose().toPose2d());
+    public double getLookaheadTargetDist(Pose3d originalTarget) {
+        return getDistance(getLookaheadTargetPose(originalTarget).toPose2d());
     }
 
-    public Rotation2d getAngleToHub() {
-        return getTranslation(getLookaheadTargetPose().toPose2d()).getAngle();
+    public Rotation2d getLookaheadTargetAngle(Pose3d originalTarget) {
+        return getTranslation(getLookaheadTargetPose(originalTarget).toPose2d()).getAngle();
     }
 
     public static boolean isIntake() {

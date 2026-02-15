@@ -120,35 +120,36 @@ public class PositionsConstants {
 
         private static final InterpolatingDoubleTreeMap kDeliveryMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kDelivery0 = new LoggedTunableNumber("Shooter/Delivery/0", 22, false);
-        private static final LoggedTunableNumber kDelivery05 = new LoggedTunableNumber("Shooter/Delivery/0.5", 25, false);
-        private static final LoggedTunableNumber kDelivery1 = new LoggedTunableNumber("Shooter/Delivery/1", 28, false);
-        private static final LoggedTunableNumber kDelivery15 = new LoggedTunableNumber("Shooter/Delivery/1.5", 31, false);
-        private static final LoggedTunableNumber kDelivery2 = new LoggedTunableNumber("Shooter/Delivery/2", 34, false);
-        private static final LoggedTunableNumber kDelivery25 = new LoggedTunableNumber("Shooter/Delivery/2.5", 37, false);
-        private static final LoggedTunableNumber kDelivery3 = new LoggedTunableNumber("Shooter/Delivery/3", 40, false);
-        private static final LoggedTunableNumber kDelivery35 = new LoggedTunableNumber("Shooter/Delivery/3.5", 43, false);
-        private static final LoggedTunableNumber kDelivery4 = new LoggedTunableNumber("Shooter/Delivery/4", 46, false);
-        private static final LoggedTunableNumber kDelivery45 = new LoggedTunableNumber("Shooter/Delivery/4.5", 49, false);
-        private static final LoggedTunableNumber kDelivery5 = new LoggedTunableNumber("Shooter/Delivery/5", 52, false);
-        private static final LoggedTunableNumber kDelivery55 = new LoggedTunableNumber("Shooter/Delivery/5.5", 55, false);
-        private static final LoggedTunableNumber kDelivery6 = new LoggedTunableNumber("Shooter/Delivery/6", 58, false);
+        private static final LoggedTunableNumber kDelivery05 = new LoggedTunableNumber("Shooter/Delivery/0.5", 20, false);
+        private static final LoggedTunableNumber kDelivery1 = new LoggedTunableNumber("Shooter/Delivery/1", 25, false);
+        private static final LoggedTunableNumber kDelivery15 = new LoggedTunableNumber("Shooter/Delivery/1.5", 30, false);
+        private static final LoggedTunableNumber kDelivery2 = new LoggedTunableNumber("Shooter/Delivery/2", 35, false);
+        private static final LoggedTunableNumber kDelivery25 = new LoggedTunableNumber("Shooter/Delivery/2.5", 40, false);
+        private static final LoggedTunableNumber kDelivery3 = new LoggedTunableNumber("Shooter/Delivery/3", 45, false);
+        private static final LoggedTunableNumber kDelivery35 = new LoggedTunableNumber("Shooter/Delivery/3.5", 50, false);
+        private static final LoggedTunableNumber kDelivery4 = new LoggedTunableNumber("Shooter/Delivery/4", 55, false);
+        private static final LoggedTunableNumber kDelivery45 = new LoggedTunableNumber("Shooter/Delivery/4.5", 60, false);
+        private static final LoggedTunableNumber kDelivery5 = new LoggedTunableNumber("Shooter/Delivery/5", 65, false);
+        private static final LoggedTunableNumber kDelivery55 = new LoggedTunableNumber("Shooter/Delivery/5.5", 70, false);
+        private static final LoggedTunableNumber kDelivery6 = new LoggedTunableNumber("Shooter/Delivery/6", 75, false);
 
         public static double getDeliverySpeed(double dist) {
-            kDeliveryMap.put(0.0, kDelivery0.get());
-            kDeliveryMap.put(0.5, kDelivery05.get());
-            kDeliveryMap.put(1.0, kDelivery1.get());
-            kDeliveryMap.put(1.5, kDelivery15.get());
-            kDeliveryMap.put(2.0, kDelivery2.get());
-            kDeliveryMap.put(2.5, kDelivery25.get());
-            kDeliveryMap.put(3.0, kDelivery3.get());
-            kDeliveryMap.put(3.5, kDelivery35.get());
-            kDeliveryMap.put(4.0, kDelivery4.get());
-            kDeliveryMap.put(4.5, kDelivery45.get());
-            kDeliveryMap.put(5.0, kDelivery5.get());
-            kDeliveryMap.put(5.5, kDelivery55.get());
-            kDeliveryMap.put(6.0, kDelivery6.get());
-
-            return kDeliveryMap.get(dist);
+//            kDeliveryMap.put(0.0, kDelivery0.get());
+//            kDeliveryMap.put(0.5, kDelivery05.get());
+//            kDeliveryMap.put(1.0, kDelivery1.get());
+//            kDeliveryMap.put(1.5, kDelivery15.get());
+//            kDeliveryMap.put(2.0, kDelivery2.get());
+//            kDeliveryMap.put(2.5, kDelivery25.get());
+//            kDeliveryMap.put(3.0, kDelivery3.get());
+//            kDeliveryMap.put(3.5, kDelivery35.get());
+//            kDeliveryMap.put(4.0, kDelivery4.get());
+//            kDeliveryMap.put(4.5, kDelivery45.get());
+//            kDeliveryMap.put(5.0, kDelivery5.get());
+//            kDeliveryMap.put(5.5, kDelivery55.get());
+//            kDeliveryMap.put(6.0, kDelivery6.get());
+//
+//            return kDeliveryMap.get(dist);
+            return 1.14 * dist * dist + 0.423 * dist + 30;
         }
     }
 
@@ -158,17 +159,17 @@ public class PositionsConstants {
 
     public static class Swerve {
         public static final LoggedTunableNumber kPositionThreshold = new LoggedTunableNumber("Swerve/Pos Thresh", 0.05, false);
-//        public static final LoggedTunableNumber kAngleThreshold = new LoggedTunableNumber("Swerve/Angle Thresh", 1, false);
-        public static final LoggedTunableNumber kAngleBaseThreshold = new LoggedTunableNumber("Swerve/Angle Base Threshold", 7.5, false);
-        public static final LoggedTunableNumber kAngleCoefficient = new LoggedTunableNumber("Swerve/Angle Coefficient", -1.2, false);
+        public static final LoggedTunableNumber kAngleThreshold = new LoggedTunableNumber("Swerve/Angle Thresh", 3, false);
+        public static final LoggedTunableNumber kAngleThresholdBase = new LoggedTunableNumber("Swerve/Angle Base Threshold", 7.5, false);
+        public static final LoggedTunableNumber kAngleThresholdCoefficient = new LoggedTunableNumber("Swerve/Angle Coefficient", -1.2, false);
         public static final LoggedTunableNumber kSpeedDifferenceThreshold = new LoggedTunableNumber("Swerve/Speed Diff Thresh", 0.3, false);
         public static final LoggedTunableNumber kTargetMinThreshold = new LoggedTunableNumber("Swerve/Target Min Thresh", 1.25, false);
 
         public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub Min Dist", 2, false);
         public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 3, false);
 
-        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 3, false);
-        private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 3, false);
+        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 2.5, false);
+        private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 5.5, false);
 
         public static Pose2d getDeliveryTarget() {
             return new Pose2d(kDeliveryTargetX.get(), kDeliveryTargetY.get(), Rotation2d.kZero);

@@ -31,6 +31,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -80,14 +81,36 @@ public class RobotContainer {
 
         new Trigger(RobotState::isHubActive)
             .onTrue(Commands.runOnce(() -> {
+                if (!GeneralConstants.enableAutoTiming)
+                    return;
+
                 RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
+                if (Set.of(States.SHOOT_HEATED,
+                    States.SHOOT_READY,
+                    States.SHOOT,
+                    States.INTAKE_WHILE_SHOOT_HEATED,
+                    States.INTAKE_WHILE_SHOOT_READY,
+                    States.INTAKE_WHILE_SHOOT)
+                    .contains(RobotState.getInstance().getRobotState()))
+                    StateMachine.getInstance().changeRobotState(States.IDLE, true, false);
             })).onFalse(Commands.runOnce(() -> {
+                if (!GeneralConstants.enableAutoTiming)
+                    return;
+
                 RobotState.setShootingMode(States.ShootingMode.DELIVERY);
+                if (Set.of(States.SHOOT_HEATED,
+                    States.SHOOT_READY,
+                    States.SHOOT,
+                    States.INTAKE_WHILE_SHOOT_HEATED,
+                    States.INTAKE_WHILE_SHOOT_READY,
+                    States.INTAKE_WHILE_SHOOT)
+                    .contains(RobotState.getInstance().getRobotState()))
+                    StateMachine.getInstance().changeRobotState(States.IDLE, true, false);
             }));
 
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
-                if (Math.abs(shooter.getVelocity()) > 0.01) {
+                if (Math.abs(shooter.getVelocity()) > 1 && (RobotState.getInstance().getRobotState() == States.SHOOT || RobotState.getInstance().getRobotState() == States.INTAKE_WHILE_SHOOT)) {
                     if (balls.size() >= 15) {
                         SimulatedArena.getInstance().removeProjectile(balls.get(0));
                         balls.remove(0);
@@ -150,8 +173,13 @@ public class RobotContainer {
         driverController.R1().onTrue(notTest(intake()));
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.SHOOT);
-            StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+            if (RobotState.isIntake()) {
+                StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_SHOOT);
+                StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_SHOOT_READY);
+            } else {
+                StateMachine.getInstance().changeRobotState(States.SHOOT);
+                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+            }
         })));
 
         driverController.cross().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE)));
@@ -170,7 +198,7 @@ public class RobotContainer {
                 case IDLE -> States.INTAKE;
                 case SHOOT_HEATED -> States.INTAKE_WHILE_SHOOT_HEATED;
                 case SHOOT_READY -> States.INTAKE_WHILE_SHOOT_READY;
-                case SHOOT -> States.SHOOT;
+                case SHOOT -> States.INTAKE_WHILE_SHOOT;
                 default -> RobotState.getInstance().getRobotState();
             });
         });
@@ -263,8 +291,8 @@ public class RobotContainer {
         accelerationCalculator.calculate(robotVel.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).toTranslation());
 
         Logger.recordOutput("Robot/Shooting/Distance Hub", FieldConstants.getDistToHub());
-        Logger.recordOutput("Robot/Shooting/Distance Lookahead Hub", RobotState.getInstance().getLookaheadTargetDist());
-        Logger.recordOutput("Robot/Shooting/Lookahead Target", new Pose3d(RobotState.getInstance().getLookaheadTargetPose().getX(), RobotState.getInstance().getLookaheadTargetPose().getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
+        Logger.recordOutput("Robot/Shooting/Distance Lookahead Hub", RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()));
+        Logger.recordOutput("Robot/Shooting/Lookahead Target", new Pose3d(RobotState.getInstance().getLookaheadTargetPose(FieldConstants.getHubPose()).getX(), RobotState.getInstance().getLookaheadTargetPose(FieldConstants.getHubPose()).getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
         Logger.recordOutput("Robot/Shooting/Shooting Ready", RobotState.isShootReady());
 
         Logger.recordOutput("Robot/Speed/Robot Speed", robotVel.getSpeed());

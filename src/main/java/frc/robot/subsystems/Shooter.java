@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -9,6 +11,7 @@ import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.subsystem.IO;
 import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.robot.RobotState;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
@@ -123,7 +126,11 @@ public class Shooter extends SubsystemBase implements
             return;
 
         backgroundCommand.setNewTask(Commands.run(() -> {
-            io.setVelocity(PositionsConstants.Shooter.getShootSpeed(RobotState.getInstance().getLookaheadTargetDist()));
+            io.setVelocity(
+                PositionsConstants.Shooter.getShootSpeed(
+                    RobotState.getInstance().getLookaheadTargetDist(
+                        FieldConstants.getHubPose()
+                    )));
         }));
     }
 
@@ -131,9 +138,15 @@ public class Shooter extends SubsystemBase implements
         if (!enabled)
             return;
 
-        backgroundCommand.setNewTask(Commands.run(() -> {
-            double dist = RobotState.getInstance().getDistance(PositionsConstants.Swerve.getDeliveryTarget());
-            io.setVelocity(PositionsConstants.Shooter.getDeliverySpeed(dist));
+        backgroundCommand.setNewTask(Commands.run(() -> {;
+            Pose3d target = new Pose3d(PositionsConstants.Swerve.getDeliveryTarget());
+            target = new Pose3d(target.getX(), target.getY(), 0, Rotation3d.kZero);
+
+            io.setVelocity(
+                PositionsConstants.Shooter.getDeliverySpeed(
+                    RobotState.getInstance().getLookaheadTargetDist(
+                        target
+                    )));
         }));
     }
 }

@@ -1,10 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +13,7 @@ import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveController;
 import frc.lib.NinjasLib.swerve.SwerveSpeeds;
 import frc.robot.RobotState;
+import frc.robot.States;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
@@ -63,18 +61,10 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().resetLookAt();
             }),
             Commands.run(() -> {
-//                double relativeYVel = Swerve.getInstance().getSpeeds().vyMetersPerSecond;
-//                double relativeYWantedVel = Swerve.getInstance().getWantedSpeeds().vyMetersPerSecond;
-
-//                double angleFix = (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYWantedVel)) * -Math.signum(relativeYWantedVel)) * 0.8
-//                        + (PositionsConstants.Swerve.getAngleFix(Math.abs(relativeYVel)) * -Math.signum(relativeYVel)) * 0.2;
-
-//                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), FieldConstants.getTranslationToHub().getAngle().rotateBy(Rotation2d.fromDegrees(angleFix)));
-
-                Rotation2d angleHub = RobotState.getInstance().getAngleToHub();
-                if (RobotState.getInstance().getLookaheadTargetDist() < PositionsConstants.Swerve.kTargetMinThreshold.get())
-                    angleHub = FieldConstants.getTranslationToHub().getAngle();
-                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleHub);
+                Rotation2d angleToHub = RobotState.getInstance().getLookaheadTargetAngle(FieldConstants.getHubPose());
+                if (RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()) < PositionsConstants.Swerve.kTargetMinThreshold.get())
+                    angleToHub = FieldConstants.getTranslationToHub().getAngle();
+                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleToHub);
 
                 double vx = 0, vy = 0;
                 if (DriverStation.isAutonomous()) {
@@ -98,8 +88,6 @@ public class SwerveSubsystem extends SubsystemBase implements
                     SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Look Hub");
-
-//                Logger.recordOutput("Swerve/Angle Fix", angleFix);
             })
         ));
     }
@@ -173,14 +161,17 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setChannel("Delivery");
             }),
             Commands.run(() -> {
-                target = RobotState.getInstance().getRobotPose();
-                target = new Pose2d(target.getX(), target.getY(), RobotState.getInstance().getTranslation(PositionsConstants.Swerve.getDeliveryTarget()).getAngle());
+                Pose3d deliveryTarget = new Pose3d(PositionsConstants.Swerve.getDeliveryTarget());
+                deliveryTarget = new Pose3d(deliveryTarget.getX(), deliveryTarget.getY(), 0, Rotation3d.kZero);
+
+                Rotation2d angleToDelivery = RobotState.getInstance().getLookaheadTargetAngle(deliveryTarget);
+                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleToDelivery);
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
                     -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
                     SwerveController.getInstance().lookAt(target.getRotation()),
-                    true
+                    GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Delivery");
             })
         ));
@@ -188,10 +179,16 @@ public class SwerveSubsystem extends SubsystemBase implements
 
     @Override
     public boolean atGoal() {
-        return RobotState.getInstance().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get()
-            && Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleBaseThreshold.get() + PositionsConstants.Swerve.kAngleCoefficient.get() * FieldConstants.getDistToHub())
-            && Math.abs(Swerve.getInstance().getWantedSpeeds().getSpeed() - Swerve.getInstance().getSpeeds().getSpeed()) < PositionsConstants.Swerve.kSpeedDifferenceThreshold.get()
-            && RobotState.getInstance().getLookaheadTargetDist() > PositionsConstants.Swerve.kHubMinDist.get();
+        boolean atPos = RobotState.getInstance().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get();
+        boolean atAngleSmart = Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleThresholdBase.get() + PositionsConstants.Swerve.kAngleThresholdCoefficient.get() * FieldConstants.getDistToHub());
+        boolean atAngle = Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < PositionsConstants.Swerve.kAngleThreshold.get();
+        boolean atSpeedDifference = Math.abs(Swerve.getInstance().getWantedSpeeds().getSpeed() - Swerve.getInstance().getSpeeds().getSpeed()) < PositionsConstants.Swerve.kSpeedDifferenceThreshold.get();
+        boolean atMinDist = RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()) > PositionsConstants.Swerve.kHubMinDist.get();
+
+        return (RobotState.getShootingMode() == States.ShootingMode.SNAP_RING ? atPos : true)
+            && (RobotState.getShootingMode() == States.ShootingMode.DELIVERY ? atAngle : atAngleSmart)
+            && (RobotState.getShootingMode() == States.ShootingMode.ON_MOVE ? atSpeedDifference : true)
+            && (RobotState.getShootingMode() == States.ShootingMode.ON_MOVE ? atMinDist : true);
     }
 
     @Override

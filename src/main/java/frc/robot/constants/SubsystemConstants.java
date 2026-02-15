@@ -189,10 +189,10 @@ public class SubsystemConstants {
     public static final SwerveConstants kSwerve = new SwerveConstants();
     static {
         /* Chassis */
-        kSwerve.chassis.trackWidth = 0.735;
-        kSwerve.chassis.wheelBase = 0.735;
-        kSwerve.chassis.bumperLength = 0.896;
-        kSwerve.chassis.bumperWidth = 0.896;
+        kSwerve.chassis.trackWidth = 0.59475;
+        kSwerve.chassis.wheelBase = 0.51855;
+        kSwerve.chassis.bumperLength = 0.8709;
+        kSwerve.chassis.bumperWidth = 0.8841;
         kSwerve.chassis.kinematics = new SwerveDriveKinematics(
             new Translation2d(kSwerve.chassis.wheelBase / 2.0, kSwerve.chassis.trackWidth / 2.0),
             new Translation2d(kSwerve.chassis.wheelBase / 2.0, -kSwerve.chassis.trackWidth / 2.0),
@@ -275,8 +275,8 @@ public class SubsystemConstants {
     public static final SwerveControllerConstants kSwerveController = new SwerveControllerConstants();
     static {
         kSwerveController.swerveConstants = kSwerve;
-        kSwerveController.drivePIDConstants = ControlConstants.createPID(0.2, 0, 0, 0);
-        kSwerveController.rotationPIDConstants = ControlConstants.createProfiledPID(6.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kSwerveController.drivePIDConstants = ControlConstants.createPID(5, 0, 0, 0);
+        kSwerveController.rotationPIDConstants = ControlConstants.createPID(6.5, 0, 0, 0);
         kSwerveController.rotationPIDContinuousConnections = Pair.of(-Math.PI, Math.PI);
     }
 
