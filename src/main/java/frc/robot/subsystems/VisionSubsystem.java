@@ -20,7 +20,8 @@ public class VisionSubsystem extends SubsystemBase {
     private double odometryDrift = 0;
     private Pose2d lastVisionPosePassed = new Pose2d();
     private Pose2d lastVisionPose = new Pose2d();
-    private Pose2d lastMegaTag1Pose = new Pose2d();
+    private Pose2d megaTag1Pose = new Pose2d();
+    private double megaTag1DistFromTag;
     private boolean enabled = true;
 
     public VisionSubsystem() {
@@ -34,6 +35,8 @@ public class VisionSubsystem extends SubsystemBase {
         odometryDrift += Swerve.getInstance().getOdometryTwist().getNorm() * GeneralConstants.Vision.kOdometryDriftPerMeter;
         Logger.recordOutput("Vision/Odometry Drift", odometryDrift);
 
+        megaTag1Pose = null;
+        megaTag1DistFromTag = 0;
         VisionOutput[] estimations = Vision.getInstance().getVisionEstimations();
         for (VisionOutput estimation : estimations) {
             if(!estimation.hasTargets)
@@ -44,7 +47,8 @@ public class VisionSubsystem extends SubsystemBase {
                 strength = VecBuilder.fill(1, 1, 1);
             boolean passedFilters = isPassedFilters(estimation);
 
-            lastMegaTag1Pose = estimation.robotPoseMegaTag1;
+            megaTag1Pose = estimation.robotPoseMegaTag1;
+            megaTag1DistFromTag = estimation.closestTargetDistMegaTag1;
             lastVisionPose = estimation.robotPose;
 
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose", estimation.robotPose);
@@ -92,8 +96,12 @@ public class VisionSubsystem extends SubsystemBase {
         return lastVisionPose;
     }
 
-    public Pose2d getLastMegaTag1Pose() {
-        return lastMegaTag1Pose;
+    public Pose2d getMegaTag1Pose() {
+        return megaTag1Pose;
+    }
+
+    public double getMegaTag1DistFromTag() {
+        return megaTag1DistFromTag;
     }
 
     public void setEnabled(boolean enabled) {

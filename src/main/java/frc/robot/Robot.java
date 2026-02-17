@@ -105,8 +105,6 @@ public class Robot extends LoggedRobot {
     public void testInit() {
 //        CommandScheduler.getInstance().cancelAll();
 
-        RobotState.getInstance().resetGyro(RobotContainer.getVision().getLastMegaTag1Pose().getRotation());
-
         CommandScheduler.getInstance().schedule(Commands.sequence(
             RobotContainer.getSwerve().reset(),
             RobotContainer.getShooter().stopCmd(),

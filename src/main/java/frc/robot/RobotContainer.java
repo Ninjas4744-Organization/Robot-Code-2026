@@ -55,15 +55,15 @@ public class RobotContainer {
     private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(5);
 
     public RobotContainer() {
-        intake = new Intake(true);
-        intakeOpen = new IntakeOpen(true);
-        indexer = new Indexer(true);
-        indexer2 = new Indexer2(true);
+        intake = new Intake(false);
+        intakeOpen = new IntakeOpen(false);
+        indexer = new Indexer(false);
+        indexer2 = new Indexer2(false);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
-        climber = new Climber(true);
-        climberAngle = new ClimberAngle(true);
-        leds = new Leds(true);
+        climber = new Climber(false);
+        climberAngle = new ClimberAngle(false);
+        leds = new Leds(false);
 
         if (!GeneralConstants.kRobotMode.isReplay())
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
@@ -163,7 +163,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation())));
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getMegaTag1Pose().getRotation())));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
         driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false)));
         driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
@@ -221,60 +221,20 @@ public class RobotContainer {
     }
 
     private void configureTestBindings() {
-//        driverController.R1().toggleOnTrue(inTest(Commands.startEnd(
-//            () -> intake.setVelocity(0.35),
-//            () -> intake.stop()
-//        )));
-//
-//        driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
-//            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
-//                Commands.runOnce(() -> swerveSubsystem.lookHub()),
-//                Commands.runOnce(() -> shooter.autoHubVelocity()),
-//                Commands.waitUntil(() -> shooter.atGoal() && swerveSubsystem.atGoal()),
-//                indexer.setPercentCmd(0.3),
-//                indexer2.setPercentCmd(0.3),
-//                accelerator.setVelocityCmd(80)
-//            )),
-//            () ->
-//                CommandScheduler.getInstance().schedule(Commands.sequence(
-//                    Commands.runOnce(() -> {
-//                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
-//                        GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
-//                    }),
-//                    Commands.runOnce(() -> swerveSubsystem.lookHub()),
-//                    Commands.runOnce(() -> shooter.autoHubVelocity()),
-//                    Commands.runOnce(() -> accelerator.setVelocity(80)),
-//                    Commands.run(() -> {
-//                        if (shooter.atGoal() && swerveSubsystem.atGoal() && accelerator.atGoal()) {
-//                            CommandScheduler.getInstance().schedule(Commands.sequence(
-//                                indexer.setPercentCmd(0),
-//                                indexer2.setPercentCmd(0.3)
-//                            ));
-//                        } else {
-//                            CommandScheduler.getInstance().schedule(Commands.sequence(
-//                                indexer.setPercentCmd(0),
-//                                indexer2.setPercentCmd(-0.1)
-//                            ));
-//                        }
-//                    })
-//                ));,
-//            () -> {
-//                CommandScheduler.getInstance().schedule(Commands.sequence(
-//                    Commands.runOnce(() -> {
-//                        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
-//                        GeneralConstants.Swerve.kDriverSpeedFactor = 1;
-//                    }),
-//                    swerveSubsystem.stop(),
-//                    indexer.stopCmd(),
-//                    indexer2.stopCmd(),
-//                    accelerator.stopCmd(),
-//                    shooter.stopCmd()
-//                ));
-//            }
-//        )));
+        driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
+            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
+                Commands.runOnce(() -> shooter.autoHubVelocity()),
+                Commands.waitUntil(() -> shooter.atGoal()),
+                accelerator.setVelocityCmd(80)
+            )),
+            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
+                accelerator.stopCmd(),
+                shooter.stopCmd()
+            ))
+        )));
 
-        driverController.L1().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
-        driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.getInstance().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
+//        driverController.L1().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
+//        driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.getInstance().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
     }
 
     public static Translation2d getRobotAcceleration() {
@@ -300,15 +260,16 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Speed/Robot Acceleration", getRobotAcceleration().getNorm());
         Logger.recordOutput("Robot/Speed/Robot Predicted Velocity", new SwerveSpeeds(robotVel.getAsFieldRelative().toTranslation().plus(getRobotAcceleration().times(0.2)), robotVel.omegaRadiansPerSecond, true));
 
-        Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getLastMegaTag1Pose());
+        Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getMegaTag1Pose());
+        Logger.recordOutput("Robot/Vision/MegaTag 1 Vision Dist", visionSubsystem.getMegaTag1DistFromTag());
         Logger.recordOutput("Robot/Vision/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
         Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
 
         Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
         Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
 
-        if (RobotState.getInstance().getDistance(visionSubsystem.getLastMegaTag1Pose()) <= 1)
-            RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getLastMegaTag1Pose().getRotation().times(0.1)));
+        if (visionSubsystem.getMegaTag1Pose() != null && visionSubsystem.getMegaTag1DistFromTag() <= 2)
+            RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getMegaTag1Pose().getRotation().times(0.1)));
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();

@@ -112,8 +112,8 @@ public class SubsystemConstants {
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createPID(0.3, 0, 0,0);
-        kShooter.real.control.controlConstants.V = 0.13;
+        kShooter.real.control.controlConstants = ControlConstants.createPID(0, 0, 0,Double.POSITIVE_INFINITY);
+        kShooter.real.control.controlConstants.V = 0.125;
         kShooter.real.control.velocityGoalTolerance = 3;
 
         /* Simulation */
@@ -127,6 +127,7 @@ public class SubsystemConstants {
     static {
         /* Base */
         kAccelerator.real.base.main.id = 32;
+        kAccelerator.real.base.main.inverted = true;
         kAccelerator.real.base.currentLimit = 80;
         kAccelerator.real.base.isBrakeMode = false;
 
@@ -215,9 +216,9 @@ public class SubsystemConstants {
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
-        kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
+        kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.36;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(90, 5, 3);
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(60, 5, 3);
 
         kSwerve.modules.steerMotorConstants = new ControllerConstants();
         kSwerve.modules.steerMotorConstants.real.base.currentLimit = 60;
@@ -242,13 +243,13 @@ public class SubsystemConstants {
             );
         }
 
-        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.267334 - Units.degreesToRotations(90);//0.279541;
-        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.291260 - Units.degreesToRotations(90);//-0.267334;
-        kSwerve.modules.moduleConstants[2].CANCoderOffset = 0.279541 - Units.degreesToRotations(90);//-0.268799;
-        kSwerve.modules.moduleConstants[3].CANCoderOffset = -0.268799 - Units.degreesToRotations(90);//-0.291260;
+        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.291260;
+        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.482422;
+        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.264160;
+        kSwerve.modules.moduleConstants[3].CANCoderOffset = 0.475342;
 
         /* Gyro */
-        kSwerve.gyro.gyroID = 45;
+        kSwerve.gyro.gyroID = 5;
         kSwerve.gyro.gyroInverted = false;
         kSwerve.gyro.gyroType = SwerveConstants.Gyro.GyroType.Pigeon2;
 
@@ -292,7 +293,7 @@ public class SubsystemConstants {
     public static final VisionConstants kVision = new VisionConstants();
     static {
         kVision.cameras = Map.of(
-            "limelight-front", Pair.of(new Transform3d(0.73 / 2, 0, 0.35, new Rotation3d(Units.degreesToRadians(0), Units.degreesToRadians(0), Units.degreesToRadians(0))), VisionConstants.CameraType.Limelight)
+            "limelight", Pair.of(new Transform3d(0, 0, 0, Rotation3d.kZero), VisionConstants.CameraType.Limelight)
         );
 
         kVision.fieldLayoutGetter = FieldConstants::getFieldLayoutWithIgnored;

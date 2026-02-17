@@ -59,6 +59,7 @@ public class ClimberAngle extends SubsystemBase implements
 
     @Override
     public Command reset() {
+        if (!enabled) return Commands.none();
         return Commands.runOnce(() -> io.setPercent(-0.4))
             .andThen(Commands.waitUntil(this::isReset))
             .finallyDo(this::stop);
