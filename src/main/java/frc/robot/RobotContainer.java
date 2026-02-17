@@ -80,37 +80,24 @@ public class RobotContainer {
         configureTestBindings();
 
         new Trigger(RobotState::isHubActive)
-            .onTrue(Commands.runOnce(() -> {
+            .onChange(Commands.runOnce(() -> {
                 if (!GeneralConstants.enableAutoTiming)
                     return;
 
-                RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
-                if (Set.of(States.SHOOT_HEATED,
-                    States.SHOOT_READY,
-                    States.SHOOT,
-                    States.INTAKE_WHILE_SHOOT_HEATED,
-                    States.INTAKE_WHILE_SHOOT_READY,
-                    States.INTAKE_WHILE_SHOOT)
-                    .contains(RobotState.getInstance().getRobotState()))
-                    StateMachine.getInstance().changeRobotState(States.IDLE, true, false);
-            })).onFalse(Commands.runOnce(() -> {
-                if (!GeneralConstants.enableAutoTiming)
-                    return;
+                if (RobotState.isHubActive()) RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
+                else                          RobotState.setShootingMode(States.ShootingMode.DELIVERY);
 
-                RobotState.setShootingMode(States.ShootingMode.DELIVERY);
                 if (Set.of(States.SHOOT_HEATED,
+                    States.SHOOT_PREPARE,
                     States.SHOOT_READY,
-                    States.SHOOT,
-                    States.INTAKE_WHILE_SHOOT_HEATED,
-                    States.INTAKE_WHILE_SHOOT_READY,
-                    States.INTAKE_WHILE_SHOOT)
+                    States.SHOOT)
                     .contains(RobotState.getInstance().getRobotState()))
                     StateMachine.getInstance().changeRobotState(States.IDLE, true, false);
             }));
 
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
-                if (Math.abs(shooter.getVelocity()) > 1 && (RobotState.getInstance().getRobotState() == States.SHOOT || RobotState.getInstance().getRobotState() == States.INTAKE_WHILE_SHOOT)) {
+                if (Math.abs(shooter.getVelocity()) > 1 && RobotState.getInstance().getRobotState() == States.SHOOT) {
                     if (balls.size() >= 15) {
                         SimulatedArena.getInstance().removeProjectile(balls.get(0));
                         balls.remove(0);
@@ -170,16 +157,13 @@ public class RobotContainer {
 
         driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE, true, false)));
 
-        driverController.R1().onTrue(notTest(intake()));
+        driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(true))));
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            if (RobotState.isIntake()) {
-                StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_SHOOT);
-                StateMachine.getInstance().changeRobotState(States.INTAKE_WHILE_SHOOT_READY);
-            } else {
+            if (RobotState.getInstance().getRobotState() == States.SHOOT_READY)
                 StateMachine.getInstance().changeRobotState(States.SHOOT);
-                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
-            }
+            else
+                StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
         })));
 
         driverController.cross().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE)));
@@ -190,18 +174,6 @@ public class RobotContainer {
         driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
             // Climbing shit
         })));
-    }
-
-    private Command intake() {
-        return Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(switch (RobotState.getInstance().getRobotState()) {
-                case IDLE -> States.INTAKE;
-                case SHOOT_HEATED -> States.INTAKE_WHILE_SHOOT_HEATED;
-                case SHOOT_READY -> States.INTAKE_WHILE_SHOOT_READY;
-                case SHOOT -> States.INTAKE_WHILE_SHOOT;
-                default -> RobotState.getInstance().getRobotState();
-            });
-        });
     }
 
     private Command inTest(Command command) {

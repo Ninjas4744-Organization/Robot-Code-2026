@@ -206,9 +206,8 @@ public class SubsystemConstants {
         kSwerve.limits.maxAngularVelocity = 8.5;
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
-        kSwerve.limits.accelerationLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = 7.5;
+        kSwerve.limits.maxSkidAcceleration = 50;
         kSwerve.limits.maxForwardAcceleration = 10;
 
         /* Modules */

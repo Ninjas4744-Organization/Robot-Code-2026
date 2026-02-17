@@ -13,9 +13,9 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
 
-@SuppressWarnings("unused")
 public class RobotState extends RobotStateWithSwerve<States> {
     private static States.ShootingMode shootingMode;
+    private static boolean isIntake;
 
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
@@ -57,10 +57,12 @@ public class RobotState extends RobotStateWithSwerve<States> {
     }
 
     public static boolean isIntake() {
-        return getInstance().getRobotState() == States.INTAKE
-            || getInstance().getRobotState() == States.INTAKE_WHILE_SHOOT_HEATED
-            || getInstance().getRobotState() == States.INTAKE_WHILE_SHOOT_READY
-            || getInstance().getRobotState() == States.INTAKE_WHILE_SHOOT;
+        return isIntake;
+    }
+
+    public static void setIntake(boolean isIntake) {
+        RobotState.isIntake = isIntake;
+        Logger.recordOutput("Robot/Is Intake", isIntake);
     }
 
     public static boolean isShootReady() {
@@ -69,7 +71,7 @@ public class RobotState extends RobotStateWithSwerve<States> {
             && RobotContainer.getAccelerator().atGoal();
 
         return shootingMode == States.ShootingMode.DELIVERY
-            ? isReady && Math.abs(RobotState.getInstance().getRobotPose().getY() - PositionsConstants.Swerve.getDeliveryTarget().getY()) < PositionsConstants.Shooter.kDeliveryYThreshold.get()
+            ? isReady && RobotState.getInstance().getRobotPose().getY() > PositionsConstants.Shooter.kDeliveryYThreshold.get()
             : isReady;
     }
 

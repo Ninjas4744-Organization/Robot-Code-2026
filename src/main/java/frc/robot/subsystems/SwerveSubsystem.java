@@ -96,23 +96,12 @@ public class SwerveSubsystem extends SubsystemBase implements
         if (!enabled)
             return;
 
-        backgroundCommand.setNewTask(Commands.sequence(
-            Commands.runOnce(() -> {
-                target = RobotState.getInstance().getRobotPose();
+        backgroundCommand.setNewTask(Commands.runOnce(() -> {
+            target = RobotState.getInstance().getRobotPose();
 
-                SwerveController.getInstance().setChannel("Lock");
-            }),
-//            Commands.run(() -> {
-//                Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
-//                SwerveController.getInstance().setControl(new SwerveInput(
-//                    pid.getX(),
-//                    pid.getY(),
-//                    SwerveController.getInstance().lookAt(target.getRotation()),
-//                    true
-//                ), "Lock");
-//            })
-            Swerve.getInstance().lockWheelsToX()
-        ));
+            SwerveController.getInstance().setChannel("Lock");
+            Swerve.getInstance().lockWheelsToX();
+        }));
     }
 
     public void snapRing() {
@@ -202,12 +191,12 @@ public class SwerveSubsystem extends SubsystemBase implements
     }
 
     public void slowForShoot() {
-        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 12.5;
+        Swerve.getInstance().setMaxSkidAcceleration(15);
         GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
     }
 
     public void unSlow() {
-        SubsystemConstants.kSwerve.limits.maxSkidAcceleration = 80;
+        Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
         GeneralConstants.Swerve.kDriverSpeedFactor = 1;
     }
 

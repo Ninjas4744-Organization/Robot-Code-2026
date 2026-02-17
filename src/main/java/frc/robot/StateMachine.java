@@ -13,7 +13,6 @@ import frc.robot.subsystems.*;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
-import java.util.Map;
 
 public class StateMachine extends StateMachineBase<States> {
     private SwerveSubsystem swerve;
@@ -90,7 +89,7 @@ public class StateMachine extends StateMachineBase<States> {
             closeIntake()
         ));
 
-        addStateEnd(States.RESET, Map.of(Commands.waitUntil(
+        addStateEnd(States.RESET, Commands.waitUntil(
             () -> intake.isReset()
             && intakeOpen.isReset()
             && indexer.isReset()
@@ -99,7 +98,7 @@ public class StateMachine extends StateMachineBase<States> {
             && accelerator.isReset()
             && climber.isReset()
             && climberAngle.isReset()
-        ), States.IDLE));
+        ), States.IDLE);
     }
 
     private void intakeCommands() {
@@ -109,65 +108,30 @@ public class StateMachine extends StateMachineBase<States> {
 
     private void shootingCommands() {
         addEdge(States.IDLE, States.SHOOT_HEATED, shooter.setVelocityCmd(PositionsConstants.Shooter.kShoot.get()));
-        addEdge(States.SHOOT_HEATED, States.INTAKE_WHILE_SHOOT_HEATED, activateIntake());
-        addEdge(States.INTAKE_WHILE_SHOOT_HEATED, States.SHOOT_HEATED, closeIntake());
-        addEdge(States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED, shooter.setVelocityCmd(PositionsConstants.Shooter.kShoot.get()));
-        addEdge(States.INTAKE_WHILE_SHOOT_HEATED, States.INTAKE, shooter.stopCmd());
 
-        addEdge(List.of(States.IDLE, States.SHOOT_HEATED), States.SHOOT_READY, () -> Commands.sequence(
+        addEdge(List.of(States.IDLE, States.SHOOT_HEATED, States.SHOOT_READY, States.SHOOT), States.SHOOT_PREPARE, () -> Commands.sequence(
             activateShooting(),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
-            Commands.waitUntil(RobotState::isShootReady)
+            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
         ));
+        addStateCommand(States.SHOOT_PREPARE, updateIntake());
 
-        addEdge(List.of(States.IDLE, States.SHOOT_HEATED, States.INTAKE, States.INTAKE_WHILE_SHOOT_HEATED), States.INTAKE_WHILE_SHOOT_READY, () -> Commands.sequence(
-            activateShooting(),
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
-            activateIntake(),
-            Commands.waitUntil(RobotState::isShootReady)
-        ));
+        addEdge(States.SHOOT_PREPARE, States.SHOOT_READY, Commands.waitUntil(RobotState::isShootReady));
+        addStateCommand(States.SHOOT_READY, updateIntake());
 
-        addEdge(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY, activateIntake());
-        addEdge(States.SHOOT, States.INTAKE_WHILE_SHOOT, activateIntake());
-        addEdge(States.INTAKE_WHILE_SHOOT_READY, States.INTAKE, stopShooting());
-        addEdge(States.INTAKE_WHILE_SHOOT_READY, States.SHOOT_READY, closeIntake());
-        addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE, stopShooting());
-        addEdge(States.INTAKE_WHILE_SHOOT, States.SHOOT, closeIntake());
-
-        addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.SHOOT, () -> Commands.sequence(
+        addEdge(States.SHOOT_READY, States.SHOOT, Commands.sequence(
             Commands.runOnce(() -> {
                if (RobotState.getShootingMode() == States.ShootingMode.SNAP_RING)
                    RobotState.setShootingMode(States.ShootingMode.LOCK);
             }),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            closeIntake()
+            indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
         ));
-
-        addEdge(List.of(States.SHOOT_READY, States.INTAKE_WHILE_SHOOT_READY), States.INTAKE_WHILE_SHOOT, () -> Commands.sequence(
-            Commands.runOnce(() -> {
-                if (RobotState.getShootingMode() == States.ShootingMode.SNAP_RING)
-                    RobotState.setShootingMode(States.ShootingMode.LOCK);
-            }),
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            activateIntake()
-        ));
+        addStateCommand(States.SHOOT, updateIntake());
 
         addEdge(States.SHOOT, States.SHOOT_READY, Commands.sequence(
-            activateShooting(),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
-            Commands.waitUntil(RobotState::isShootReady)
-        ));
-
-        addEdge(States.INTAKE_WHILE_SHOOT, States.INTAKE_WHILE_SHOOT_READY, Commands.sequence(
-            activateShooting(),
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
-            Commands.waitUntil(RobotState::isShootReady)
+            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
         ));
 
         addStateCommand(States.SHOOT, Commands.run(() -> {
@@ -189,11 +153,10 @@ public class StateMachine extends StateMachineBase<States> {
         }));
 
         addEdge(List.of(States.SHOOT_HEATED,
+            States.SHOOT_PREPARE,
             States.SHOOT_READY,
             States.SHOOT,
-            States.INTAKE_WHILE_SHOOT_HEATED,
-            States.INTAKE_WHILE_SHOOT_READY,
-            States.INTAKE_WHILE_SHOOT), States.IDLE, () -> Commands.sequence(
+            States.DUMP), States.IDLE, () -> Commands.sequence(
             stopShooting(),
             closeIntake()
         ));
@@ -202,20 +165,28 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.setVelocityCmd(PositionsConstants.Shooter.kDump.get()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndex.get()),
-            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get())
+            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndex.get())
         ));
 
-        addEdge(States.DUMP, States.IDLE, Commands.sequence(
-            indexer.stopCmd(),
-            indexer2.stopCmd(),
-            shooter.stopCmd(),
-            accelerator.stopCmd()
-        ));
+        addStateEnd(States.SHOOT,
+            Commands.waitUntil(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3)),
+            States.IDLE
+        );
 
-        addStateEnd(States.SHOOT, Map.of(
-            Commands.waitUntil(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3)), States.IDLE
-        ));
+        addStateEnd(States.SHOOT_PREPARE,
+            Commands.waitUntil(RobotState::isShootReady),
+            States.SHOOT_READY
+        );
+
+        addStateEnd(States.SHOOT_READY,
+            Commands.waitUntil(() -> !RobotState.isShootReady()),
+            States.SHOOT_PREPARE
+        );
+
+        addStateEnd(States.SHOOT,
+            Commands.waitUntil(() -> !RobotState.isShootReady()),
+            States.SHOOT_PREPARE
+        );
     }
 
     private void climbingCommands() {
@@ -259,6 +230,9 @@ public class StateMachine extends StateMachineBase<States> {
         ));
     }
 
+    private States.ShootingMode lastShootMode = null;
+    private boolean lastIsIntake;
+
     private Command closeIntake() {
         return Commands.sequence(
             intake.stopCmd(),
@@ -275,7 +249,16 @@ public class StateMachine extends StateMachineBase<States> {
         );
     }
 
-    private States.ShootingMode lastShootMode = null;
+    private Command updateIntake() {
+        return Commands.run(() -> {
+            if (RobotState.isIntake() != lastIsIntake) {
+                if (RobotState.isIntake()) activateIntake();
+                else closeIntake();
+                lastIsIntake = RobotState.isIntake();
+            }
+        }).beforeStarting(() -> lastIsIntake = false);
+    }
+
     private Command activateShooting() {
         return shootCommand.setNewTaskCommand(Commands.sequence(
             Commands.runOnce(() -> {
@@ -285,10 +268,8 @@ public class StateMachine extends StateMachineBase<States> {
             }),
             Commands.run(() -> {
                 if (RobotState.getShootingMode() != lastShootMode) {
-                    if (getCurrentState() == States.SHOOT)
-                        changeRobotState(States.SHOOT_READY);
-                    else if (getCurrentState() == States.INTAKE_WHILE_SHOOT)
-                        changeRobotState(States.INTAKE_WHILE_SHOOT_READY);
+                    if (getCurrentState() == States.SHOOT || getCurrentState() == States.SHOOT_READY)
+                        changeRobotState(States.SHOOT_PREPARE);
 
                     lastShootMode = RobotState.getShootingMode();
                 }
