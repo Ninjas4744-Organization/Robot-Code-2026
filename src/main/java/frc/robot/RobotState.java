@@ -30,7 +30,6 @@ public class RobotState extends RobotStateWithSwerve<States> {
         return (RobotState) RobotStateBase.getInstance();
     }
 
-//    private final double predictTime = 0.5;
     private final double iterations = 20;
     public Pose3d getLookaheadTargetPose(Pose3d originalTarget) {
         Translation2d robotVel = Swerve.getInstance().getSpeeds().getAsFieldRelative(getRobotPose().getRotation()).toTranslation();
@@ -44,6 +43,8 @@ public class RobotState extends RobotStateWithSwerve<States> {
             if (i == 0)
                 Logger.recordOutput("Robot/Shooting/Original Lookahead Target", new Pose3d(new Translation3d(target.getX(), target.getY(), originalTarget.getZ()), originalTarget.getRotation()));
         }
+
+        target = target.minus(RobotContainer.getRobotAcceleration().times(PositionsConstants.Swerve.kAccelerationFactor.get()));
 
         return new Pose3d(new Translation3d(target.getX(), target.getY(), originalTarget.getZ()), originalTarget.getRotation());
     }
@@ -67,11 +68,11 @@ public class RobotState extends RobotStateWithSwerve<States> {
 
     public static boolean isShootReady() {
         boolean isReady = RobotContainer.getSwerve().atGoal()
-            && RobotContainer.getShooter().atGoal()
-            && RobotContainer.getAccelerator().atGoal();
+            && RobotContainer.getShooter().atGoal();
+            //&& RobotContainer.getAccelerator().atGoal();
 
         return shootingMode == States.ShootingMode.DELIVERY
-            ? isReady && RobotState.getInstance().getRobotPose().getY() > PositionsConstants.Shooter.kDeliveryYThreshold.get()
+            ? isReady && RobotState.getInstance().getRobotPose().getY() > PositionsConstants.Swerve.kDeliveryYThreshold.get()
             : isReady;
     }
 

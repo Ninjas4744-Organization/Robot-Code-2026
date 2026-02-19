@@ -114,7 +114,7 @@ public class SubsystemConstants {
         /* Control */
         kShooter.real.control.controlConstants = ControlConstants.createPID(0, 0, 0,Double.POSITIVE_INFINITY);
         kShooter.real.control.controlConstants.V = 0.125;
-        kShooter.real.control.velocityGoalTolerance = 3;
+        kShooter.real.control.velocityGoalTolerance = 6;
 
         /* Simulation */
         kShooter.simMotor = DCMotor.getKrakenX60(2);
@@ -202,22 +202,25 @@ public class SubsystemConstants {
         );
 
         /* Limits */
-        kSwerve.limits.maxSpeed = 4.42;
+        kSwerve.limits.maxSpeed = 4.2;
         kSwerve.limits.maxAngularVelocity = 8.5;
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = 50;
-        kSwerve.limits.maxForwardAcceleration = 10;
+        kSwerve.limits.maxSkidAcceleration = Double.MAX_VALUE;//50;
+        kSwerve.limits.maxForwardAcceleration = Double.MAX_VALUE;//10;
 
         /* Modules */
         double wheelRadius = 0.048;
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
-        kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.36;
+        kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(60, 5, 3);
+//        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(60, 5, 3);
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(0, 0.5, 0, 0.2);
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.35;
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants.A = 1;
 
         kSwerve.modules.steerMotorConstants = new ControllerConstants();
         kSwerve.modules.steerMotorConstants.real.base.currentLimit = 60;
@@ -276,14 +279,16 @@ public class SubsystemConstants {
     static {
         kSwerveController.swerveConstants = kSwerve;
         kSwerveController.drivePIDConstants = ControlConstants.createPID(5, 0, 0, 0);
-        kSwerveController.rotationPIDConstants = ControlConstants.createPID(6.5, 0, 0, 0);
+        kSwerveController.rotationPIDConstants = ControlConstants.createPID(5.5, 0, 0, 0);
         kSwerveController.rotationPIDContinuousConnections = Pair.of(-Math.PI, Math.PI);
     }
 
 
 
     public static final PathFollowingController kAutonomyConfig = new PPHolonomicDriveController(
-        new PIDConstants(kSwerveController.drivePIDConstants.P, kSwerveController.drivePIDConstants.I, kSwerveController.drivePIDConstants.D),
+//        new PIDConstants(kSwerveController.drivePIDConstants.P, kSwerveController.drivePIDConstants.I, kSwerveController.drivePIDConstants.D),
+//        new PIDConstants(kSwerveController.rotationPIDConstants.P, kSwerveController.rotationPIDConstants.I, kSwerveController.rotationPIDConstants.D)
+        new PIDConstants(0, 0, 0),
         new PIDConstants(kSwerveController.rotationPIDConstants.P, kSwerveController.rotationPIDConstants.I, kSwerveController.rotationPIDConstants.D)
     );
 

@@ -53,6 +53,7 @@ public class RobotContainer {
 
     List<GamePieceProjectile> balls = new ArrayList<>();
     private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(5);
+    public static boolean autoReadyToShoot = false;
 
     public RobotContainer() {
         intake = new Intake(false);
@@ -92,7 +93,7 @@ public class RobotContainer {
                     States.SHOOT_READY,
                     States.SHOOT)
                     .contains(RobotState.getInstance().getRobotState()))
-                    StateMachine.getInstance().changeRobotState(States.IDLE, true, false);
+                    StateMachine.getInstance().changeRobotStateForce(States.IDLE);
             }));
 
         if (GeneralConstants.kRobotMode.isSim()) {
@@ -143,28 +144,49 @@ public class RobotContainer {
             () -> false
         );
 
-        NamedCommands.registerCommand("Prepare Shoot", StateMachine.getInstance().changeRobotStateCommand(States.SHOOT_READY));
-        NamedCommands.registerCommand("Shoot", StateMachine.getInstance().changeRobotStateCommand(States.SHOOT));
+        NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> {
+            autoReadyToShoot = true;
+            StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
+        }));
+
+        NamedCommands.registerCommand("Stop", Commands.runOnce(() -> {
+            autoReadyToShoot = false;
+            StateMachine.getInstance().changeRobotState(States.IDLE);
+        }));
+
+        NamedCommands.registerCommand("Intake", Commands.runOnce(() -> {
+            StateMachine.getInstance().changeRobotState(States.INTAKE);
+        }));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
     }
 
     private void configureBindings() {
-        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getMegaTag1Pose().getRotation())));
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(visionSubsystem.getMegaTag1Pose() == null ? Rotation2d.kZero : visionSubsystem.getMegaTag1Pose().getRotation())));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.getInstance().resetGyro(Rotation2d.kZero)));
-        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.RESET, true, false)));
+        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateForceCommand(States.RESET)));
         driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
 
-        driverController.L1().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE, true, false)));
+        driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
+            autoReadyToShoot = false;
+            StateMachine.getInstance().changeRobotStateForce(States.IDLE);
+        })));
 
         driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(true))));
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            if (RobotState.getInstance().getRobotState() == States.SHOOT_READY)
-                StateMachine.getInstance().changeRobotState(States.SHOOT);
-            else
+            if (RobotState.getInstance().getRobotState() == States.SHOOT) {
+                autoReadyToShoot = false;
+                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+            } else {
+                autoReadyToShoot = true;
                 StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
+            }
         })));
+
+        driverController.R3().onTrue(notTest(Commands.runOnce(swerveSubsystem::snapAngle)
+            .andThen(Commands.waitUntil(swerveSubsystem::atAngle))
+            .finallyDo(swerveSubsystem::stop)));
 
         driverController.cross().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE)));
         driverController.circle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.SNAP_RING)));
@@ -193,20 +215,20 @@ public class RobotContainer {
     }
 
     private void configureTestBindings() {
-        driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
-            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
-                Commands.runOnce(() -> shooter.autoHubVelocity()),
-                Commands.waitUntil(() -> shooter.atGoal()),
-                accelerator.setVelocityCmd(80)
-            )),
-            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
-                accelerator.stopCmd(),
-                shooter.stopCmd()
-            ))
-        )));
+//        driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
+//            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
+//                Commands.runOnce(() -> shooter.autoHubVelocity()),
+//                Commands.waitUntil(() -> shooter.atGoal()),
+//                accelerator.setVelocityCmd(80)
+//            )),
+//            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
+//                accelerator.stopCmd(),
+//                shooter.stopCmd()
+//            ))
+//        )));
 
-//        driverController.L1().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
-//        driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.getInstance().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
+        driverController.L2().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
+        driverController.R2().onTrue(inTest(Commands.runOnce(() -> RobotState.getInstance().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
     }
 
     public static Translation2d getRobotAcceleration() {
@@ -220,28 +242,26 @@ public class RobotContainer {
 
     public void periodic() {
         SwerveSpeeds robotVel = Swerve.getInstance().getSpeeds();
-        accelerationCalculator.calculate(robotVel.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).toTranslation());
+        accelerationCalculator.calculate(robotVel.getAsFieldRelative().toTranslation());
 
-        Logger.recordOutput("Robot/Shooting/Distance Hub", FieldConstants.getDistToHub());
-        Logger.recordOutput("Robot/Shooting/Distance Lookahead Hub", RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()));
         Logger.recordOutput("Robot/Shooting/Lookahead Target", new Pose3d(RobotState.getInstance().getLookaheadTargetPose(FieldConstants.getHubPose()).getX(), RobotState.getInstance().getLookaheadTargetPose(FieldConstants.getHubPose()).getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
         Logger.recordOutput("Robot/Shooting/Shooting Ready", RobotState.isShootReady());
 
         Logger.recordOutput("Robot/Speed/Robot Speed", robotVel.getSpeed());
-        Logger.recordOutput("Robot/Speed/Robot Acceleration 2d", getRobotAcceleration());
-        Logger.recordOutput("Robot/Speed/Robot Acceleration", getRobotAcceleration().getNorm());
-        Logger.recordOutput("Robot/Speed/Robot Predicted Velocity", new SwerveSpeeds(robotVel.getAsFieldRelative().toTranslation().plus(getRobotAcceleration().times(0.2)), robotVel.omegaRadiansPerSecond, true));
+        Logger.recordOutput("Robot/Speed/Robot Acceleration", getRobotAcceleration());
 
         Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getMegaTag1Pose());
         Logger.recordOutput("Robot/Vision/MegaTag 1 Vision Dist", visionSubsystem.getMegaTag1DistFromTag());
         Logger.recordOutput("Robot/Vision/Odometry Only Pose", RobotState.getInstance().getOdometryOnlyRobotPose());
         Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.getInstance().getOdometryOnlyRobotPose().getTranslation()));
 
+        Logger.recordOutput("Robot/Hub/Distance Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Robot/Hub/Distance Lookahead Hub", RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()));
         Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
         Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
 
-        if (visionSubsystem.getMegaTag1Pose() != null && visionSubsystem.getMegaTag1DistFromTag() <= 2)
-            RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getMegaTag1Pose().getRotation().times(0.1)));
+//        if (visionSubsystem.getMegaTag1Pose() != null && visionSubsystem.getMegaTag1DistFromTag() <= 2)
+//            RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getMegaTag1Pose().getRotation().times(0.1)));
 
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
@@ -261,12 +281,12 @@ public class RobotContainer {
     public void reset() {
 //        RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation());
         if (GeneralConstants.kRobotMode.isComp()) {
-            StateMachine.getInstance().changeRobotState(States.STARTING_POSE, false, true);
-            StateMachine.getInstance().changeRobotState(States.IDLE, true, false);
+            StateMachine.getInstance().forceRobotState(States.STARTING_POSE);
+            StateMachine.getInstance().changeRobotStateForce(States.IDLE);
         }
         else {
-            StateMachine.getInstance().changeRobotState(States.UNKNOWN, false, true);
-            StateMachine.getInstance().changeRobotState(States.RESET, true, false);
+            StateMachine.getInstance().forceRobotState(States.UNKNOWN);
+            StateMachine.getInstance().changeRobotStateForce(States.RESET);
         }
     }
 }
