@@ -75,7 +75,11 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.reset(),
             accelerator.reset(),
             climber.reset(),
-            climberAngle.reset()
+            climberAngle.reset(),
+            Commands.runOnce(() -> {
+                RobotState.setIntake(false);
+                RobotState.setAutoReadyToShoot(false);
+            })
         )));
 
         addEdge(States.RESET, States.IDLE);
@@ -104,6 +108,16 @@ public class StateMachine extends StateMachineBase<States> {
     private void intakeCommands() {
         addEdge(States.IDLE, States.INTAKE, activateIntake());
         addEdge(States.INTAKE, States.IDLE, closeIntake());
+
+        addStateEnd(States.IDLE,
+            Commands.waitUntil(RobotState::isIntake),
+            States.INTAKE
+        );
+
+        addStateEnd(States.INTAKE,
+            Commands.waitUntil(() -> !RobotState.isIntake()),
+            States.IDLE
+        );
     }
 
     private void shootingCommands() {
@@ -192,7 +206,7 @@ public class StateMachine extends StateMachineBase<States> {
         );
 
         addStateEnd(States.SHOOT_READY,
-            Commands.waitUntil(() -> RobotContainer.autoReadyToShoot),
+            Commands.waitUntil(RobotState::isAutoReadyToShoot),
             States.SHOOT
         );
     }

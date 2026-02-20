@@ -173,7 +173,8 @@ public class SwerveSubsystem extends SubsystemBase implements
         ));
     }
 
-    private static final double autoTrenchStrength = 1;
+    private static final double autoTrenchMaxStrength = 1;
+    private static final double autoTrenchExp = 0.75;
     public void autoTrench() {
         backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> {
@@ -186,11 +187,11 @@ public class SwerveSubsystem extends SubsystemBase implements
                 boolean isRightTrench = nearRightTrench();
 
                 target = isRightTrench ? FieldConstants.getRightTrenchPose() : FieldConstants.getLeftTrenchPose();
-
-//                if (RobotState.getInstance().getRobotPose().getX() > target.getX()) {
-//                    stop();
-//                    return;
-//                }
+                target = new Pose2d(
+                    RobotState.getInstance().getRobotPose().getX(),
+                    target.getY(),
+                    Rotation2d.fromDegrees(Math.round(RobotState.getInstance().getRobotPose().getRotation().getDegrees() / 180) * 180)
+                );
 
                 Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
                 if (!getDriveInput().fieldRelative) {
@@ -201,14 +202,14 @@ public class SwerveSubsystem extends SubsystemBase implements
                 double dist = nearRightTrench()
                     ? RobotState.getInstance().getDistance(FieldConstants.getRightTrenchPose())
                     : RobotState.getInstance().getDistance(FieldConstants.getLeftTrenchPose());
-                double strength = Math.pow(Math.pow(autoTrenchStrength, 1 / 1.25) - Math.pow(autoTrenchStrength, 1 / 1.25) * (dist / PositionsConstants.Swerve.kAutoTrenchThreshold.get()), 1.25);
+                double strength = Math.pow(Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) - Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) * (dist / PositionsConstants.Swerve.kAutoTrenchThreshold.get()), autoTrenchExp);
                 strength = MathUtil.clamp(strength, 0, 1);
-                Logger.recordOutput("Swerve/Trench Strength", strength);
+                Logger.recordOutput("Robot/Swerve/Trench Strength", strength);
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
                     getDriveInput().vxMetersPerSecond,
                     getDriveInput().vyMetersPerSecond * (1 - strength) + pid.getY() * strength,
-                    getDriveInput().omegaRadiansPerSecond * (1 - strength) + SwerveController.getInstance().lookAt(Rotation2d.kZero) * strength,
+                    getDriveInput().omegaRadiansPerSecond * (1 - strength) + SwerveController.getInstance().lookAt(target.getRotation()) * strength,
                     getDriveInput().fieldRelative
                 ), "Auto Trench");
             })
@@ -339,9 +340,9 @@ public class SwerveSubsystem extends SubsystemBase implements
 
         SwerveController.getInstance().periodic();
 
-        Logger.recordOutput("Swerve/Auto Command", backgroundCommand.isRunning());
-        Logger.recordOutput("Swerve/Target", target);
-        Logger.recordOutput("Swerve/Delivery Target", PositionsConstants.Swerve.getDeliveryTarget());
-        Logger.recordOutput("Swerve/At Goal", atGoal());
+        Logger.recordOutput("Robot/Swerve/Auto Command", backgroundCommand.isRunning());
+        Logger.recordOutput("Robot/Swerve/Target", target);
+        Logger.recordOutput("Robot/Swerve/Delivery Target", PositionsConstants.Swerve.getDeliveryTarget());
+        Logger.recordOutput("Robot/Swerve/At Goal", atGoal());
     }
 }

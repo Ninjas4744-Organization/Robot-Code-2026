@@ -17,6 +17,8 @@ public class RobotState extends RobotStateWithSwerve<States> {
     private static States.ShootingMode shootingMode;
     private static boolean isIntake;
 
+    private static boolean autoReadyToShoot = false;
+
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
         robotState = States.UNKNOWN;
@@ -27,7 +29,7 @@ public class RobotState extends RobotStateWithSwerve<States> {
     }
 
     public static RobotState getInstance() {
-        return (RobotState) RobotStateBase.getInstance();
+        return (RobotState) RobotStateBase.get();
     }
 
     private final double iterations = 20;
@@ -83,6 +85,16 @@ public class RobotState extends RobotStateWithSwerve<States> {
     public static void setShootingMode(States.ShootingMode shootingMode) {
         Logger.recordOutput("Robot/Shooting/Shoot Mode", shootingMode.name());
         RobotState.shootingMode = shootingMode;
+    }
+
+
+    public static boolean isAutoReadyToShoot() {
+        return autoReadyToShoot;
+    }
+
+    public static void setAutoReadyToShoot(boolean autoReadyToShoot) {
+        RobotState.autoReadyToShoot = autoReadyToShoot;
+        Logger.recordOutput("Robot/Shooting/Auto Ready To Shoot", autoReadyToShoot);
     }
 
     public static double getMatchTime() {

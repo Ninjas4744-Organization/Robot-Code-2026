@@ -51,9 +51,8 @@ public class RobotContainer {
     private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
 
-    List<GamePieceProjectile> balls = new ArrayList<>();
+    List<GamePieceProjectile> simBalls = new ArrayList<>();
     private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(5);
-    public static boolean autoReadyToShoot = false;
 
     public RobotContainer() {
         intake = new Intake(false);
@@ -96,16 +95,16 @@ public class RobotContainer {
                     StateMachine.getInstance().changeRobotStateForce(States.IDLE);
             }));
 
-        new Trigger(() -> swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()).debounce(0.3)
+        new Trigger(() -> RobotState.isTeleop() && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
             .onTrue(Commands.runOnce(swerveSubsystem::autoTrench))
             .onFalse(Commands.runOnce(swerveSubsystem::stop));
 
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
                 if (Math.abs(shooter.getVelocity()) > 1 && RobotState.getInstance().getRobotState() == States.SHOOT) {
-                    if (balls.size() >= 15) {
-                        SimulatedArena.getInstance().removeProjectile(balls.get(0));
-                        balls.remove(0);
+                    if (simBalls.size() >= 15) {
+                        SimulatedArena.getInstance().removeProjectile(simBalls.get(0));
+                        simBalls.remove(0);
                     }
 
                     GamePieceProjectile ball = new RebuiltFuelOnFly(
@@ -118,7 +117,7 @@ public class RobotContainer {
                         Degrees.of(60)
                     );
 
-                    balls.add(ball);
+                    simBalls.add(ball);
                     SimulatedArena.getInstance().addGamePieceProjectile(ball);
                 }
             }).andThen(Commands.waitSeconds(0.1)).repeatedly().ignoringDisable(true));
@@ -149,17 +148,18 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> {
-            autoReadyToShoot = true;
+            RobotState.setAutoReadyToShoot(true);
             StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
         }));
 
         NamedCommands.registerCommand("Stop", Commands.runOnce(() -> {
-            autoReadyToShoot = false;
+            RobotState.setAutoReadyToShoot(false);
+            RobotState.setIntake(false);
             StateMachine.getInstance().changeRobotState(States.IDLE);
         }));
 
         NamedCommands.registerCommand("Intake", Commands.runOnce(() -> {
-            StateMachine.getInstance().changeRobotState(States.INTAKE);
+            RobotState.setIntake(true);
         }));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
@@ -172,8 +172,9 @@ public class RobotContainer {
         driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
 
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
-            autoReadyToShoot = false;
+            RobotState.setAutoReadyToShoot(false);
             swerveSubsystem.stop();
+            RobotState.setIntake(false);
             StateMachine.getInstance().changeRobotStateForce(States.IDLE);
         })));
 
@@ -181,10 +182,10 @@ public class RobotContainer {
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
             if (RobotState.getInstance().getRobotState() == States.SHOOT) {
-                autoReadyToShoot = false;
+                RobotState.setAutoReadyToShoot(false);
                 StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
             } else {
-                autoReadyToShoot = true;
+                RobotState.setAutoReadyToShoot(true);
                 StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
             }
         })));
@@ -271,9 +272,9 @@ public class RobotContainer {
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
 
-            Pose3d[] balls = new Pose3d[this.balls.size()];
-            for (int i = 0; i < this.balls.size(); i++) {
-                balls[i] = this.balls.get(i).getPose3d();
+            Pose3d[] balls = new Pose3d[this.simBalls.size()];
+            for (int i = 0; i < this.simBalls.size(); i++) {
+                balls[i] = this.simBalls.get(i).getPose3d();
             }
             Logger.recordOutput("Robot/Shooting/Balls", balls);
         }
