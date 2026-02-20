@@ -44,7 +44,7 @@ public class RobotState extends RobotStateWithSwerve<States> {
                 Logger.recordOutput("Robot/Shooting/Original Lookahead Target", new Pose3d(new Translation3d(target.getX(), target.getY(), originalTarget.getZ()), originalTarget.getRotation()));
         }
 
-        target = target.minus(RobotContainer.getRobotAcceleration().times(PositionsConstants.Swerve.kAccelerationFactor.get()));
+//        target = target.minus(RobotContainer.getRobotAcceleration().times(PositionsConstants.Swerve.kAccelerationFactor.get()));
 
         return new Pose3d(new Translation3d(target.getX(), target.getY(), originalTarget.getZ()), originalTarget.getRotation());
     }

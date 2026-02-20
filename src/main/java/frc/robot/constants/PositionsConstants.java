@@ -158,7 +158,10 @@ public class PositionsConstants {
         private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 5.5, false);
         public static final LoggedTunableNumber kDeliveryYThreshold = new LoggedTunableNumber("Swerve/Delivery Y Threshold", 5, false);
 
-        public static final LoggedTunableNumber kAccelerationFactor = new LoggedTunableNumber("Swerve/Acceleration Factor", 0.1, true);
+//        public static final LoggedTunableNumber kAccelerationFactor = new LoggedTunableNumber("Swerve/Acceleration Factor", 0, true);
+
+        public static final LoggedTunableNumber kAutoTrenchThreshold = new LoggedTunableNumber("Swerve/Auto Trench Threshold", 2, false);
+        public static final LoggedTunableNumber kAutoTrenchYThreshold = new LoggedTunableNumber("Swerve/Auto Trench Y Threshold", 1.75, false);
 
         public static Pose2d getDeliveryTarget() {
             return new Pose2d(kDeliveryTargetX.get(), kDeliveryTargetY.get(), Rotation2d.kZero);

@@ -67,25 +67,9 @@ public class SwerveSubsystem extends SubsystemBase implements
                     angleToHub = FieldConstants.getTranslationToHub().getAngle();
                 target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleToHub);
 
-                double vx = 0, vy = 0;
-                if (DriverStation.isAutonomous()) {
-                    if (autoInput != null) {
-                        if (GeneralConstants.Swerve.kDriverFieldRelative) {
-                            vx = autoInput.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).vxMetersPerSecond;
-                            vy = autoInput.getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()).vyMetersPerSecond;
-                        } else {
-                            vx = autoInput.getAsRobotRelative(RobotState.getInstance().getRobotPose().getRotation()).vxMetersPerSecond;
-                            vy = autoInput.getAsRobotRelative(RobotState.getInstance().getRobotPose().getRotation()).vyMetersPerSecond;
-                        }
-                    }
-                } else {
-                    vx = -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed;
-                    vy = -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed;
-                }
-
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
-                    vx,
-                    vy,
+                    getDriveInput().vxMetersPerSecond,
+                    getDriveInput().vyMetersPerSecond,
                     SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Look Hub");
@@ -158,8 +142,8 @@ public class SwerveSubsystem extends SubsystemBase implements
                 target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleToDelivery);
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
-                    -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-                    -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+                    getDriveInput().vxMetersPerSecond,
+                    getDriveInput().vyMetersPerSecond,
                     SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Delivery");
@@ -180,13 +164,71 @@ public class SwerveSubsystem extends SubsystemBase implements
                     Rotation2d.fromDegrees(Math.round(target.getRotation().getDegrees() / 90.0) * 90.0));
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
-                    -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-                    -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+                    getDriveInput().vxMetersPerSecond,
+                    getDriveInput().vyMetersPerSecond,
                     SwerveController.getInstance().lookAt(target.getRotation()),
                     GeneralConstants.Swerve.kDriverFieldRelative
                 ), "Snap Angle");
             })
         ));
+    }
+
+    private static final double autoTrenchStrength = 1;
+    public void autoTrench() {
+        backgroundCommand.setNewTask(Commands.sequence(
+            Commands.runOnce(() -> {
+                SwerveController.getInstance().setChannel("Auto Trench");
+            }),
+            Commands.run(() -> {
+                if (!nearLeftTrench() && !nearRightTrench())
+                    return;
+
+                boolean isRightTrench = nearRightTrench();
+
+                target = isRightTrench ? FieldConstants.getRightTrenchPose() : FieldConstants.getLeftTrenchPose();
+
+//                if (RobotState.getInstance().getRobotPose().getX() > target.getX()) {
+//                    stop();
+//                    return;
+//                }
+
+                Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
+                if (!getDriveInput().fieldRelative) {
+                    ChassisSpeeds pidRobotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(pid.getX(), pid.getY(), 0), RobotState.getInstance().getRobotPose().getRotation());
+                    pid = new Translation2d(pidRobotRelative.vxMetersPerSecond, pidRobotRelative.vyMetersPerSecond);
+                }
+
+                double dist = nearRightTrench()
+                    ? RobotState.getInstance().getDistance(FieldConstants.getRightTrenchPose())
+                    : RobotState.getInstance().getDistance(FieldConstants.getLeftTrenchPose());
+                double strength = Math.pow(Math.pow(autoTrenchStrength, 1 / 1.25) - Math.pow(autoTrenchStrength, 1 / 1.25) * (dist / PositionsConstants.Swerve.kAutoTrenchThreshold.get()), 1.25);
+                strength = MathUtil.clamp(strength, 0, 1);
+                Logger.recordOutput("Swerve/Trench Strength", strength);
+
+                SwerveController.getInstance().setControl(new SwerveSpeeds(
+                    getDriveInput().vxMetersPerSecond,
+                    getDriveInput().vyMetersPerSecond * (1 - strength) + pid.getY() * strength,
+                    getDriveInput().omegaRadiansPerSecond * (1 - strength) + SwerveController.getInstance().lookAt(Rotation2d.kZero) * strength,
+                    getDriveInput().fieldRelative
+                ), "Auto Trench");
+            })
+        ));
+    }
+
+    private SwerveSpeeds getDriveInput() {
+        if (DriverStation.isAutonomous()) {
+            if (autoInput == null)
+                return new SwerveSpeeds(0, 0, 0, GeneralConstants.Swerve.kDriverFieldRelative);
+
+            return autoInput.getAs(GeneralConstants.Swerve.kDriverFieldRelative);
+        }
+
+        return new SwerveSpeeds(
+            -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+            -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+            -MathUtil.applyDeadband(driverRightX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband) * GeneralConstants.Swerve.kDriverRotationSpeedFactor * SubsystemConstants.kSwerve.limits.maxAngularVelocity,
+            GeneralConstants.Swerve.kDriverFieldRelative
+        );
     }
 
     @Override
@@ -201,6 +243,18 @@ public class SwerveSubsystem extends SubsystemBase implements
             && (RobotState.getShootingMode() == States.ShootingMode.DELIVERY ? atAngle : atAngleSmart)
             && (RobotState.getShootingMode() == States.ShootingMode.ON_MOVE ? atAcceleration : true)
             && (RobotState.getShootingMode() == States.ShootingMode.ON_MOVE ? atMinDist : true);
+    }
+
+    public boolean nearLeftTrench() {
+        double leftTrenchDist = RobotState.getInstance().getDistance(FieldConstants.getLeftTrenchPose());
+        double robotY = RobotState.getInstance().getRobotPose().getY();
+        return leftTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getLeftTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
+    }
+
+    public boolean nearRightTrench() {
+        double rightTrenchDist = RobotState.getInstance().getDistance(FieldConstants.getRightTrenchPose());
+        double robotY = RobotState.getInstance().getRobotPose().getY();
+        return rightTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getRightTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
     }
 
     public boolean atAngle() {

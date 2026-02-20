@@ -202,7 +202,7 @@ public class SubsystemConstants {
         );
 
         /* Limits */
-        kSwerve.limits.maxSpeed = 4.2;
+        kSwerve.limits.maxSpeed = GeneralConstants.kRobotMode.isSim() ? 5.145 : 4.5;
         kSwerve.limits.maxAngularVelocity = 8.5;
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
@@ -211,7 +211,7 @@ public class SubsystemConstants {
         kSwerve.limits.maxForwardAcceleration = Double.MAX_VALUE;//10;
 
         /* Modules */
-        double wheelRadius = 0.048;
+        double wheelRadius = 0.05026;
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
@@ -245,10 +245,10 @@ public class SubsystemConstants {
             );
         }
 
-        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.291260;
-        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.482422;
-        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.264160;
-        kSwerve.modules.moduleConstants[3].CANCoderOffset = 0.475342;
+        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.293701;
+        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.476318;
+        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.267090;
+        kSwerve.modules.moduleConstants[3].CANCoderOffset = 0.481689;
 
         /* Gyro */
         kSwerve.gyro.gyroID = 5;
@@ -288,7 +288,7 @@ public class SubsystemConstants {
     public static final PathFollowingController kAutonomyConfig = new PPHolonomicDriveController(
 //        new PIDConstants(kSwerveController.drivePIDConstants.P, kSwerveController.drivePIDConstants.I, kSwerveController.drivePIDConstants.D),
 //        new PIDConstants(kSwerveController.rotationPIDConstants.P, kSwerveController.rotationPIDConstants.I, kSwerveController.rotationPIDConstants.D)
-        new PIDConstants(0, 0, 0),
+        new PIDConstants(3.5, 0, 0),
         new PIDConstants(kSwerveController.rotationPIDConstants.P, kSwerveController.rotationPIDConstants.I, kSwerveController.rotationPIDConstants.D)
     );
 

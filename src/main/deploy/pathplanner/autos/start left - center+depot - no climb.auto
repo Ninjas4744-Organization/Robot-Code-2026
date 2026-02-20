@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "start left - intake - shoot"
+            "pathName": "start left - center+depot - no climb"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

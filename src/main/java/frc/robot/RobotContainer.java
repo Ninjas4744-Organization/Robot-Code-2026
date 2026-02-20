@@ -96,6 +96,10 @@ public class RobotContainer {
                     StateMachine.getInstance().changeRobotStateForce(States.IDLE);
             }));
 
+        new Trigger(() -> swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()).debounce(0.3)
+            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench))
+            .onFalse(Commands.runOnce(swerveSubsystem::stop));
+
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
                 if (Math.abs(shooter.getVelocity()) > 1 && RobotState.getInstance().getRobotState() == States.SHOOT) {
@@ -169,6 +173,7 @@ public class RobotContainer {
 
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
             autoReadyToShoot = false;
+            swerveSubsystem.stop();
             StateMachine.getInstance().changeRobotStateForce(States.IDLE);
         })));
 

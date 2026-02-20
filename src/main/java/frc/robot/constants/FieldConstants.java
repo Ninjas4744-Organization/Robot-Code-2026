@@ -3,9 +3,7 @@ package frc.robot.constants;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.RobotState;
@@ -74,5 +72,13 @@ public class FieldConstants {
 
     public static double getDistToHub() {
         return RobotState.getInstance().getDistance(getHubPose().toPose2d());
+    }
+
+    public static Pose2d getLeftTrenchPose() {
+        return new Pose2d(4.65, 7.4, Rotation2d.kZero);
+    }
+
+    public static Pose2d getRightTrenchPose() {
+        return new Pose2d(4.65, 0.6, Rotation2d.kZero);
     }
 }
