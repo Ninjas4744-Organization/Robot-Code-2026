@@ -8,7 +8,9 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -20,6 +22,8 @@ public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private final RobotContainer robotContainer;
     public static double teleopStartTime;
+    private double lastLoopTime;
+    private double robotDt = 0.02;
 
     public Robot() {
         // Record metadata
@@ -50,11 +54,19 @@ public class Robot extends LoggedRobot {
         robotContainer = new RobotContainer();
     }
 
+    public double getRobotDt() {
+        return robotDt;
+    }
+
     @Override
     public void robotPeriodic() {
         robotContainer.controllerPeriodic();
         CommandScheduler.getInstance().run();
         robotContainer.periodic();
+
+        robotDt = RobotController.getFPGATime() / 1000000.0 - lastLoopTime;
+        Logger.recordOutput("Robot/Delta Time", getRobotDt());
+        lastLoopTime = RobotController.getFPGATime() / 1000000.0;
     }
 
     @Override
@@ -74,6 +86,9 @@ public class Robot extends LoggedRobot {
         robotContainer.reset();
         autonomousCommand = robotContainer.getAutonomousCommand();
 
+        Swerve.getInstance().setMaxSkidAcceleration(Double.MAX_VALUE);
+        Swerve.getInstance().setMaxForwardAcceleration(Double.MAX_VALUE);
+
         if (autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(autonomousCommand);
         }
@@ -91,6 +106,9 @@ public class Robot extends LoggedRobot {
     public void teleopInit() {
         teleopStartTime = RobotController.getFPGATime();
         robotContainer.reset();
+
+        Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
+        Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
     }
 
     @Override
@@ -104,6 +122,9 @@ public class Robot extends LoggedRobot {
     @Override
     public void testInit() {
 //        CommandScheduler.getInstance().cancelAll();
+
+        Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
+        Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
 
         CommandScheduler.getInstance().schedule(Commands.sequence(
             RobotContainer.getSwerve().reset(),

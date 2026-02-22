@@ -61,6 +61,6 @@ public class GeneralConstants {
         public static final double kMaxSpeedFilter = 2;
         public static final double kMaxAngularSpeedFilter = 2;
         public static final double kMaxAmbiguityFilter = 0.2;
-        public static final double kOdometryDriftPerMeter = 0.0177;
+        public static final double kOdometryDriftPerMeter = 0.02316;
     }
 }

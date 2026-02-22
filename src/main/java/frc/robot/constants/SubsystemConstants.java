@@ -207,20 +207,20 @@ public class SubsystemConstants {
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = Double.MAX_VALUE;//50;
-        kSwerve.limits.maxForwardAcceleration = Double.MAX_VALUE;//10;
+        kSwerve.limits.maxSkidAcceleration = 40;
+        kSwerve.limits.maxForwardAcceleration = 10;
 
         /* Modules */
-        double wheelRadius = 0.05026;
+        double wheelRadius = 0.051;
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
 //        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(60, 5, 3);
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(0, 0.5, 0, 0.2);
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(1, 0.25, 0, 0.2);
         kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.35;
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants.A = 1;
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants.A = 0.5;
 
         kSwerve.modules.steerMotorConstants = new ControllerConstants();
         kSwerve.modules.steerMotorConstants.real.base.currentLimit = 60;

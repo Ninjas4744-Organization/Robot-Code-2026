@@ -190,7 +190,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                 target = new Pose2d(
                     RobotState.getInstance().getRobotPose().getX(),
                     target.getY(),
-                    Rotation2d.fromDegrees(Math.round(RobotState.getInstance().getRobotPose().getRotation().getDegrees() / 180) * 180)
+                    Rotation2d.fromDegrees(Math.round(RobotState.getInstance().getRobotPose().getRotation().getDegrees() / 90) * 90)
                 );
 
                 Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());

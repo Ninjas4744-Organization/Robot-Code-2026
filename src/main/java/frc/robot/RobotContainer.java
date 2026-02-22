@@ -95,9 +95,9 @@ public class RobotContainer {
                     StateMachine.getInstance().changeRobotStateForce(States.IDLE);
             }));
 
-        new Trigger(() -> RobotState.isTeleop() && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
-            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench))
-            .onFalse(Commands.runOnce(swerveSubsystem::stop));
+//        new Trigger(() -> RobotState.isTeleop() && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
+//            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench))
+//            .onFalse(Commands.runOnce(swerveSubsystem::stop));
 
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
