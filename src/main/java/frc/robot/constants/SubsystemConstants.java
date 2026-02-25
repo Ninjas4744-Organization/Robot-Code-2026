@@ -51,7 +51,7 @@ public class SubsystemConstants {
         kIntakeOpen.real.base.currentLimit = 60;
 
         /* Control */
-        kIntakeOpen.real.control.controlConstants = ControlConstants.createProfiledPID(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kIntakeOpen.real.control.controlConstants = ControlConstants.createProfiledPIDF(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
         kIntakeOpen.real.control.positionGoalTolerance = 0.02;
 
         /* Soft Limits */
@@ -171,7 +171,7 @@ public class SubsystemConstants {
         kClimberAngle.real.base.currentLimit = 60;
 
         /* Control */
-        kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPID(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPIDF(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
         kClimberAngle.real.control.gearRatio = 1;
         kClimberAngle.real.control.conversionFactor = 1;
         kClimberAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);
@@ -209,6 +209,7 @@ public class SubsystemConstants {
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
         kSwerve.limits.maxSkidAcceleration = 40;
         kSwerve.limits.maxForwardAcceleration = 10;
+        kSwerve.limits.discretizeFactor = 2.75;
 
         /* Modules */
         double wheelRadius = 0.051;
@@ -286,8 +287,6 @@ public class SubsystemConstants {
 
 
     public static final PathFollowingController kAutonomyConfig = new PPHolonomicDriveController(
-//        new PIDConstants(kSwerveController.drivePIDConstants.P, kSwerveController.drivePIDConstants.I, kSwerveController.drivePIDConstants.D),
-//        new PIDConstants(kSwerveController.rotationPIDConstants.P, kSwerveController.rotationPIDConstants.I, kSwerveController.rotationPIDConstants.D)
         new PIDConstants(3.5, 0, 0),
         new PIDConstants(kSwerveController.rotationPIDConstants.P, kSwerveController.rotationPIDConstants.I, kSwerveController.rotationPIDConstants.D)
     );

@@ -95,9 +95,9 @@ public class RobotContainer {
                     StateMachine.getInstance().changeRobotStateForce(States.IDLE);
             }));
 
-//        new Trigger(() -> RobotState.isTeleop() && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
-//            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench))
-//            .onFalse(Commands.runOnce(swerveSubsystem::stop));
+        new Trigger(() -> RobotState.isTeleop() && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
+            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench))
+            .onFalse(Commands.runOnce(swerveSubsystem::stop));
 
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
@@ -191,11 +191,11 @@ public class RobotContainer {
         })));
 
         driverController.R3().onTrue(notTest(Commands.runOnce(swerveSubsystem::snapAngle)
-            .andThen(Commands.waitUntil(swerveSubsystem::atAngle))
+            .andThen(Commands.waitUntil(swerveSubsystem::atGoal))
             .finallyDo(swerveSubsystem::stop)));
 
-        driverController.cross().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE)));
-        driverController.circle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.SNAP_RING)));
+        driverController.cross().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.SNAP_RING)));
+        driverController.circle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE)));
         driverController.triangle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.LOCK)));
         driverController.square().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.DELIVERY)));
 
