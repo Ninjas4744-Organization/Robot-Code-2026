@@ -259,6 +259,8 @@ public class SubsystemConstants {
         /* Simulation */
         kSwerve.simulation.driveMotorType = DCMotor.getKrakenX60Foc(1);
         kSwerve.simulation.steerMotorType = DCMotor.getKrakenX60Foc(1);
+        kSwerve.simulation.swerveType = SwerveConstants.Simulation.SwerveType.Mark4n;
+        kSwerve.simulation.gearRatioLevel = 2;
 
         /* Special */
         kSwerve.special.enableOdometryThread = true;
