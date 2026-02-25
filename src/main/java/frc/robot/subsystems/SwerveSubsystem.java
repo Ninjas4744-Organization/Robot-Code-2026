@@ -274,9 +274,17 @@ public class SwerveSubsystem extends SubsystemBase implements
             return autoInput.getAs(GeneralConstants.Swerve.kDriverFieldRelative);
         }
 
+        Translation2d driverTranslation = new Translation2d(
+            -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband),
+            -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband)
+        );
+        driverTranslation = new Translation2d(Math.pow(driverTranslation.getNorm(), GeneralConstants.Swerve.kDriverPowFactor), driverTranslation.getAngle())
+            .times(GeneralConstants.Swerve.kDriverSpeedFactor)
+            .times(SubsystemConstants.kSwerve.limits.maxSpeed);
+
         return new SwerveSpeeds(
-            -Math.signum(driverLeftY.getAsDouble()) * Math.pow(MathUtil.applyDeadband(Math.abs(driverLeftY.getAsDouble()), GeneralConstants.Swerve.kJoystickDeadband), GeneralConstants.Swerve.kDriverPowFactor) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
-            -Math.signum(driverLeftX.getAsDouble()) * Math.pow(MathUtil.applyDeadband(Math.abs(driverLeftX.getAsDouble()), GeneralConstants.Swerve.kJoystickDeadband), GeneralConstants.Swerve.kDriverPowFactor) * GeneralConstants.Swerve.kDriverSpeedFactor * SubsystemConstants.kSwerve.limits.maxSpeed,
+            driverTranslation.getX(),
+            driverTranslation.getY(),
             -Math.signum(driverRightX.getAsDouble()) * Math.pow(MathUtil.applyDeadband(Math.abs(driverRightX.getAsDouble()), GeneralConstants.Swerve.kJoystickDeadband), GeneralConstants.Swerve.kDriverPowFactor) * GeneralConstants.Swerve.kDriverRotationSpeedFactor * SubsystemConstants.kSwerve.limits.maxAngularVelocity,
             GeneralConstants.Swerve.kDriverFieldRelative
         );
