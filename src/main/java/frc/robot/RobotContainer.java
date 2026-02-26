@@ -95,9 +95,11 @@ public class RobotContainer {
                     StateMachine.getInstance().changeRobotStateForce(States.IDLE);
             }));
 
-        new Trigger(() -> RobotState.isTeleop() && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
-            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench))
-            .onFalse(Commands.runOnce(swerveSubsystem::stop));
+        new Trigger(() -> RobotState.isTeleop() && Set.of(States.IDLE, States.INTAKE).contains(RobotState.getInstance().getRobotState()) && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
+            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench));
+
+        new Trigger(() -> !swerveSubsystem.nearRightTrench() && !swerveSubsystem.nearLeftTrench() && Set.of(States.IDLE, States.INTAKE).contains(RobotState.getInstance().getRobotState()) && !StateMachine.getInstance().isTransitioning())
+            .onTrue(Commands.runOnce(swerveSubsystem::stop));
 
         if (GeneralConstants.kRobotMode.isSim()) {
             CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
@@ -110,7 +112,7 @@ public class RobotContainer {
                     GamePieceProjectile ball = new RebuiltFuelOnFly(
                         RobotState.getInstance().getRobotPose().getTranslation(),
                         new Translation2d(),
-                        Swerve.getInstance().getSpeeds().getAsFieldRelative(RobotState.getInstance().getRobotPose().getRotation()),
+                        Swerve.getInstance().getSpeeds().getAsFieldRelative(),
                         RobotState.getInstance().getRobotPose().getRotation(),
                         Meters.of(0.481),
                         MetersPerSecond.of(13.25 * Math.abs(shooter.getGoal()) / 100),
