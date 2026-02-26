@@ -266,9 +266,6 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
         Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
 
-//        if (visionSubsystem.getMegaTag1Pose() != null && visionSubsystem.getMegaTag1DistFromTag() <= 2)
-//            RobotState.getInstance().resetGyro(Swerve.getInstance().getGyro().getYaw().times(0.9).plus(visionSubsystem.getMegaTag1Pose().getRotation().times(0.1)));
-
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
 
@@ -285,7 +282,8 @@ public class RobotContainer {
     }
 
     public void reset() {
-//        RobotState.getInstance().resetGyro(visionSubsystem.getLastMegaTag1Pose().getRotation());
+        RobotState.getInstance().resetGyro(visionSubsystem.getMegaTag1Pose().getRotation());
+
         if (GeneralConstants.kRobotMode.isComp()) {
             StateMachine.getInstance().forceRobotState(States.STARTING_POSE);
             StateMachine.getInstance().changeRobotStateForce(States.IDLE);

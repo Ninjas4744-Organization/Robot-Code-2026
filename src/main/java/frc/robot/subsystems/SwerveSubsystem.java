@@ -278,7 +278,7 @@ public class SwerveSubsystem extends SubsystemBase implements
             -MathUtil.applyDeadband(driverLeftY.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband),
             -MathUtil.applyDeadband(driverLeftX.getAsDouble(), GeneralConstants.Swerve.kJoystickDeadband)
         );
-        driverTranslation = new Translation2d(Math.pow(driverTranslation.getNorm(), GeneralConstants.Swerve.kDriverPowFactor), driverTranslation.getAngle())
+        driverTranslation = new Translation2d(Math.pow(driverTranslation.getNorm(), GeneralConstants.Swerve.kDriverPowFactor), driverTranslation.equals(new Translation2d()) ? Rotation2d.kZero : driverTranslation.getAngle())
             .times(GeneralConstants.Swerve.kDriverSpeedFactor)
             .times(SubsystemConstants.kSwerve.limits.maxSpeed);
 
