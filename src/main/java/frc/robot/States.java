@@ -3,8 +3,9 @@ package frc.robot;
 public enum States {
     UNKNOWN,
     STARTING_POSE,
-    IDLE,
     RESET,
+    IDLE,
+    BALLS_READY,
 
     INTAKE,
 

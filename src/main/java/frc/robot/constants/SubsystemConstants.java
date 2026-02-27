@@ -51,11 +51,19 @@ public class SubsystemConstants {
         kIntakeOpen.real.base.currentLimit = 60;
 
         /* Control */
-        kIntakeOpen.real.control.controlConstants = ControlConstants.createProfiledPIDF(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
+        kIntakeOpen.real.control.controlConstants = ControlConstants.createProfiledPIDF(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kIntakeOpen.real.control.positionGoalTolerance = 0.02;
 
         /* Soft Limits */
         kIntakeOpen.real.softLimits.max = 0.5;
+
+        /* Hard Limit */
+        kIntakeOpen.real.hardLimit.enable = true;
+        kIntakeOpen.real.hardLimit.id = 2;
+        kIntakeOpen.real.hardLimit.inverted = false;
+        kIntakeOpen.real.hardLimit.direction = -1;
+        kIntakeOpen.real.hardLimit.autoStopReset = true;
+        kIntakeOpen.real.hardLimit.homePosition = 0;
 
         /* Simulation */
         kIntakeOpen.simMotor = DCMotor.getKrakenX60(1);
@@ -105,15 +113,16 @@ public class SubsystemConstants {
         /* Base */
         kShooter.real.base.main.id = 30;
         kShooter.real.base.main.inverted = true;
-        kShooter.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
+        kShooter.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants(), new SimpleControllerConstants() };
         kShooter.real.base.followers[0].id = 31;
         kShooter.real.base.followers[0].inverted = true;
-        kShooter.real.base.currentLimit = 90;
+        kShooter.real.base.followers[1].id = 32;
+        kShooter.real.base.followers[1].inverted = true;
+        kShooter.real.base.currentLimit = 60;
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createPID(0, 0, 0,Double.POSITIVE_INFINITY);
-        kShooter.real.control.controlConstants.V = 0.125;
+        kShooter.real.control.controlConstants = ControlConstants.createPIDF(0, 0, 0, Double.POSITIVE_INFINITY, 0.125, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kShooter.real.control.velocityGoalTolerance = 6;
 
         /* Simulation */
@@ -132,8 +141,7 @@ public class SubsystemConstants {
         kAccelerator.real.base.isBrakeMode = false;
 
         /* Control */
-        kAccelerator.real.control.controlConstants = ControlConstants.createPID(0.4, 0, 0, 0);
-        kAccelerator.real.control.controlConstants.V = 0.13;
+        kAccelerator.real.control.controlConstants = ControlConstants.createPIDF(0, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kAccelerator.real.control.velocityGoalTolerance = 10;
 
         /* Simulation */

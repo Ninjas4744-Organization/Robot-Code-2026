@@ -52,7 +52,7 @@ public class RobotContainer {
     private LoggedDashboardChooser<Command> autoChooser;
 
     List<GamePieceProjectile> simBalls = new ArrayList<>();
-    private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(5);
+    private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(1);
 
     public RobotContainer() {
         intake = new Intake(false);
@@ -164,6 +164,10 @@ public class RobotContainer {
             RobotState.setIntake(true);
         }));
 
+        NamedCommands.registerCommand("Climb", Commands.runOnce(() -> {
+//            StateMachine.getInstance().changeRobotState();
+        }));
+
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
     }
 
@@ -177,7 +181,7 @@ public class RobotContainer {
             RobotState.setAutoReadyToShoot(false);
             swerveSubsystem.stop();
             RobotState.setIntake(false);
-            StateMachine.getInstance().changeRobotStateForce(States.IDLE);
+            StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
         })));
 
         driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(true))));
@@ -198,7 +202,7 @@ public class RobotContainer {
 
         driverController.cross().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.SNAP_RING)));
         driverController.circle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE)));
-        driverController.triangle().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.LOCK)));
+        driverController.triangle().onTrue(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.IDLE)));
         driverController.square().onTrue(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.DELIVERY)));
 
         driverController.L2().onTrue(notTest(Commands.runOnce(() -> {

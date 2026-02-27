@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.commands.DetachedCommand;
@@ -93,6 +94,16 @@ public class StateMachine extends StateMachineBase<States> {
             closeIntake()
         ));
 
+        addEdge(States.BALLS_READY, States.IDLE, Commands.sequence(
+            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
+            Commands.waitUntil(intakeOpen::atGoal)
+        ));
+
+        addEdge(States.IDLE, States.BALLS_READY, Commands.sequence(
+            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
+            Commands.waitUntil(intakeOpen::atGoal)
+        ));
+
         addStateEnd(States.RESET, Commands.waitUntil(
             () -> intake.isReset()
             && intakeOpen.isReset()
@@ -106,7 +117,8 @@ public class StateMachine extends StateMachineBase<States> {
     }
 
     private void intakeCommands() {
-        addEdge(States.IDLE, States.INTAKE, activateIntake());
+        addEdge(List.of(States.IDLE, States.BALLS_READY), States.INTAKE, this::activateIntake);
+        addEdge(States.INTAKE, States.BALLS_READY, Commands.runOnce(intake::stopCmd));
         addEdge(States.INTAKE, States.IDLE, closeIntake());
 
         addStateEnd(States.IDLE,
@@ -114,16 +126,21 @@ public class StateMachine extends StateMachineBase<States> {
             States.INTAKE
         );
 
+        addStateEnd(States.BALLS_READY,
+            Commands.waitUntil(RobotState::isIntake),
+            States.INTAKE
+        );
+
         addStateEnd(States.INTAKE,
             Commands.waitUntil(() -> !RobotState.isIntake()),
-            States.IDLE
+            States.BALLS_READY
         );
     }
 
     private void shootingCommands() {
         addEdge(States.IDLE, States.SHOOT_HEATED, shooter.setVelocityCmd(PositionsConstants.Shooter.kShootHeat.get()));
 
-        addEdge(List.of(States.IDLE, States.SHOOT_HEATED, States.SHOOT_READY, States.SHOOT), States.SHOOT_PREPARE, () -> Commands.sequence(
+        addEdge(List.of(States.IDLE, States.BALLS_READY, States.SHOOT_HEATED, States.SHOOT_READY, States.SHOOT), States.SHOOT_PREPARE, () -> Commands.sequence(
             activateShooting(),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
             indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
@@ -139,7 +156,8 @@ public class StateMachine extends StateMachineBase<States> {
                    RobotState.setShootingMode(States.ShootingMode.LOCK);
             }),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
+            indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
+            intakeOpen.slowClose()
         ));
         addStateCommand(States.SHOOT, updateIntake());
 
@@ -162,10 +180,22 @@ public class StateMachine extends StateMachineBase<States> {
             States.SHOOT,
             States.DUMP), States.IDLE, () -> Commands.sequence(
             stopShooting(),
+
             closeIntake()
         ));
 
-        addEdge(States.IDLE, States.DUMP, Commands.sequence(
+        addEdge(List.of(States.SHOOT_HEATED,
+            States.SHOOT_PREPARE,
+            States.SHOOT_READY,
+            States.SHOOT,
+            States.DUMP), States.BALLS_READY, () -> Commands.sequence(
+            stopShooting(),
+
+            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
+            Commands.waitUntil(intakeOpen::atGoal)
+        ));
+
+        addEdge(List.of(States.IDLE, States.BALLS_READY), States.DUMP, () -> Commands.sequence(
             shooter.setVelocityCmd(PositionsConstants.Shooter.kDump.get()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
@@ -174,7 +204,7 @@ public class StateMachine extends StateMachineBase<States> {
 
         addStateEnd(States.SHOOT,
             Commands.waitUntil(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3)),
-            States.IDLE
+            States.BALLS_READY
         );
 
         addStateEnd(States.SHOOT_PREPARE,
@@ -261,8 +291,10 @@ public class StateMachine extends StateMachineBase<States> {
     private Command updateIntake() {
         return Commands.run(() -> {
             if (RobotState.isIntake() != lastIsIntake) {
-                if (RobotState.isIntake()) activateIntake();
-                else closeIntake();
+                if (RobotState.isIntake())
+                    CommandScheduler.getInstance().schedule(activateIntake());
+                else
+                    intake.stop();
                 lastIsIntake = RobotState.isIntake();
             }
         }).beforeStarting(() -> lastIsIntake = false);

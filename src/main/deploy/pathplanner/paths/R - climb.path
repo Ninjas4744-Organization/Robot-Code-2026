@@ -3,32 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.5,
-        "y": 5.7
+        "x": 3.5,
+        "y": 0.65
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.8369190589303306,
-        "y": 5.303575439339835
+        "x": 3.1776867469879515,
+        "y": 1.1391566265060238
       },
       "isLocked": false,
-      "linkedName": "depot"
-    },
-    {
-      "anchor": {
-        "x": 1.75,
-        "y": 5.1736724633429025
-      },
-      "prevControl": {
-        "x": 1.3793414532381048,
-        "y": 5.669355246222368
-      },
-      "nextControl": {
-        "x": 1.8997145759847978,
-        "y": 4.973458713221458
-      },
-      "isLocked": false,
-      "linkedName": null
+      "linkedName": "R"
     },
     {
       "anchor": {
@@ -36,8 +20,8 @@
         "y": 3.75
       },
       "prevControl": {
-        "x": 1.6987931622435748,
-        "y": 4.431457129388384
+        "x": 1.877710755171899,
+        "y": 3.5350814968100157
       },
       "nextControl": null,
       "isLocked": false,
@@ -49,7 +33,7 @@
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 2.0,
+      "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 4.0,
@@ -61,32 +45,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Shoot",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "sequential",
-        "data": {
-          "commands": [
-            {
-              "type": "named",
-              "data": {
-                "name": "Stop"
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "Shoot"
-              }
-            }
-          ]
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.75,
     "maxAcceleration": 5.0,

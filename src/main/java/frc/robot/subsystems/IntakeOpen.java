@@ -3,11 +3,13 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.subsystem.IO;
 import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -20,13 +22,16 @@ public class IntakeOpen extends SubsystemBase implements
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
 
+    private BackgroundCommand slowCloseCommand = new BackgroundCommand();
+
     public IntakeOpen(boolean enabled) {
         this.enabled = enabled;
+
         if (enabled) {
             if (!GeneralConstants.kRobotMode.isReplay())
                 this.io = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kIntakeOpen);
             else
-                this.io = new IO.All<>(){};
+                this.io = new IO.All<>() {};
             io.setup();
         }
     }
@@ -47,7 +52,10 @@ public class IntakeOpen extends SubsystemBase implements
     @Override
     public Command reset() {
         if (!enabled) return Commands.none();
-        return Commands.runOnce(() -> io.setPercent(-0.4))
+        return Commands.runOnce(() -> {
+                slowCloseCommand.stop();
+                io.setPercent(-0.4);
+            })
             .andThen(Commands.waitUntil(this::isReset))
             .finallyDo(io::stopMotor);
     }
@@ -70,11 +78,20 @@ public class IntakeOpen extends SubsystemBase implements
     @Override
     public void setPosition(double position) {
         if (!enabled) return;
+        slowCloseCommand.stop();
         io.setPosition(position);
     }
 
     @Override
     public Command setPositionCmd(double position) {
         return Commands.runOnce(() -> setPosition(position));
+    }
+
+    public Command slowClose() {
+        return slowCloseCommand.setNewTaskCommand(Commands.sequence(
+            Commands.runOnce(() -> io.setVelocity(-0.1)),
+            Commands.waitUntil(this::isReset),
+            setPositionCmd(PositionsConstants.IntakeOpen.kClose.get())
+        ));
     }
 }

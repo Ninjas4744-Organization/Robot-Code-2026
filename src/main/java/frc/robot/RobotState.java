@@ -70,8 +70,8 @@ public class RobotState extends RobotStateWithSwerve<States> {
 
     public static boolean isShootReady() {
         boolean isReady = RobotContainer.getSwerve().atGoal()
-            && RobotContainer.getShooter().atGoal();
-            //&& RobotContainer.getAccelerator().atGoal();
+            && RobotContainer.getShooter().atGoal()
+            && RobotContainer.getAccelerator().atGoal();
 
         return shootingMode == States.ShootingMode.DELIVERY
             ? isReady && RobotState.getInstance().getRobotPose().getY() > PositionsConstants.Swerve.kDeliveryYThreshold.get()
