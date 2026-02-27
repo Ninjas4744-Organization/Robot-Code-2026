@@ -59,8 +59,8 @@ public class RobotContainer {
         intakeOpen = new IntakeOpen(false);
         indexer = new Indexer(false);
         indexer2 = new Indexer2(false);
-        shooter = new Shooter(true);
-        accelerator = new Accelerator(true);
+        shooter = new Shooter(false);
+        accelerator = new Accelerator(false);
         climber = new Climber(false);
         climberAngle = new ClimberAngle(false);
         leds = new Leds(false);
@@ -272,6 +272,11 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
         Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
 
+        if (DriverStation.isDisabled()) {
+            if (visionSubsystem.getMegaTag1Pose() != null)
+                RobotState.getInstance().resetGyro(visionSubsystem.getMegaTag1Pose().getRotation());
+        }
+
         if(GeneralConstants.kRobotMode.isSim()) {
             SimulatedArena.getInstance().simulationPeriodic();
 
@@ -288,8 +293,6 @@ public class RobotContainer {
     }
 
     public void reset() {
-        RobotState.getInstance().resetGyro(visionSubsystem.getMegaTag1Pose().getRotation());
-
         if (GeneralConstants.kRobotMode.isComp()) {
             StateMachine.getInstance().forceRobotState(States.STARTING_POSE);
             StateMachine.getInstance().changeRobotStateForce(States.IDLE);

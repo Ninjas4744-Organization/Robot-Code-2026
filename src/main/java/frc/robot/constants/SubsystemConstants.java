@@ -31,6 +31,7 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIntake.real.base.main.id = 20;
+        kIntake.real.base.main.inverted = true;
         kIntake.real.base.currentLimit = 60;
 
         /* Control */
@@ -76,7 +77,7 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIndexer.real.base.main.id = 22;
-        kIndexer.real.base.main.inverted = true;
+        kIndexer.real.base.main.inverted = false;
         kIndexer.real.base.currentLimit = 60;
 
         /* Control */
@@ -112,12 +113,12 @@ public class SubsystemConstants {
     static {
         /* Base */
         kShooter.real.base.main.id = 30;
-        kShooter.real.base.main.inverted = true;
+        kShooter.real.base.main.inverted = false;
         kShooter.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants(), new SimpleControllerConstants() };
         kShooter.real.base.followers[0].id = 31;
-        kShooter.real.base.followers[0].inverted = true;
+        kShooter.real.base.followers[0].inverted = false;
         kShooter.real.base.followers[1].id = 32;
-        kShooter.real.base.followers[1].inverted = true;
+        kShooter.real.base.followers[1].inverted = false;
         kShooter.real.base.currentLimit = 60;
         kShooter.real.base.isBrakeMode = false;
 
@@ -135,8 +136,8 @@ public class SubsystemConstants {
     public static final ControllerConstants kAccelerator = new ControllerConstants();
     static {
         /* Base */
-        kAccelerator.real.base.main.id = 32;
-        kAccelerator.real.base.main.inverted = true;
+        kAccelerator.real.base.main.id = 33;
+        kAccelerator.real.base.main.inverted = false;
         kAccelerator.real.base.currentLimit = 80;
         kAccelerator.real.base.isBrakeMode = false;
 
@@ -210,32 +211,30 @@ public class SubsystemConstants {
         );
 
         /* Limits */
-        kSwerve.limits.maxSpeed = GeneralConstants.kRobotMode.isSim() ? 5.145 : 4.5;
+        kSwerve.limits.maxSpeed = GeneralConstants.kRobotMode.isSim() ? 5.145 : 4.7;
         kSwerve.limits.maxAngularVelocity = 8.5;
         kSwerve.limits.speedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationSpeedLimit = Double.MAX_VALUE;
         kSwerve.limits.rotationAccelerationLimit = Double.MAX_VALUE;
-        kSwerve.limits.maxSkidAcceleration = 40;
-        kSwerve.limits.maxForwardAcceleration = 10;
+        kSwerve.limits.maxSkidAcceleration = 60;
+        kSwerve.limits.maxForwardAcceleration = 20;
         kSwerve.limits.discretizeFactor = 2.75;
 
         /* Modules */
-        double wheelRadius = 0.051;
+        double wheelRadius = 0.049;
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
 //        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(60, 5, 3);
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPID(1, 0.25, 0, 0.2);
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants.V = 2.35;
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants.A = 0.5;
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPIDF(1, 0, 0, 0.5, 2.35, 0.25, 0.3, 0, GravityTypeValue.Elevator_Static);
 
         kSwerve.modules.steerMotorConstants = new ControllerConstants();
         kSwerve.modules.steerMotorConstants.real.base.currentLimit = 60;
         kSwerve.modules.steerMotorConstants.real.control.gearRatio = 18.75;
         kSwerve.modules.steerMotorConstants.real.control.conversionFactor = 2 * Math.PI;
-        kSwerve.modules.steerMotorConstants.real.control.controlConstants = ControlConstants.createPID(10, 0, 0, 0);
+        kSwerve.modules.steerMotorConstants.real.control.controlConstants = ControlConstants.createPID(25, 30, 0.25, Math.PI);
 
         kSwerve.modules.driveControllerType = Controller.ControllerType.TalonFX;
         kSwerve.modules.steerControllerType = Controller.ControllerType.TalonFX;
@@ -254,10 +253,10 @@ public class SubsystemConstants {
             );
         }
 
-        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.293701;
-        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.476318;
-        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.267090;
-        kSwerve.modules.moduleConstants[3].CANCoderOffset = 0.481689;
+        kSwerve.modules.moduleConstants[0].CANCoderOffset = -0.294189;
+        kSwerve.modules.moduleConstants[1].CANCoderOffset = -0.472412;
+        kSwerve.modules.moduleConstants[2].CANCoderOffset = -0.274170;
+        kSwerve.modules.moduleConstants[3].CANCoderOffset = 0.481934;
 
         /* Gyro */
         kSwerve.gyro.gyroID = 5;

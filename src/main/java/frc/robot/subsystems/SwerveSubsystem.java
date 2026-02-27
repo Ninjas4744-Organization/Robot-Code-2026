@@ -285,7 +285,7 @@ public class SwerveSubsystem extends SubsystemBase implements
         return new SwerveSpeeds(
             driverTranslation.getX(),
             driverTranslation.getY(),
-            -Math.signum(driverRightX.getAsDouble()) * Math.pow(MathUtil.applyDeadband(Math.abs(driverRightX.getAsDouble()), GeneralConstants.Swerve.kJoystickDeadband), GeneralConstants.Swerve.kDriverPowFactor) * GeneralConstants.Swerve.kDriverRotationSpeedFactor * SubsystemConstants.kSwerve.limits.maxAngularVelocity,
+            -Math.signum(driverRightX.getAsDouble()) * Math.pow(MathUtil.applyDeadband(Math.abs(driverRightX.getAsDouble()), GeneralConstants.Swerve.kJoystickDeadband), GeneralConstants.Swerve.kDriverRotationPowFactor) * GeneralConstants.Swerve.kDriverRotationSpeedFactor * SubsystemConstants.kSwerve.limits.maxAngularVelocity,
             GeneralConstants.Swerve.kDriverFieldRelative
         );
     }
