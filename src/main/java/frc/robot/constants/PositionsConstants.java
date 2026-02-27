@@ -21,17 +21,17 @@ public class PositionsConstants {
     }
 
     public static class Intake {
-        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 35, false);
+        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 65, false);
     }
 
     public static class Indexer {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 30, false);
-        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index", -10, false);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 26, false);
+        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index", -15, false);
     }
 
     public static class Indexer2 {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer2/Index", 30, false);
-        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer2/Index", -10, false);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer2/Index", 28.5, false);
+        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer2/Index", -15, false);
     }
 
     public static class IntakeOpen {

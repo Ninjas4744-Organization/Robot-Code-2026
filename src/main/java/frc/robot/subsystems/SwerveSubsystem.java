@@ -52,7 +52,7 @@ public class SwerveSubsystem extends SubsystemBase implements
     }
 
     private Rotation2d lastLookHubTargetAngle = new Rotation2d();
-    private double lookHubFF = 1;
+    private double lookHubFF = 0;
     public void lookHub() {
         if (!enabled)
             return;

@@ -55,12 +55,12 @@ public class RobotContainer {
     private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(1);
 
     public RobotContainer() {
-        intake = new Intake(false);
+        intake = new Intake(true);
         intakeOpen = new IntakeOpen(false);
-        indexer = new Indexer(false);
-        indexer2 = new Indexer2(false);
-        shooter = new Shooter(false);
-        accelerator = new Accelerator(false);
+        indexer = new Indexer(true);
+        indexer2 = new Indexer2(true);
+        shooter = new Shooter(true);
+        accelerator = new Accelerator(true);
         climber = new Climber(false);
         climberAngle = new ClimberAngle(false);
         leds = new Leds(false);

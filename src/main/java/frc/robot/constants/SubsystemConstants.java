@@ -31,12 +31,12 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIntake.real.base.main.id = 20;
-        kIntake.real.base.main.inverted = true;
+        kIntake.real.base.main.inverted = false;
         kIntake.real.base.currentLimit = 60;
+        kIntake.real.base.isBrakeMode = false;
 
         /* Control */
-         kIntake.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kIntake.real.control.gearRatio = 2;
+        kIntake.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, 0, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
 
         /* Simulation */
         kIntake.simMotor = DCMotor.getKrakenX60(1);
@@ -77,12 +77,12 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIndexer.real.base.main.id = 22;
-        kIndexer.real.base.main.inverted = false;
+        kIndexer.real.base.main.inverted = true;
         kIndexer.real.base.currentLimit = 60;
+        kIndexer.real.base.isBrakeMode = false;
 
         /* Control */
-        kIndexer.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kIndexer.real.control.gearRatio = 2;
+        kIndexer.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
 
         /* Simulation */
         kIndexer.simMotor = DCMotor.getKrakenX60(1);
@@ -95,12 +95,12 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIndexer2.real.base.main.id = 23;
-        kIndexer2.real.base.main.inverted = true;
+        kIndexer2.real.base.main.inverted = false;
         kIndexer2.real.base.currentLimit = 60;
+        kIndexer2.real.base.isBrakeMode = false;
 
         /* Control */
-        kIndexer2.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kIndexer2.real.control.gearRatio = 2;
+        kIndexer2.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
 
         /* Simulation */
         kIndexer2.simMotor = DCMotor.getKrakenX60(1);
@@ -113,7 +113,7 @@ public class SubsystemConstants {
     static {
         /* Base */
         kShooter.real.base.main.id = 30;
-        kShooter.real.base.main.inverted = false;
+        kShooter.real.base.main.inverted = true;
         kShooter.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants(), new SimpleControllerConstants() };
         kShooter.real.base.followers[0].id = 31;
         kShooter.real.base.followers[0].inverted = false;
@@ -123,7 +123,7 @@ public class SubsystemConstants {
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createPIDF(0, 0, 0, Double.POSITIVE_INFINITY, 0.125, 0, 0, 0, GravityTypeValue.Elevator_Static);
+        kShooter.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kShooter.real.control.velocityGoalTolerance = 6;
 
         /* Simulation */
@@ -137,7 +137,7 @@ public class SubsystemConstants {
     static {
         /* Base */
         kAccelerator.real.base.main.id = 33;
-        kAccelerator.real.base.main.inverted = false;
+        kAccelerator.real.base.main.inverted = true;
         kAccelerator.real.base.currentLimit = 80;
         kAccelerator.real.base.isBrakeMode = false;
 
