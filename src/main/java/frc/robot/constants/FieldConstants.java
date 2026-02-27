@@ -67,11 +67,11 @@ public class FieldConstants {
     }
 
     public static Translation2d getTranslationToHub() {
-        return RobotState.getInstance().getTranslation(getHubPose().toPose2d());
+        return RobotState.get().getTranslation(getHubPose().toPose2d());
     }
 
     public static double getDistToHub() {
-        return RobotState.getInstance().getDistance(getHubPose().toPose2d());
+        return RobotState.get().getDistance(getHubPose().toPose2d());
     }
 
     public static Pose2d getLeftTrenchPose() {

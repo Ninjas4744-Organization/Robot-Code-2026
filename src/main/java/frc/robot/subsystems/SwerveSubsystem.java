@@ -62,15 +62,15 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setChannel("Look Hub");
 //                SwerveController.getInstance().resetLookAt();
 
-                lastLookHubTargetAngle = RobotState.getInstance().getLookaheadTargetAngle(FieldConstants.getHubPose());
-                if (RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()) < PositionsConstants.Swerve.kTargetMinThreshold.get())
+                lastLookHubTargetAngle = RobotState.get().getLookaheadTargetAngle(FieldConstants.getHubPose());
+                if (RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose()) < PositionsConstants.Swerve.kTargetMinThreshold.get())
                     lastLookHubTargetAngle = FieldConstants.getTranslationToHub().getAngle();
             }),
             Commands.run(() -> {
-                Rotation2d angleToHub = RobotState.getInstance().getLookaheadTargetAngle(FieldConstants.getHubPose());
-                if (RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()) < PositionsConstants.Swerve.kTargetMinThreshold.get())
+                Rotation2d angleToHub = RobotState.get().getLookaheadTargetAngle(FieldConstants.getHubPose());
+                if (RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose()) < PositionsConstants.Swerve.kTargetMinThreshold.get())
                     angleToHub = FieldConstants.getTranslationToHub().getAngle();
-                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleToHub);
+                target = new Pose2d(RobotState.get().getRobotPose().getX(), RobotState.get().getRobotPose().getY(), angleToHub);
 
                 double FF = target.getRotation().minus(lastLookHubTargetAngle).div(0.02).times(lookHubFF).getRadians();
                 Logger.recordOutput("Robot/Swerve/Look Hub Target Rotational Velocity", target.getRotation().minus(lastLookHubTargetAngle).div(0.02).getRadians());
@@ -92,7 +92,7 @@ public class SwerveSubsystem extends SubsystemBase implements
             return;
 
         backgroundCommand.setNewTask(Commands.runOnce(() -> {
-            target = RobotState.getInstance().getRobotPose();
+            target = RobotState.get().getRobotPose();
 
             SwerveController.getInstance().setChannel("Lock");
             Swerve.getInstance().lockWheelsToX();
@@ -106,7 +106,7 @@ public class SwerveSubsystem extends SubsystemBase implements
         backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> {
                 double dist = FieldConstants.getDistToHub();
-                Pose2d robot = RobotState.getInstance().getRobotPose();
+                Pose2d robot = RobotState.get().getRobotPose();
                 Transform2d transform = new Transform2d();
 
                 if (dist > PositionsConstants.Swerve.kHubMaxDist.get()) {
@@ -148,8 +148,8 @@ public class SwerveSubsystem extends SubsystemBase implements
                 Pose3d deliveryTarget = new Pose3d(PositionsConstants.Swerve.getDeliveryTarget());
                 deliveryTarget = new Pose3d(deliveryTarget.getX(), deliveryTarget.getY(), 0, Rotation3d.kZero);
 
-                Rotation2d angleToDelivery = RobotState.getInstance().getLookaheadTargetAngle(deliveryTarget);
-                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(), RobotState.getInstance().getRobotPose().getY(), angleToDelivery);
+                Rotation2d angleToDelivery = RobotState.get().getLookaheadTargetAngle(deliveryTarget);
+                target = new Pose2d(RobotState.get().getRobotPose().getX(), RobotState.get().getRobotPose().getY(), angleToDelivery);
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
                     getDriveInput().vxMetersPerSecond,
@@ -164,13 +164,13 @@ public class SwerveSubsystem extends SubsystemBase implements
     public void snapAngle() {
         backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> {
-                target = RobotState.getInstance().getRobotPose();
+                target = RobotState.get().getRobotPose();
                 target = new Pose2d(target.getX(), target.getY(), Rotation2d.fromDegrees(Math.round(target.getRotation().getDegrees() / 90.0) * 90.0));
                 SwerveController.getInstance().setChannel("Snap Angle");
             }),
             Commands.run(() -> {
-                target = new Pose2d(RobotState.getInstance().getRobotPose().getX(),
-                    RobotState.getInstance().getRobotPose().getY(),
+                target = new Pose2d(RobotState.get().getRobotPose().getX(),
+                    RobotState.get().getRobotPose().getY(),
                     Rotation2d.fromDegrees(Math.round(target.getRotation().getDegrees() / 90.0) * 90.0));
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
@@ -198,20 +198,20 @@ public class SwerveSubsystem extends SubsystemBase implements
 
                 target = isRightTrench ? FieldConstants.getRightTrenchPose() : FieldConstants.getLeftTrenchPose();
                 target = new Pose2d(
-                    RobotState.getInstance().getRobotPose().getX(),
+                    RobotState.get().getRobotPose().getX(),
                     target.getY(),
-                    Rotation2d.fromDegrees(Math.round(RobotState.getInstance().getRobotPose().getRotation().getDegrees() / 90) * 90)
+                    Rotation2d.fromDegrees(Math.round(RobotState.get().getRobotPose().getRotation().getDegrees() / 90) * 90)
                 );
 
                 Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
                 if (!getDriveInput().fieldRelative) {
-                    ChassisSpeeds pidRobotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(pid.getX(), pid.getY(), 0), RobotState.getInstance().getRobotPose().getRotation());
+                    ChassisSpeeds pidRobotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(pid.getX(), pid.getY(), 0), RobotState.get().getRobotPose().getRotation());
                     pid = new Translation2d(pidRobotRelative.vxMetersPerSecond, pidRobotRelative.vyMetersPerSecond);
                 }
 
                 double dist = nearRightTrench()
-                    ? RobotState.getInstance().getDistance(FieldConstants.getRightTrenchPose())
-                    : RobotState.getInstance().getDistance(FieldConstants.getLeftTrenchPose());
+                    ? RobotState.get().getDistance(FieldConstants.getRightTrenchPose())
+                    : RobotState.get().getDistance(FieldConstants.getLeftTrenchPose());
                 double strength = Math.pow(Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) - Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) * (dist / PositionsConstants.Swerve.kAutoTrenchThreshold.get()), autoTrenchExp);
                 strength = MathUtil.clamp(strength, 0, 1);
                 Logger.recordOutput("Robot/Swerve/Trench Strength", strength);
@@ -228,11 +228,11 @@ public class SwerveSubsystem extends SubsystemBase implements
 
     @Override
     public boolean atGoal() {
-        boolean atPos = RobotState.getInstance().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get();
-        boolean atAngleSmart = Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleThresholdBase.get() + PositionsConstants.Swerve.kAngleThresholdCoefficient.get() * FieldConstants.getDistToHub());
-        boolean atAngle = Math.abs(target.getRotation().minus(RobotState.getInstance().getRobotPose().getRotation()).getDegrees()) < PositionsConstants.Swerve.kAngleThreshold.get();
+        boolean atPos = RobotState.get().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get();
+        boolean atAngleSmart = Math.abs(target.getRotation().minus(RobotState.get().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleThresholdBase.get() + PositionsConstants.Swerve.kAngleThresholdCoefficient.get() * FieldConstants.getDistToHub());
+        boolean atAngle = Math.abs(target.getRotation().minus(RobotState.get().getRobotPose().getRotation()).getDegrees()) < PositionsConstants.Swerve.kAngleThreshold.get();
         boolean atAcceleration = RobotContainer.getRobotAcceleration().getNorm() < PositionsConstants.Swerve.kMaxAcceleration.get();
-        boolean atMinDist = RobotState.getInstance().getLookaheadTargetDist(FieldConstants.getHubPose()) > PositionsConstants.Swerve.kHubMinDist.get();
+        boolean atMinDist = RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose()) > PositionsConstants.Swerve.kHubMinDist.get();
 
         return switch (SwerveController.getInstance().getChannel()) {
             case "Look Hub" -> atAngleSmart && atAcceleration && atMinDist;
@@ -255,14 +255,14 @@ public class SwerveSubsystem extends SubsystemBase implements
     }
 
     public boolean nearLeftTrench() {
-        double leftTrenchDist = RobotState.getInstance().getDistance(FieldConstants.getLeftTrenchPose());
-        double robotY = RobotState.getInstance().getRobotPose().getY();
+        double leftTrenchDist = RobotState.get().getDistance(FieldConstants.getLeftTrenchPose());
+        double robotY = RobotState.get().getRobotPose().getY();
         return leftTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getLeftTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
     }
 
     public boolean nearRightTrench() {
-        double rightTrenchDist = RobotState.getInstance().getDistance(FieldConstants.getRightTrenchPose());
-        double robotY = RobotState.getInstance().getRobotPose().getY();
+        double rightTrenchDist = RobotState.get().getDistance(FieldConstants.getRightTrenchPose());
+        double robotY = RobotState.get().getRobotPose().getY();
         return rightTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getRightTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
     }
 

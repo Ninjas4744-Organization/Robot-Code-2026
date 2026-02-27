@@ -310,6 +310,6 @@ public class SubsystemConstants {
 
         kVision.fieldLayoutGetter = FieldConstants::getFieldLayoutWithIgnored;
         kVision.isReplay = GeneralConstants.kRobotMode.isReplay();
-        kVision.robotPoseSupplier = () -> RobotState.getInstance().getRobotPose();
+        kVision.robotPoseSupplier = () -> RobotState.get().getRobotPose();
     }
 }

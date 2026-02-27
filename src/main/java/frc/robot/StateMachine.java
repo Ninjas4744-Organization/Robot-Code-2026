@@ -118,7 +118,7 @@ public class StateMachine extends StateMachineBase<States> {
 
     private void intakeCommands() {
         addEdge(List.of(States.IDLE, States.BALLS_READY), States.INTAKE, this::activateIntake);
-        addEdge(States.INTAKE, States.BALLS_READY, Commands.runOnce(intake::stopCmd));
+        addEdge(States.INTAKE, States.BALLS_READY, intake.stopCmd());
         addEdge(States.INTAKE, States.IDLE, closeIntake());
 
         addStateEnd(States.IDLE,
@@ -140,7 +140,7 @@ public class StateMachine extends StateMachineBase<States> {
     private void shootingCommands() {
         addEdge(States.IDLE, States.SHOOT_HEATED, shooter.setVelocityCmd(PositionsConstants.Shooter.kShootHeat.get()));
 
-        addEdge(List.of(States.IDLE, States.BALLS_READY, States.SHOOT_HEATED, States.SHOOT_READY, States.SHOOT), States.SHOOT_PREPARE, () -> Commands.sequence(
+        addEdge(List.of(States.IDLE, States.BALLS_READY, States.INTAKE, States.SHOOT_HEATED, States.SHOOT_READY, States.SHOOT), States.SHOOT_PREPARE, () -> Commands.sequence(
             activateShooting(),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
             indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
@@ -157,22 +157,22 @@ public class StateMachine extends StateMachineBase<States> {
             }),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
             indexer2.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            intakeOpen.slowClose()
+            intakeOpen.slowClose().onlyIf(() -> !RobotState.isIntake())
         ));
-        addStateCommand(States.SHOOT, updateIntake());
 
         addEdge(States.SHOOT, States.SHOOT_READY, Commands.sequence(
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
             indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
         ));
 
-        addStateCommand(States.SHOOT, Commands.run(() -> {
-            if (GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3)) {
-                leds.blink(Color.kRed, 0.3);
-            }
-        }).finallyDo(() -> {
-            leds.stop();
-        }));
+        addStateCommand(States.SHOOT, Commands.parallel(
+            Commands.run(() -> {
+                if (GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3))
+                    leds.blink(Color.kRed, 0.3);
+            }).finallyDo(leds::stop),
+
+            updateIntake()
+        ));
 
         addEdge(List.of(States.SHOOT_HEATED,
             States.SHOOT_PREPARE,
@@ -191,6 +191,7 @@ public class StateMachine extends StateMachineBase<States> {
             States.DUMP), States.BALLS_READY, () -> Commands.sequence(
             stopShooting(),
 
+            intake.stopCmd(),
             intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
@@ -293,11 +294,14 @@ public class StateMachine extends StateMachineBase<States> {
             if (RobotState.isIntake() != lastIsIntake) {
                 if (RobotState.isIntake())
                     CommandScheduler.getInstance().schedule(activateIntake());
-                else
+                else {
                     intake.stop();
+                    if (RobotState.get().getRobotState() == States.SHOOT)
+                        CommandScheduler.getInstance().schedule(intakeOpen.slowClose());
+                }
                 lastIsIntake = RobotState.isIntake();
             }
-        }).beforeStarting(() -> lastIsIntake = false);
+        }).beforeStarting(() -> lastIsIntake = !RobotState.isIntake());
     }
 
     private Command activateShooting() {

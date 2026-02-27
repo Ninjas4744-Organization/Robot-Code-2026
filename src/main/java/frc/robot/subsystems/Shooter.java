@@ -128,7 +128,7 @@ public class Shooter extends SubsystemBase implements
         backgroundCommand.setNewTask(Commands.run(() -> {
             io.setVelocity(
                 PositionsConstants.Shooter.getShootSpeed(
-                    RobotState.getInstance().getLookaheadTargetDist(
+                    RobotState.get().getLookaheadTargetDist(
                         FieldConstants.getHubPose()
                     )));
         }));
@@ -144,7 +144,7 @@ public class Shooter extends SubsystemBase implements
 
             io.setVelocity(
                 PositionsConstants.Shooter.getDeliverySpeed(
-                    RobotState.getInstance().getLookaheadTargetDist(
+                    RobotState.get().getLookaheadTargetDist(
                         target
                     )));
         }));
