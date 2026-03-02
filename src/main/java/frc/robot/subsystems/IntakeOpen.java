@@ -87,9 +87,11 @@ public class IntakeOpen extends SubsystemBase implements
         return Commands.runOnce(() -> setPosition(position));
     }
 
-    public Command slowClose() {
-        if (!enabled) return Commands.none();
-        return slowCloseCommand.setNewTaskCommand(Commands.sequence(
+    public void slowClose() {
+        if (!enabled)
+            return;
+
+        slowCloseCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> io.setVelocity(-0.1)),
             Commands.waitUntil(this::isReset),
             setPositionCmd(PositionsConstants.IntakeOpen.kClose.get())

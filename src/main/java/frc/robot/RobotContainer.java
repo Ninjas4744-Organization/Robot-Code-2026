@@ -68,21 +68,30 @@ public class RobotContainer {
         configureAuto();
         configureBindings();
         configureTestBindings();
+        configureTriggers();
 
+        if (GeneralConstants.kRobotMode.isSim()) {
+            Simulation.setup();
+        }
+    }
+
+    private void configureTriggers() {
         new Trigger(RobotState::isHubActive)
             .onChange(Commands.runOnce(() -> {
                 if (!GeneralConstants.enableAutoTiming)
                     return;
 
-                if (RobotState.isHubActive()) RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
-                else                          RobotState.setShootingMode(States.ShootingMode.DELIVERY);
+                if (RobotState.isHubActive())
+                    RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
+                else
+                    RobotState.setShootingMode(States.ShootingMode.DELIVERY);
 
                 if (Set.of(States.SHOOT_HEATED,
-                    States.SHOOT_PREPARE,
-                    States.SHOOT_READY,
-                    States.SHOOT)
+                        States.SHOOT_PREPARE,
+                        States.SHOOT_READY,
+                        States.SHOOT)
                     .contains(RobotState.get().getRobotState()))
-                    StateMachine.getInstance().changeRobotStateForce(States.IDLE);
+                    StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
             }));
 
         new Trigger(() -> RobotState.isTeleop() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
@@ -90,17 +99,15 @@ public class RobotContainer {
 
         new Trigger(() -> !swerveSubsystem.nearRightTrench() && !swerveSubsystem.nearLeftTrench() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && !StateMachine.getInstance().isTransitioning())
             .onTrue(Commands.runOnce(swerveSubsystem::stop));
-
-        if (GeneralConstants.kRobotMode.isSim()) {
-            Simulation.setup();
-        }
     }
 
     private void configureBindings() {
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(visionSubsystem.getMegaTag1Pose() == null ? Rotation2d.kZero : visionSubsystem.getMegaTag1Pose().getRotation())));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(Rotation2d.kZero)));
         driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateForceCommand(States.RESET)));
-        driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
+        driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
+
+        driverController.options().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
 
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
             RobotState.setAutoReadyToShoot(false);
@@ -109,7 +116,7 @@ public class RobotContainer {
             StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
         })));
 
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(true))));
+        driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(!RobotState.isIntake()))));
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
             if (RobotState.get().getRobotState() == States.SHOOT) {
@@ -121,38 +128,23 @@ public class RobotContainer {
             }
         })));
 
+        driverController.L2().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.CLIMB1_READY)));
+
         driverController.R3().onTrue(notTest(Commands.runOnce(swerveSubsystem::snapAngle)
             .andThen(Commands.waitUntil(swerveSubsystem::atGoal))
             .finallyDo(swerveSubsystem::stop)
             .onlyIf(() -> Set.of(States.IDLE, States.BALLS_READY, States.INTAKE, States.DUMP).contains(RobotState.get().getRobotState()))));
 
-        driverController.cross().onTrue (notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.SNAP_RING))));
-        driverController.circle().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE))));
+        driverController.cross().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE))));
         driverController.square().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.DELIVERY))));
-
-        driverController.triangle().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(false))));
-
-        driverController.options().onTrue(notTest(Commands.runOnce(() -> StateMachine.getInstance().changeRobotState(States.IDLE))));
-
-        driverController.L2().onTrue(notTest(Commands.runOnce(() -> {
-            // Climbing shit
-        })));
     }
 
     private Command inTest(Command command) {
-        return Commands.either(
-            command,
-            Commands.none(),
-            DriverStation::isTest
-        );
+        return command.onlyIf(DriverStation::isTest);
     }
 
     private Command notTest(Command command) {
-        return Commands.either(
-            Commands.none(),
-            command,
-            DriverStation::isTest
-        );
+        return command.unless(DriverStation::isTest);
     }
 
     private void configureTestBindings() {
@@ -198,9 +190,11 @@ public class RobotContainer {
             RobotState.setIntake(true);
         }));
 
-        NamedCommands.registerCommand("Climb", Commands.runOnce(() -> {
-//            StateMachine.getInstance().changeRobotState();
-        }));
+        NamedCommands.registerCommand("Climb", Commands.sequence(
+            StateMachine.getInstance().changeRobotStateCommand(States.IDLE),
+            Commands.waitUntil(() -> RobotState.get().getRobotState() == States.IDLE),
+            StateMachine.getInstance().changeRobotStateCommand(States.CLIMB1_READY)
+        ));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
     }
@@ -254,8 +248,12 @@ public class RobotContainer {
 
     public void reset() {
         if (GeneralConstants.kRobotMode.isComp()) {
-            StateMachine.getInstance().forceRobotState(States.STARTING_POSE);
-            StateMachine.getInstance().changeRobotStateForce(States.IDLE);
+            if (!RobotState.isTeleop()) {
+                StateMachine.getInstance().forceRobotState(States.STARTING_POSE);
+                StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
+            } else {
+                StateMachine.getInstance().changeRobotState(States.CLIMB_DOWN);
+            }
         }
         else {
             StateMachine.getInstance().forceRobotState(States.UNKNOWN);
