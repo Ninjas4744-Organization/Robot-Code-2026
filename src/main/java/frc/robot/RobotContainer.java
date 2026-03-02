@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.NinjasLib.DerivativeCalculator2d;
@@ -23,17 +22,10 @@ import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.*;
-import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
-import org.ironmaple.simulation.seasonspecific.rebuilt2026.RebuiltFuelOnFly;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
-
-import static edu.wpi.first.units.Units.*;
 
 public class RobotContainer {
     private static SwerveSubsystem swerveSubsystem;
@@ -50,8 +42,6 @@ public class RobotContainer {
 
     private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
-
-    List<GamePieceProjectile> simBalls = new ArrayList<>();
     private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(1);
 
     public RobotContainer() {
@@ -102,27 +92,7 @@ public class RobotContainer {
             .onTrue(Commands.runOnce(swerveSubsystem::stop));
 
         if (GeneralConstants.kRobotMode.isSim()) {
-            CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
-                if (Math.abs(shooter.getVelocity()) > 1 && RobotState.get().getRobotState() == States.SHOOT) {
-                    if (simBalls.size() >= 15) {
-                        SimulatedArena.getInstance().removeProjectile(simBalls.get(0));
-                        simBalls.remove(0);
-                    }
-
-                    GamePieceProjectile ball = new RebuiltFuelOnFly(
-                        RobotState.get().getRobotPose().getTranslation(),
-                        new Translation2d(),
-                        Swerve.getInstance().getSpeeds().getAsFieldRelative(),
-                        RobotState.get().getRobotPose().getRotation(),
-                        Meters.of(0.481),
-                        MetersPerSecond.of(13.25 * Math.abs(shooter.getGoal()) / 100),
-                        Degrees.of(60)
-                    );
-
-                    simBalls.add(ball);
-                    SimulatedArena.getInstance().addGamePieceProjectile(ball);
-                }
-            }).andThen(Commands.waitSeconds(0.1)).repeatedly().ignoringDisable(true));
+            Simulation.setup();
         }
     }
 
@@ -186,18 +156,6 @@ public class RobotContainer {
     }
 
     private void configureTestBindings() {
-//        driverController.R2().toggleOnTrue(inTest(Commands.startEnd(
-//            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
-//                Commands.runOnce(() -> shooter.autoHubVelocity()),
-//                Commands.waitUntil(() -> shooter.atGoal()),
-//                accelerator.setVelocityCmd(80)
-//            )),
-//            () -> CommandScheduler.getInstance().schedule(Commands.sequence(
-//                accelerator.stopCmd(),
-//                shooter.stopCmd()
-//            ))
-//        )));
-
         driverController.L2().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
         driverController.R2().onTrue(inTest(Commands.runOnce(() -> RobotState.get().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
     }
@@ -277,7 +235,7 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
         Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
 
-        if (DriverStation.isDisabled()) {
+        if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
             framesSinceGyroUpdate++;
             if (framesSinceGyroUpdate >= 25 && visionSubsystem.getMegaTag1Pose() != null) {
                 RobotState.get().resetGyro(visionSubsystem.getMegaTag1Pose().getRotation());
@@ -286,13 +244,7 @@ public class RobotContainer {
         }
 
         if(GeneralConstants.kRobotMode.isSim()) {
-            SimulatedArena.getInstance().simulationPeriodic();
-
-            Pose3d[] balls = new Pose3d[this.simBalls.size()];
-            for (int i = 0; i < this.simBalls.size(); i++) {
-                balls[i] = this.simBalls.get(i).getPose3d();
-            }
-            Logger.recordOutput("Robot/Shooting/Balls", balls);
+            Simulation.periodic();
         }
     }
 

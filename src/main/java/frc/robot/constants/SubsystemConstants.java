@@ -201,7 +201,7 @@ public class SubsystemConstants {
         /* Chassis */
         kSwerve.chassis.trackWidth = 0.59475;
         kSwerve.chassis.wheelBase = 0.51855;
-        kSwerve.chassis.bumperLength = 0.8709;
+        kSwerve.chassis.bumperLength = 0.8079;
         kSwerve.chassis.bumperWidth = 0.8841;
         kSwerve.chassis.kinematics = new SwerveDriveKinematics(
             new Translation2d(kSwerve.chassis.wheelBase / 2.0, kSwerve.chassis.trackWidth / 2.0),
