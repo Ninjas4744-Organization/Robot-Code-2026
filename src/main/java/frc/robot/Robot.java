@@ -22,6 +22,7 @@ public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private final RobotContainer robotContainer;
     public static double teleopStartTime;
+    public static double autoStartTime;
     private double lastLoopTime;
     private double robotDt = 0.02;
 
@@ -83,6 +84,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
+        autoStartTime = RobotController.getFPGATime();
         robotContainer.reset();
         autonomousCommand = robotContainer.getAutonomousCommand();
 

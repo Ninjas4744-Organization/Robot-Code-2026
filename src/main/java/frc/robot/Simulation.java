@@ -21,6 +21,7 @@ import static edu.wpi.first.units.Units.*;
 public class Simulation {
     private static List<GamePieceProjectile> simFlyingBalls = new ArrayList<>();
     private static List<GamePieceOnFieldSimulation> simFieldBalls = new ArrayList<>();
+    private static int ballsCollected = 0;
 
     private static void spawnBalls() {
         for (int x = 7 * 5; x <= 10 * 5; x++) {
@@ -36,11 +37,14 @@ public class Simulation {
         spawnBalls();
 
         CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
-            if (Math.abs(RobotContainer.getShooter().getVelocity()) > 10 && RobotState.get().getRobotState() == States.SHOOT) {
+            if (ballsCollected > 0 && Math.abs(RobotContainer.getShooter().getVelocity()) > 10 && RobotState.get().getRobotState() == States.SHOOT) {
 //                if (simFlyingBalls.size() >= 15) {
 //                    SimulatedArena.getInstance().removeProjectile(simFlyingBalls.get(0));
 //                    simFlyingBalls.remove(0);
 //                }
+
+                ballsCollected--;
+                Logger.recordOutput("Balls Collected", ballsCollected);
 
                 GamePieceProjectile ball = new RebuiltFuelOnFly(
                     RobotState.get().getRobotPose().getTranslation(),
@@ -81,7 +85,7 @@ public class Simulation {
             }
         }
 
-        if (RobotContainer.getIntake().getVelocity() > 10) {
+        if (RobotContainer.getIntake().getVelocity() > 10 && ballsCollected < 40) {
             var fieldBallsIter = simFieldBalls.iterator();
             while (fieldBallsIter.hasNext()) {
                 GamePieceOnFieldSimulation ball = fieldBallsIter.next();
@@ -109,6 +113,8 @@ public class Simulation {
                 if (simBallColliding(intakeCenter, intakeWidth, intakeHeight, ball.getPose3d().toPose2d().getTranslation(), ballRadius)) {
                     SimulatedArena.getInstance().removePiece(ball);
                     fieldBallsIter.remove();
+                    ballsCollected++;
+                    Logger.recordOutput("Balls Collected", ballsCollected);
                 }
             }
         }

@@ -7,6 +7,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -20,6 +23,7 @@ import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveSpeeds;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.*;
 import org.littletonrobotics.junction.Logger;
@@ -43,6 +47,8 @@ public class RobotContainer {
     private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
     private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(1);
+    private NinjasTimebar timebar;
+    private Field2d logField = new Field2d();
 
     public RobotContainer() {
         intake = new Intake(true);
@@ -73,6 +79,8 @@ public class RobotContainer {
         if (GeneralConstants.kRobotMode.isSim()) {
             Simulation.setup();
         }
+
+        timebar = new NinjasTimebar("Timebar");
     }
 
     private void configureTriggers() {
@@ -85,6 +93,8 @@ public class RobotContainer {
                     RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
                 else
                     RobotState.setShootingMode(States.ShootingMode.DELIVERY);
+
+                RobotState.setIntake(false);
 
                 if (Set.of(States.SHOOT_HEATED,
                         States.SHOOT_PREPARE,
@@ -229,6 +239,10 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
         Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
 
+        logField.setRobotPose(RobotState.get().getRobotPose());
+        logField.getObject("Target").setPose(RobotState.getShootingMode() == States.ShootingMode.DELIVERY ? PositionsConstants.Swerve.getDeliveryTarget() : RobotState.get().getLookaheadTargetPose(FieldConstants.getHubPose()).toPose2d());
+        SmartDashboard.putData("Field", logField);
+
         if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
             framesSinceGyroUpdate++;
             if (framesSinceGyroUpdate >= 25 && visionSubsystem.getMegaTag1Pose() != null) {
@@ -239,6 +253,13 @@ public class RobotContainer {
 
         if(GeneralConstants.kRobotMode.isSim()) {
             Simulation.periodic();
+        }
+
+        if (DriverStation.isEnabled()) {
+            if (DriverStation.isAutonomous())
+                timebar.update((RobotController.getFPGATime() - Robot.autoStartTime) / 1000000, true);
+            else
+                timebar.update((RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000 + 20, RobotState.isWonAuto());
         }
     }
 

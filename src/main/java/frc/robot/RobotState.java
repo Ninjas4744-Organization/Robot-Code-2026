@@ -101,11 +101,29 @@ public class RobotState extends RobotStateWithSwerve<States> {
         return 140 - (RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000;
     }
 
+    public static boolean isWonAuto() {
+        Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
+        if (alliance.isEmpty()) return true;
+
+        if (!GeneralConstants.kRobotMode.isSim()) {
+            String gameData = DriverStation.getGameSpecificMessage();
+            if (gameData.isEmpty()) return true;
+
+            return switch (gameData.charAt(0)) {
+                case 'R' -> alliance.get() == DriverStation.Alliance.Red;
+                case 'B' -> alliance.get() == DriverStation.Alliance.Blue;
+                default -> true;
+            };
+        }
+
+        return true;
+    }
+
     public static boolean isHubActiveAtTime(double matchTime) {
         Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
         if (alliance.isEmpty()) return false;
 
-        boolean shift1Active = true;
+        boolean shift1Active = false;
         if (!GeneralConstants.kRobotMode.isSim()) {
             String gameData = DriverStation.getGameSpecificMessage();
             if (gameData.isEmpty()) return true;
