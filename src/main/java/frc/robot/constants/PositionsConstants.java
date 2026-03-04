@@ -156,7 +156,7 @@ public class PositionsConstants {
 
         private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 2.5, false);
         private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 5.5, false);
-        public static final LoggedTunableNumber kDeliveryYThreshold = new LoggedTunableNumber("Swerve/Delivery Y Threshold", 5, false);
+        public static final LoggedTunableNumber kDeliveryYThreshold = new LoggedTunableNumber("Swerve/Delivery Y Threshold", 3.5, false);
 
 //        public static final LoggedTunableNumber kAccelerationFactor = new LoggedTunableNumber("Swerve/Acceleration Factor", 0, true);
 

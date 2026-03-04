@@ -86,11 +86,8 @@ public class Robot extends LoggedRobot {
     public void autonomousInit() {
         autoStartTime = RobotController.getFPGATime();
         robotContainer.reset();
+
         autonomousCommand = robotContainer.getAutonomousCommand();
-
-        Swerve.getInstance().setMaxSkidAcceleration(Double.MAX_VALUE);
-        Swerve.getInstance().setMaxForwardAcceleration(Double.MAX_VALUE);
-
         if (autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(autonomousCommand);
         }
@@ -108,9 +105,6 @@ public class Robot extends LoggedRobot {
     public void teleopInit() {
         teleopStartTime = RobotController.getFPGATime();
         robotContainer.reset();
-
-        Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
-        Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
     }
 
     @Override

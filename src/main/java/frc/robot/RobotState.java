@@ -73,9 +73,10 @@ public class RobotState extends RobotStateWithSwerve<States> {
             && RobotContainer.getShooter().atGoal()
             && RobotContainer.getAccelerator().atGoal();
 
-        return shootingMode == States.ShootingMode.DELIVERY
-            ? isReady && RobotState.get().getRobotPose().getY() > PositionsConstants.Swerve.kDeliveryYThreshold.get()
-            : isReady;
+        if (shootingMode == States.ShootingMode.DELIVERY)
+            return isReady && !RobotState.isHubActive() && RobotState.get().getRobotPose().getY() > PositionsConstants.Swerve.kDeliveryYThreshold.get();
+        else
+            return isReady && RobotState.isHubActive();
     }
 
     public static States.ShootingMode getShootingMode() {

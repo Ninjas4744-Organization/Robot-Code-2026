@@ -17,12 +17,18 @@ import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class VisionSubsystem extends SubsystemBase {
+    private boolean enabled = true;
+
     private double odometryDrift = 0;
     private Pose2d lastVisionPosePassed = new Pose2d();
     private Pose2d lastVisionPose = new Pose2d();
+
     private Pose2d megaTag1Pose = new Pose2d();
     private double megaTag1DistFromTag;
-    private boolean enabled = true;
+
+    private boolean resettedGyro = false;
+    private boolean resettedPose = false;
+    private int framesSinceGyroUpdate = 25;
 
     public VisionSubsystem() {
         Vision.setInstance(new Vision(SubsystemConstants.kVision));
@@ -34,6 +40,15 @@ public class VisionSubsystem extends SubsystemBase {
 
         odometryDrift += Swerve.getInstance().getOdometryTwist().getNorm() * GeneralConstants.Vision.kOdometryDriftPerMeter;
         Logger.recordOutput("Vision/Odometry Drift", odometryDrift);
+
+        if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
+            framesSinceGyroUpdate++;
+            if (framesSinceGyroUpdate >= 25 && getMegaTag1Pose() != null) {
+                RobotState.get().resetGyro(getMegaTag1Pose().getRotation());
+                resettedGyro = true;
+                framesSinceGyroUpdate = 0;
+            }
+        }
 
         megaTag1Pose = null;
         megaTag1DistFromTag = 0;
@@ -55,13 +70,14 @@ public class VisionSubsystem extends SubsystemBase {
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Passed Filters", passedFilters);
             Logger.recordOutput("Vision/" + estimation.cameraName + "/Strength", strength.get(0, 0));
 
-            if ((passedFilters || DriverStation.isDisabled()) && enabled) {
+            if ((passedFilters || (DriverStation.isDisabled() && resettedGyro)) && enabled) {
                 Logger.recordOutput("Vision/" + estimation.cameraName + "/Vision Pose (Passed Filters)", estimation.robotPose);
 
-                RobotState.get().updateRobotPose(!DriverStation.isDisabled() ? estimation.robotPose : estimation.robotPoseMegaTag1, estimation.timestamp, strength);
+                RobotState.get().updateRobotPose(estimation.robotPose, estimation.timestamp, strength);
                 lastVisionPosePassed = estimation.robotPose;
 
                 odometryDrift *= 1 - strength.get(0, 0);
+                resettedPose = true;
             }
         }
     }
@@ -102,6 +118,14 @@ public class VisionSubsystem extends SubsystemBase {
 
     public double getMegaTag1DistFromTag() {
         return megaTag1DistFromTag;
+    }
+
+    public boolean isResettedGyro() {
+        return resettedGyro;
+    }
+
+    public boolean isResettedPose() {
+        return resettedPose;
     }
 
     public void setEnabled(boolean enabled) {

@@ -180,7 +180,7 @@ public class StateMachine extends StateMachineBase<States> {
 
         addStateCommand(States.SHOOT, Commands.parallel(
             Commands.run(() -> {
-                if (GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3))
+                if (GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(GeneralConstants.autoTimingSeconds))
                     leds.blink(Color.kRed, 0.3);
             }).finallyDo(leds::stop),
 
@@ -220,7 +220,7 @@ public class StateMachine extends StateMachineBase<States> {
 
 
         addStateEnd(States.SHOOT,
-            () -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(3),
+            () -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(GeneralConstants.autoTimingSeconds),
             States.BALLS_READY
         );
 

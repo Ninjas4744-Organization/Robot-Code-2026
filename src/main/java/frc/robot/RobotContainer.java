@@ -3,16 +3,12 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.NinjasLib.DerivativeCalculator2d;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
@@ -28,8 +24,6 @@ import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.*;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
-import java.util.Set;
 
 public class RobotContainer {
     private static SwerveSubsystem swerveSubsystem;
@@ -72,94 +66,16 @@ public class RobotContainer {
         visionSubsystem = new VisionSubsystem();
 
         configureAuto();
-        configureBindings();
-        configureTestBindings();
-        configureTriggers();
+        Triggers.setControllers(driverController);
+        Triggers.configureBindings();
+        Triggers.configureTestBindings();
+        Triggers.configureTriggers();
 
         if (GeneralConstants.kRobotMode.isSim()) {
             Simulation.setup();
         }
 
         timebar = new NinjasTimebar("Timebar");
-    }
-
-    private void configureTriggers() {
-        new Trigger(RobotState::isHubActive)
-            .onChange(Commands.runOnce(() -> {
-                if (!GeneralConstants.enableAutoTiming)
-                    return;
-
-                if (RobotState.isHubActive())
-                    RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
-                else
-                    RobotState.setShootingMode(States.ShootingMode.DELIVERY);
-
-                RobotState.setIntake(false);
-
-                if (Set.of(States.SHOOT_HEATED,
-                        States.SHOOT_PREPARE,
-                        States.SHOOT_READY,
-                        States.SHOOT)
-                    .contains(RobotState.get().getRobotState()))
-                    StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
-            }));
-
-        new Trigger(() -> RobotState.isTeleop() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && (swerveSubsystem.nearRightTrench() || swerveSubsystem.nearLeftTrench()))
-            .onTrue(Commands.runOnce(swerveSubsystem::autoTrench));
-
-        new Trigger(() -> !swerveSubsystem.nearRightTrench() && !swerveSubsystem.nearLeftTrench() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && !StateMachine.getInstance().isTransitioning())
-            .onTrue(Commands.runOnce(swerveSubsystem::stop));
-    }
-
-    private void configureBindings() {
-        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(visionSubsystem.getMegaTag1Pose() == null ? Rotation2d.kZero : visionSubsystem.getMegaTag1Pose().getRotation())));
-        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(Rotation2d.kZero)));
-        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateForceCommand(States.RESET)));
-        driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
-
-        driverController.options().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
-
-        driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
-            RobotState.setAutoReadyToShoot(false);
-            swerveSubsystem.stop();
-            RobotState.setIntake(false);
-            StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
-        })));
-
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(!RobotState.isIntake()))));
-
-        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            if (RobotState.get().getRobotState() == States.SHOOT) {
-                RobotState.setAutoReadyToShoot(false);
-                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
-            } else {
-                RobotState.setAutoReadyToShoot(true);
-                StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
-            }
-        })));
-
-        driverController.L2().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.CLIMB1_READY)));
-
-        driverController.R3().onTrue(notTest(Commands.runOnce(swerveSubsystem::snapAngle)
-            .andThen(Commands.waitUntil(swerveSubsystem::atGoal))
-            .finallyDo(swerveSubsystem::stop)
-            .onlyIf(() -> Set.of(States.IDLE, States.BALLS_READY, States.INTAKE, States.DUMP).contains(RobotState.get().getRobotState()))));
-
-        driverController.cross().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE))));
-        driverController.square().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.DELIVERY))));
-    }
-
-    private Command inTest(Command command) {
-        return command.onlyIf(DriverStation::isTest);
-    }
-
-    private Command notTest(Command command) {
-        return command.unless(DriverStation::isTest);
-    }
-
-    private void configureTestBindings() {
-        driverController.L2().toggleOnTrue(inTest(Commands.startEnd(() -> visionSubsystem.setEnabled(false), () -> visionSubsystem.setEnabled(true))));
-        driverController.R2().onTrue(inTest(Commands.runOnce(() -> RobotState.get().setOdometryOnlyRobotPose(visionSubsystem.getLastVisionPose()))));
     }
 
     public static SwerveSubsystem getSwerve() { return swerveSubsystem; }
@@ -218,7 +134,6 @@ public class RobotContainer {
 //        operatorController.periodic();
     }
 
-    private int framesSinceGyroUpdate = 0;
     public void periodic() {
         SwerveSpeeds robotVel = Swerve.getInstance().getSpeeds();
         accelerationCalculator.calculate(robotVel.getAsFieldRelative().toTranslation());
@@ -243,24 +158,11 @@ public class RobotContainer {
         logField.getObject("Target").setPose(RobotState.getShootingMode() == States.ShootingMode.DELIVERY ? PositionsConstants.Swerve.getDeliveryTarget() : RobotState.get().getLookaheadTargetPose(FieldConstants.getHubPose()).toPose2d());
         SmartDashboard.putData("Field", logField);
 
-        if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
-            framesSinceGyroUpdate++;
-            if (framesSinceGyroUpdate >= 25 && visionSubsystem.getMegaTag1Pose() != null) {
-                RobotState.get().resetGyro(visionSubsystem.getMegaTag1Pose().getRotation());
-                framesSinceGyroUpdate = 0;
-            }
-        }
-
         if(GeneralConstants.kRobotMode.isSim()) {
             Simulation.periodic();
         }
 
-        if (DriverStation.isEnabled()) {
-            if (DriverStation.isAutonomous())
-                timebar.update((RobotController.getFPGATime() - Robot.autoStartTime) / 1000000, true);
-            else
-                timebar.update((RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000 + 20, RobotState.isWonAuto());
-        }
+        timebar.update();
     }
 
     public Command getAutonomousCommand() {
@@ -268,6 +170,14 @@ public class RobotContainer {
     }
 
     public void reset() {
+        if (RobotState.isTeleop()) {
+            Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
+            Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
+        } else {
+            Swerve.getInstance().setMaxSkidAcceleration(Double.MAX_VALUE);
+            Swerve.getInstance().setMaxForwardAcceleration(Double.MAX_VALUE);
+        }
+
         if (GeneralConstants.kRobotMode.isComp()) {
             if (!RobotState.isTeleop()) {
                 StateMachine.getInstance().forceRobotState(States.STARTING_POSE);

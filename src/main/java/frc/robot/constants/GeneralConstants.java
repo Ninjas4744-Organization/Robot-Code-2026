@@ -47,6 +47,7 @@ public class GeneralConstants {
     public static final int kOperatorControllerPort = 1;
 
     public static final boolean enableAutoTiming = true;
+    public static final double autoTimingSeconds = 3;
 
     public static class Swerve {
         public static double kDriverSpeedFactor = 1;
