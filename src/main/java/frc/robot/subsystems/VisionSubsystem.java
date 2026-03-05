@@ -32,6 +32,11 @@ public class VisionSubsystem extends SubsystemBase {
 
     public VisionSubsystem() {
         Vision.setInstance(new Vision(SubsystemConstants.kVision));
+
+        if (GeneralConstants.kRobotMode.isSim()) {
+            resettedGyro = true;
+            resettedPose = true;
+        }
     }
 
     @Override

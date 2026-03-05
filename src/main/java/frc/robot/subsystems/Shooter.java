@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -127,10 +128,12 @@ public class Shooter extends SubsystemBase implements
 
         backgroundCommand.setNewTask(Commands.run(() -> {
             io.setVelocity(
-                PositionsConstants.Shooter.getShootSpeed(
-                    RobotState.get().getLookaheadTargetDist(
-                        FieldConstants.getHubPose()
-                    )));
+                MathUtil.clamp(
+                    PositionsConstants.Shooter.getShootSpeed(
+                        RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose())
+                    ), 0, 95
+                )
+            );
         }));
     }
 
@@ -138,15 +141,17 @@ public class Shooter extends SubsystemBase implements
         if (!enabled)
             return;
 
-        backgroundCommand.setNewTask(Commands.run(() -> {;
+        backgroundCommand.setNewTask(Commands.run(() -> {
             Pose3d target = new Pose3d(PositionsConstants.Swerve.getDeliveryTarget());
             target = new Pose3d(target.getX(), target.getY(), 0, Rotation3d.kZero);
 
             io.setVelocity(
-                PositionsConstants.Shooter.getDeliverySpeed(
-                    RobotState.get().getLookaheadTargetDist(
-                        target
-                    )));
+                MathUtil.clamp(
+                    PositionsConstants.Shooter.getDeliverySpeed(
+                        RobotState.get().getLookaheadTargetDist(target)
+                    ), 0, 95
+                )
+            );
         }));
     }
 }

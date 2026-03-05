@@ -170,6 +170,9 @@ public class RobotContainer {
     }
 
     public void reset() {
+        if (GeneralConstants.kRobotMode.isSim())
+            Simulation.reset();
+
         if (RobotState.isTeleop()) {
             Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
             Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);

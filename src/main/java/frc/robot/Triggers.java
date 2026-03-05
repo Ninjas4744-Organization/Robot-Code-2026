@@ -19,7 +19,7 @@ public class Triggers {
     }
 
     public static void configureTriggers() {
-        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(GeneralConstants.autoTimingSeconds)).onChange(Commands.runOnce(() -> {
+        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
             if (RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds))
                 RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
             else
@@ -57,7 +57,7 @@ public class Triggers {
             StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
         })));
 
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(!RobotState.isIntake()))));
+        driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(true))));
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
             if (!RobotContainer.getVision().isResettedPose())

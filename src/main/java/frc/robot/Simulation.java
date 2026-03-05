@@ -22,6 +22,7 @@ public class Simulation {
     private static List<GamePieceProjectile> simFlyingBalls = new ArrayList<>();
     private static List<GamePieceOnFieldSimulation> simFieldBalls = new ArrayList<>();
     private static int ballsCollected = 0;
+    private static int points = 0;
 
     private static void spawnBalls() {
         for (int x = 7 * 5; x <= 10 * 5; x++) {
@@ -33,7 +34,16 @@ public class Simulation {
         }
     }
 
+    public static void reset() {
+        points = 0;
+        ballsCollected = 0;
+        spawnBalls();
+        Logger.recordOutput("Simulation/Points", points);
+        Logger.recordOutput("Simulation/Balls Collected", ballsCollected);
+    }
+
     public static void setup() {
+        reset();
         spawnBalls();
 
         CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
@@ -44,7 +54,7 @@ public class Simulation {
 //                }
 
                 ballsCollected--;
-                Logger.recordOutput("Balls Collected", ballsCollected);
+                Logger.recordOutput("Simulation/Balls Collected", ballsCollected);
 
                 GamePieceProjectile ball = new RebuiltFuelOnFly(
                     RobotState.get().getRobotPose().getTranslation(),
@@ -76,7 +86,15 @@ public class Simulation {
             Pose3d ballPose = ball.getPose3d();
             double ballRadius = 0.07;
 
-            if (ballPose.getZ() <= ballRadius) {
+            if (simBallColliding(new Translation2d(4.63, 4.03), 0.8, 0.8, ballPose.toPose2d().getTranslation(), 0.07)) {
+                RebuiltFuelOnField newBall = new RebuiltFuelOnField(new Translation2d(ball.getPose3d().getX() + 1, ball.getPose3d().getY()));
+                SimulatedArena.getInstance().addGamePiece(newBall);
+                simFieldBalls.add(newBall);
+                points++;
+                Logger.recordOutput("Simulation/Points", points);
+
+                flyingBallsIter.remove();
+            } else if (ballPose.getZ() <= ballRadius) {
                 RebuiltFuelOnField newBall = new RebuiltFuelOnField(new Translation2d(ball.getPose3d().getX(), ball.getPose3d().getY()));
                 SimulatedArena.getInstance().addGamePiece(newBall);
                 simFieldBalls.add(newBall);
@@ -114,7 +132,7 @@ public class Simulation {
                     SimulatedArena.getInstance().removePiece(ball);
                     fieldBallsIter.remove();
                     ballsCollected++;
-                    Logger.recordOutput("Balls Collected", ballsCollected);
+                    Logger.recordOutput("Simulation/Balls Collected", ballsCollected);
                 }
             }
         }
