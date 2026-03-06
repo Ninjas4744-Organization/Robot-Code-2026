@@ -8,6 +8,7 @@ import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.subsystem.IO;
 import frc.lib.NinjasLib.subsystem.ISubsystem;
+import frc.robot.RobotState;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
@@ -54,7 +55,8 @@ public class IntakeOpen extends SubsystemBase implements
         if (!enabled) return Commands.none();
         return Commands.runOnce(() -> {
                 slowCloseCommand.stop();
-                io.setPercent(-0.4);
+                io.resetVirtualLimit();
+                io.setPercent(-0.3);
             })
             .andThen(Commands.waitUntil(this::isReset))
             .finallyDo(io::stopMotor);
@@ -94,7 +96,8 @@ public class IntakeOpen extends SubsystemBase implements
         slowCloseCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> io.setVelocity(-0.1)),
             Commands.waitUntil(this::isReset),
-            setPositionCmd(PositionsConstants.IntakeOpen.kClose.get())
+            setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
+            Commands.runOnce(() -> RobotState.setIntake(true))
         ));
     }
 }

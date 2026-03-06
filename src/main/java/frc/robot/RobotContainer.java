@@ -108,7 +108,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Stop", Commands.runOnce(() -> {
             RobotState.setAutoReadyToShoot(false);
-            RobotState.setIntake(false);
+//            RobotState.setIntake(false);
             StateMachine.getInstance().changeRobotState(States.IDLE);
         }));
 
@@ -181,17 +181,16 @@ public class RobotContainer {
             Swerve.getInstance().setMaxForwardAcceleration(Double.MAX_VALUE);
         }
 
-        if (GeneralConstants.kRobotMode.isComp()) {
-            if (!RobotState.isTeleop()) {
-                StateMachine.getInstance().forceRobotState(States.STARTING_POSE);
-                StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
-            } else {
+        if (RobotState.isTeleop()) {
+            if (GeneralConstants.kRobotMode.isComp()) {
                 StateMachine.getInstance().changeRobotState(States.CLIMB_DOWN);
+            } else {
+                StateMachine.getInstance().forceRobotState(States.UNKNOWN);
+                StateMachine.getInstance().changeRobotStateForce(States.RESET);
             }
-        }
-        else {
-            StateMachine.getInstance().forceRobotState(States.UNKNOWN);
-            StateMachine.getInstance().changeRobotStateForce(States.RESET);
+        } else {
+            StateMachine.getInstance().forceRobotState(States.STARTING_POSE);
+            StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
         }
     }
 }

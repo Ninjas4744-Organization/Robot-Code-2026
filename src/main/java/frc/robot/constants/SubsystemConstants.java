@@ -31,7 +31,6 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIntake.real.base.main.id = 20;
-        kIntake.real.base.main.inverted = false;
         kIntake.real.base.currentLimit = 60;
         kIntake.real.base.isBrakeMode = false;
 
@@ -49,19 +48,23 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIntakeOpen.real.base.main.id = 21;
+        kIntakeOpen.real.base.main.inverted = true;
         kIntakeOpen.real.base.currentLimit = 60;
 
         /* Control */
-        kIntakeOpen.real.control.controlConstants = ControlConstants.createProfiledPIDF(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Elevator_Static);
-        kIntakeOpen.real.control.positionGoalTolerance = 0.02;
+        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(80, 0, 0.03, 0);
+        kIntakeOpen.real.control.conversionFactor = 0.0086457822992017;
+        kIntakeOpen.real.control.positionGoalTolerance = 0.01;
 
         /* Soft Limits */
-        kIntakeOpen.real.softLimits.max = 0.5;
+        kIntakeOpen.real.softLimits.max = 0.3;
 
         /* Hard Limit */
         kIntakeOpen.real.hardLimit.enable = true;
-        kIntakeOpen.real.hardLimit.id = 2;
-        kIntakeOpen.real.hardLimit.inverted = false;
+//        kIntakeOpen.real.hardLimit.id = 0;
+//        kIntakeOpen.real.hardLimit.inverted = false;
+        kIntakeOpen.real.hardLimit.isVirtual = true;
+        kIntakeOpen.real.hardLimit.virtualStallThreshold = 40;
         kIntakeOpen.real.hardLimit.direction = -1;
         kIntakeOpen.real.hardLimit.autoStopReset = true;
         kIntakeOpen.real.hardLimit.homePosition = 0;
@@ -138,7 +141,7 @@ public class SubsystemConstants {
         /* Base */
         kAccelerator.real.base.main.id = 33;
         kAccelerator.real.base.main.inverted = true;
-        kAccelerator.real.base.currentLimit = 80;
+        kAccelerator.real.base.currentLimit = 60;
         kAccelerator.real.base.isBrakeMode = false;
 
         /* Control */
@@ -177,7 +180,7 @@ public class SubsystemConstants {
     static {
         /* Base */
         kClimberAngle.real.base.main.id = 41;
-        kClimberAngle.real.base.currentLimit = 60;
+        kClimberAngle.real.base.currentLimit = 40;
 
         /* Control */
         kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPIDF(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);

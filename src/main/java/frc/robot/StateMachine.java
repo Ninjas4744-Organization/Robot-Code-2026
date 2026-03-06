@@ -104,7 +104,8 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(States.IDLE, States.BALLS_READY, Commands.sequence(
             intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
-            Commands.waitUntil(intakeOpen::atGoal)
+            Commands.waitUntil(intakeOpen::atGoal),
+            Commands.runOnce(() -> RobotState.setIntake(true))
         ));
 
         addStateEnd(States.RESET, () -> intake.isReset()
@@ -155,8 +156,10 @@ public class StateMachine extends StateMachineBase<States> {
 
         addEdge(List.of(States.IDLE, States.BALLS_READY, States.INTAKE, States.SHOOT_HEATED, States.SHOOT_READY, States.SHOOT), States.SHOOT_PREPARE, () -> Commands.sequence(
             activateShooting(),
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
+//            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
+//            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get()),
+            indexer.stopCmd(),
+            indexer2.stopCmd(),
             intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get())
         ));
         addStateCommand(States.SHOOT_PREPARE, updateIntake());
@@ -174,8 +177,10 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.SHOOT, States.SHOOT_READY, Commands.sequence(
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
-            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
+//            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndexBack.get()),
+//            indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndexBack.get())
+            indexer.stopCmd(),
+            indexer2.stopCmd()
         ));
 
         addStateCommand(States.SHOOT, Commands.parallel(
@@ -218,11 +223,6 @@ public class StateMachine extends StateMachineBase<States> {
             indexer2.setVelocityCmd(PositionsConstants.Indexer2.kIndex.get())
         ));
 
-
-        addStateEnd(States.SHOOT,
-            () -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(GeneralConstants.autoTimingSeconds),
-            States.BALLS_READY
-        );
 
         addStateEnd(States.SHOOT_PREPARE,
             RobotState::isShootReady,

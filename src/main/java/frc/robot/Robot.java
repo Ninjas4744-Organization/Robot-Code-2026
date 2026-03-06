@@ -20,13 +20,17 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
-    private final RobotContainer robotContainer;
+    private RobotContainer robotContainer;
     public static double teleopStartTime;
     public static double autoStartTime;
     private double lastLoopTime;
     private double robotDt = 0.02;
+    private final boolean enabled = true;
 
     public Robot() {
+        if (!enabled)
+            return;
+
         // Record metadata
         Logger.recordMetadata("ProjectName", "Robot-Code-2026");
 
@@ -61,6 +65,9 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
+        if (!enabled)
+            return;
+
         robotContainer.controllerPeriodic();
         CommandScheduler.getInstance().run();
         robotContainer.periodic();
@@ -84,6 +91,9 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void autonomousInit() {
+        if (!enabled)
+            return;
+
         autoStartTime = RobotController.getFPGATime();
         robotContainer.reset();
 
@@ -103,6 +113,9 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
+        if (!enabled)
+            return;
+
         teleopStartTime = RobotController.getFPGATime();
         robotContainer.reset();
     }
@@ -117,6 +130,9 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void testInit() {
+        if (!enabled)
+            return;
+
 //        CommandScheduler.getInstance().cancelAll();
 
         Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);

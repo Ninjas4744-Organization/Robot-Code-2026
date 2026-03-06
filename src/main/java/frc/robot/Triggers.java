@@ -19,13 +19,24 @@ public class Triggers {
     }
 
     public static void configureTriggers() {
+        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingDeliveryStopSeconds)).onTrue(Commands.runOnce(() -> {
+            RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
+
+            if (Set.of(States.SHOOT_HEATED,
+                    States.SHOOT_PREPARE,
+                    States.SHOOT_READY,
+                    States.SHOOT)
+                .contains(RobotState.get().getRobotState()))
+                StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
+        }));
+
         new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
             if (RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds))
                 RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
             else
                 RobotState.setShootingMode(States.ShootingMode.DELIVERY);
 
-            RobotState.setIntake(false);
+            RobotState.setIntake(true);
 
             if (Set.of(States.SHOOT_HEATED,
                     States.SHOOT_PREPARE,
@@ -53,7 +64,7 @@ public class Triggers {
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
             RobotState.setAutoReadyToShoot(false);
             RobotContainer.getSwerve().stop();
-            RobotState.setIntake(false);
+            RobotState.setIntake(true);
             StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
         })));
 
@@ -64,8 +75,9 @@ public class Triggers {
                 return;
 
             if (RobotState.get().getRobotState() == States.SHOOT) {
-                RobotState.setAutoReadyToShoot(false);
-                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+//                RobotState.setAutoReadyToShoot(false);
+//                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
+                RobotState.setIntake(false);
             } else {
                 RobotState.setAutoReadyToShoot(true);
                 StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
