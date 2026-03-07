@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -11,8 +9,7 @@ import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.subsystem.IO;
 import frc.lib.NinjasLib.subsystem.ISubsystem;
-import frc.robot.RobotState;
-import frc.robot.constants.FieldConstants;
+import frc.robot.ShootCalculator;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
@@ -122,36 +119,20 @@ public class Shooter extends SubsystemBase implements
         return stopCmd();
     }
 
-    public void autoHubVelocity() {
+    public void autoVelocity(boolean isDelivery) {
         if (!enabled)
             return;
 
         backgroundCommand.setNewTask(Commands.run(() -> {
-            io.setVelocity(
-                MathUtil.clamp(
-                    PositionsConstants.Shooter.getShootSpeed(
-                        RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose())
-                    ), 0, 95
-                )
-            );
-        }));
-    }
+            double speed;
+            double virtualDist = ShootCalculator.getShootParams().virtualDist();
 
-    public void autoDeliveryVelocity() {
-        if (!enabled)
-            return;
+            if (isDelivery)
+                speed = PositionsConstants.Shooter.getDeliverySpeed(virtualDist);
+            else
+                speed = PositionsConstants.Shooter.getShootSpeed(virtualDist);
 
-        backgroundCommand.setNewTask(Commands.run(() -> {
-            Pose3d target = new Pose3d(PositionsConstants.Swerve.getDeliveryTarget());
-            target = new Pose3d(target.getX(), target.getY(), 0, Rotation3d.kZero);
-
-            io.setVelocity(
-                MathUtil.clamp(
-                    PositionsConstants.Shooter.getDeliverySpeed(
-                        RobotState.get().getLookaheadTargetDist(target)
-                    ), 0, 95
-                )
-            );
+            io.setVelocity(MathUtil.clamp(speed, 0, 95));
         }));
     }
 }

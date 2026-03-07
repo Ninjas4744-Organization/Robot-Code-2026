@@ -23,6 +23,7 @@ public class Simulation {
     private static List<GamePieceOnFieldSimulation> simFieldBalls = new ArrayList<>();
     private static int ballsCollected = 0;
     private static int points = 0;
+    private static int ballZigZagNum = 0;
 
     private static void spawnBalls() {
         for (int x = 7 * 5; x <= 10 * 5; x++) {
@@ -48,28 +49,24 @@ public class Simulation {
 
         CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
             if (ballsCollected > 0 && Math.abs(RobotContainer.getShooter().getVelocity()) > 10 && RobotState.get().getRobotState() == States.SHOOT) {
-//                if (simFlyingBalls.size() >= 15) {
-//                    SimulatedArena.getInstance().removeProjectile(simFlyingBalls.get(0));
-//                    simFlyingBalls.remove(0);
-//                }
-
                 ballsCollected--;
                 Logger.recordOutput("Simulation/Balls Collected", ballsCollected);
 
                 GamePieceProjectile ball = new RebuiltFuelOnFly(
                     RobotState.get().getRobotPose().getTranslation(),
-                    new Translation2d(),
+                    new Translation2d(0.2, ballZigZagNum % 2 == 0 ? 0.1 : -0.1),
                     Swerve.getInstance().getSpeeds().getAsFieldRelative(),
                     RobotState.get().getRobotPose().getRotation(),
                     Meters.of(0.481),
-                    MetersPerSecond.of(0.062 * Math.abs(RobotContainer.getShooter().getGoal()) + 3.7),
+                    MetersPerSecond.of(0.062 * Math.abs(RobotContainer.getShooter().getGoal()) + 3.3),
                     Degrees.of(60)
                 );
+                ballZigZagNum = (ballZigZagNum + 1) % 2;
 
                 simFlyingBalls.add(ball);
                 SimulatedArena.getInstance().addGamePieceProjectile(ball);
             }
-        }).andThen(Commands.waitSeconds(0.1)).repeatedly().ignoringDisable(true));
+        }).andThen(Commands.waitSeconds(0.06)).repeatedly().ignoringDisable(true));
     }
 
     public static void periodic() {
@@ -86,7 +83,7 @@ public class Simulation {
             Pose3d ballPose = ball.getPose3d();
             double ballRadius = 0.07;
 
-            if (simBallColliding(new Translation2d(4.63, 4.03), 0.8, 0.8, ballPose.toPose2d().getTranslation(), 0.07)) {
+            if (simBallColliding(new Translation2d(4.63, 4.03), 0.8, 0.8, ballPose.toPose2d().getTranslation(), 0.07) && ball.getPose3d().getZ() > 1.6 && ball.getPose3d().getZ() < 1.85) {
                 RebuiltFuelOnField newBall = new RebuiltFuelOnField(new Translation2d(ball.getPose3d().getX() + 1, ball.getPose3d().getY()));
                 SimulatedArena.getInstance().addGamePiece(newBall);
                 simFieldBalls.add(newBall);

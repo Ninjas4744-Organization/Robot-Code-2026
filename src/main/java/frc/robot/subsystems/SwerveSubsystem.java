@@ -1,19 +1,23 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.NinjasLib.DerivativeCalculator2d;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveController;
 import frc.lib.NinjasLib.swerve.SwerveSpeeds;
-import frc.robot.RobotContainer;
 import frc.robot.RobotState;
+import frc.robot.ShootCalculator;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
@@ -32,6 +36,7 @@ public class SwerveSubsystem extends SubsystemBase implements
     private SwerveSpeeds autoInput;
     private BackgroundCommand backgroundCommand;
     private Pose2d target = new Pose2d();
+    private DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(1);
 
     public SwerveSubsystem(boolean enabled, boolean enabledMinimum, DoubleSupplier driverLeftX, DoubleSupplier driverLeftY, DoubleSupplier driverRightX, DoubleSupplier driverRightY) {
         this.enabled = enabled;
@@ -62,19 +67,14 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setChannel("Look Hub");
 //                SwerveController.getInstance().resetLookAt();
 
-                lastLookHubTargetAngle = RobotState.get().getLookaheadTargetAngle(FieldConstants.getHubPose());
-                if (RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose()) < PositionsConstants.Swerve.kTargetMinThreshold.get())
-                    lastLookHubTargetAngle = FieldConstants.getTranslationToHub().getAngle();
+                lastLookHubTargetAngle = ShootCalculator.getShootParams().angle();
             }),
             Commands.run(() -> {
-                Rotation2d angleToHub = RobotState.get().getLookaheadTargetAngle(FieldConstants.getHubPose());
-                if (RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose()) < PositionsConstants.Swerve.kTargetMinThreshold.get())
-                    angleToHub = FieldConstants.getTranslationToHub().getAngle();
-                target = new Pose2d(RobotState.get().getRobotPose().getX(), RobotState.get().getRobotPose().getY(), angleToHub);
+                target = new Pose2d(RobotState.get().getTranslation(), ShootCalculator.getShootParams().angle());
 
                 double FF = target.getRotation().minus(lastLookHubTargetAngle).div(0.02).times(lookHubFF).getRadians();
-                Logger.recordOutput("Robot/Swerve/Look Hub Target Rotational Velocity", target.getRotation().minus(lastLookHubTargetAngle).div(0.02).getRadians());
-                Logger.recordOutput("Robot/Swerve/Look Hub FF", FF);
+                Logger.recordOutput("Robot/Shooting/Virtual Target Rotational Velocity", target.getRotation().minus(lastLookHubTargetAngle).div(0.02).getRadians());
+                Logger.recordOutput("Robot/Shooting/Look Hub FF", FF);
                 lastLookHubTargetAngle = target.getRotation();
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
@@ -145,10 +145,7 @@ public class SwerveSubsystem extends SubsystemBase implements
                 SwerveController.getInstance().setChannel("Delivery");
             }),
             Commands.run(() -> {
-                Pose3d deliveryTarget = new Pose3d(PositionsConstants.Swerve.getDeliveryTarget());
-                deliveryTarget = new Pose3d(deliveryTarget.getX(), deliveryTarget.getY(), 0, Rotation3d.kZero);
-
-                Rotation2d angleToDelivery = RobotState.get().getLookaheadTargetAngle(deliveryTarget);
+                Rotation2d angleToDelivery = ShootCalculator.getShootParams().angle();
                 target = new Pose2d(RobotState.get().getRobotPose().getX(), RobotState.get().getRobotPose().getY(), angleToDelivery);
 
                 SwerveController.getInstance().setControl(new SwerveSpeeds(
@@ -231,8 +228,8 @@ public class SwerveSubsystem extends SubsystemBase implements
         boolean atPos = RobotState.get().getDistance(target) < PositionsConstants.Swerve.kPositionThreshold.get();
         boolean atAngleSmart = Math.abs(target.getRotation().minus(RobotState.get().getRobotPose().getRotation()).getDegrees()) < (PositionsConstants.Swerve.kAngleThresholdBase.get() + PositionsConstants.Swerve.kAngleThresholdCoefficient.get() * FieldConstants.getDistToHub());
         boolean atAngle = Math.abs(target.getRotation().minus(RobotState.get().getRobotPose().getRotation()).getDegrees()) < PositionsConstants.Swerve.kAngleThreshold.get();
-        boolean atAcceleration = RobotContainer.getRobotAcceleration().getNorm() < PositionsConstants.Swerve.kMaxAcceleration.get();
-        boolean atMinDist = RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose()) > PositionsConstants.Swerve.kHubMinDist.get();
+        boolean atAcceleration = getAcceleration().getNorm() < PositionsConstants.Swerve.kMaxAcceleration.get();
+        boolean atMinDist = ShootCalculator.getShootParams() == null || ShootCalculator.getShootParams().virtualDist() > PositionsConstants.Swerve.kHubMinDist.get();
 
         return switch (SwerveController.getInstance().getChannel()) {
             case "Look Hub" -> atAngleSmart && atAcceleration && atMinDist;
@@ -305,6 +302,10 @@ public class SwerveSubsystem extends SubsystemBase implements
         GeneralConstants.Swerve.kDriverSpeedFactor = 1;
     }
 
+    public Translation2d getAcceleration() {
+        return accelerationCalculator.get();
+    }
+
     @Override
     public void stop() {
         if (!enabled)
@@ -353,9 +354,11 @@ public class SwerveSubsystem extends SubsystemBase implements
         if (!enabled)
             return;
 
+        SwerveController.getInstance().periodic();
+
         SwerveController.getInstance().setControl(getDriveInput(), "Driver");
 
-        SwerveController.getInstance().periodic();
+        accelerationCalculator.calculate(Swerve.getInstance().getSpeeds().getAsFieldRelative().toTranslation());
 
         Logger.recordOutput("Robot/Swerve/Auto Command", backgroundCommand.isRunning());
         Logger.recordOutput("Robot/Swerve/Target", target);

@@ -2,14 +2,12 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import frc.lib.NinjasLib.DerivativeCalculator2d;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
@@ -17,9 +15,7 @@ import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveSpeeds;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
-import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import frc.robot.subsystems.*;
 import org.littletonrobotics.junction.Logger;
@@ -37,14 +33,24 @@ public class RobotContainer {
     private static Climber climber;
     private static ClimberAngle climberAngle;
     private static Leds leds;
+    private static ShootCalculator shootCalculator;
 
     private LoggedCommandController driverController;
     private LoggedDashboardChooser<Command> autoChooser;
-    private static DerivativeCalculator2d accelerationCalculator = new DerivativeCalculator2d(1);
     private NinjasTimebar timebar;
     private Field2d logField = new Field2d();
 
     public RobotContainer() {
+        if (!GeneralConstants.kRobotMode.isReplay())
+            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
+        else
+            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
+
+        swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
+        RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
+        visionSubsystem = new VisionSubsystem();
+        shootCalculator = new ShootCalculator();
+
         intake = new Intake(true);
         intakeOpen = new IntakeOpen(false);
         indexer = new Indexer(true);
@@ -55,15 +61,7 @@ public class RobotContainer {
         climberAngle = new ClimberAngle(false);
         leds = new Leds(false);
 
-        if (!GeneralConstants.kRobotMode.isReplay())
-            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
-        else
-            driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
-
-        swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
-        RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         StateMachineBase.setInstance(new StateMachine());
-        visionSubsystem = new VisionSubsystem();
 
         configureAuto();
         Triggers.setControllers(driverController);
@@ -125,10 +123,6 @@ public class RobotContainer {
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
     }
 
-    public static Translation2d getRobotAcceleration() {
-        return accelerationCalculator.get();
-    }
-
     public void controllerPeriodic() {
         driverController.periodic();
 //        operatorController.periodic();
@@ -136,26 +130,20 @@ public class RobotContainer {
 
     public void periodic() {
         SwerveSpeeds robotVel = Swerve.getInstance().getSpeeds();
-        accelerationCalculator.calculate(robotVel.getAsFieldRelative().toTranslation());
-
-        Logger.recordOutput("Robot/Shooting/Lookahead Target", new Pose3d(RobotState.get().getLookaheadTargetPose(FieldConstants.getHubPose()).getX(), RobotState.get().getLookaheadTargetPose(FieldConstants.getHubPose()).getY(), FieldConstants.getHubPose().getZ(), Rotation3d.kZero));
-        Logger.recordOutput("Robot/Shooting/Shooting Ready", RobotState.isShootReady());
 
         Logger.recordOutput("Robot/Speed/Robot Speed", robotVel.getSpeed());
-        Logger.recordOutput("Robot/Speed/Robot Acceleration", getRobotAcceleration());
+        Logger.recordOutput("Robot/Speed/Robot Acceleration", swerveSubsystem.getAcceleration());
 
         Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getMegaTag1Pose());
         Logger.recordOutput("Robot/Vision/MegaTag 1 Vision Dist", visionSubsystem.getMegaTag1DistFromTag());
         Logger.recordOutput("Robot/Vision/Odometry Only Pose", RobotState.get().getOdometryOnlyRobotPose());
         Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.get().getOdometryOnlyRobotPose().getTranslation()));
 
-        Logger.recordOutput("Robot/Hub/Distance Hub", FieldConstants.getDistToHub());
-        Logger.recordOutput("Robot/Hub/Distance Lookahead Hub", RobotState.get().getLookaheadTargetDist(FieldConstants.getHubPose()));
-        Logger.recordOutput("Robot/Hub/Active", RobotState.isHubActive());
-        Logger.recordOutput("Robot/Hub/Time Until Hub Change", RobotState.timeUntilHubChange());
+        Logger.recordOutput("Robot/Timing/Active", RobotState.isHubActive());
+        Logger.recordOutput("Robot/Timing/Time Until Hub Change", RobotState.timeUntilHubChange());
 
         logField.setRobotPose(RobotState.get().getRobotPose());
-        logField.getObject("Target").setPose(RobotState.getShootingMode() == States.ShootingMode.DELIVERY ? PositionsConstants.Swerve.getDeliveryTarget() : RobotState.get().getLookaheadTargetPose(FieldConstants.getHubPose()).toPose2d());
+        logField.getObject("Target").setPose(new Pose2d(ShootCalculator.getShootParams().virtualTarget(), Rotation2d.kZero));
         SmartDashboard.putData("Field", logField);
 
         if(GeneralConstants.kRobotMode.isSim()) {

@@ -351,25 +351,25 @@ public class StateMachine extends StateMachineBase<States> {
             case LOCK:
                 swerve.unSlow();
                 swerve.lock();
-                shooter.autoHubVelocity();
+                shooter.autoVelocity(false);
                 break;
 
             case ON_MOVE:
                 swerve.slowForShoot();
                 swerve.lookHub();
-                shooter.autoHubVelocity();
+                shooter.autoVelocity(false);
                 break;
 
             case SNAP_RING:
                 swerve.unSlow();
                 swerve.snapRing();
-                shooter.autoHubVelocity();
+                shooter.autoVelocity(false);
                 break;
 
             case DELIVERY:
                 swerve.unSlow();
                 swerve.delivery();
-                shooter.autoDeliveryVelocity();
+                shooter.autoVelocity(true);
                 break;
         }
     }
