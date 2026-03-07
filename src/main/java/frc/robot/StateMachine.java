@@ -92,6 +92,12 @@ public class StateMachine extends StateMachineBase<States> {
             accelerator.stopCmd(),
             intake.stopCmd(),
 
+            Commands.runOnce(() -> {
+                RobotState.setIntake(true);
+                RobotState.setAutoReadyToShoot(false);
+                RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
+            }),
+
             intakeOpen.reset(),
             intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
             Commands.waitUntil(intakeOpen::atGoal)

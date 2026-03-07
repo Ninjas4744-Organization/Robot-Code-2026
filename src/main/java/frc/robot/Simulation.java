@@ -33,6 +33,14 @@ public class Simulation {
                 simFieldBalls.add(ball);
             }
         }
+
+        for (int x = 0 * 5; x <= 0.5 * 5; x++) {
+            for (int y = (int)(5.5 * 5); y <= 6.5 * 5; y++) {
+                RebuiltFuelOnField ball = new RebuiltFuelOnField(new Translation2d(x / 5.0, y / 5.0));
+                SimulatedArena.getInstance().addGamePiece(ball);
+                simFieldBalls.add(ball);
+            }
+        }
     }
 
     public static void reset() {
