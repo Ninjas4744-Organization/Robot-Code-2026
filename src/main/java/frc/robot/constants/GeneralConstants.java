@@ -48,7 +48,7 @@ public class GeneralConstants {
 
     public static final boolean enableAutoTiming = false;
     public static final double autoTimingSeconds = 3;
-    public static final double autoTimingDeliveryStopSeconds = 6;
+    public static final double autoTimingStopDeliverySeconds = 6;
 
     public static class Swerve {
         public static double kDriverSpeedFactor = 1;

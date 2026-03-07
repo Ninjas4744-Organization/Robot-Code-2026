@@ -19,7 +19,7 @@ public class Triggers {
     }
 
     public static void configureTriggers() {
-        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingDeliveryStopSeconds)).onTrue(Commands.runOnce(() -> {
+        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingStopDeliverySeconds)).onTrue(Commands.runOnce(() -> {
             RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
 
             if (Set.of(States.SHOOT_HEATED,
