@@ -293,7 +293,7 @@ public class SwerveSubsystem extends SubsystemBase implements
     }
 
     public void slowForShoot() {
-        Swerve.getInstance().setMaxSkidAcceleration(15);
+        Swerve.getInstance().setMaxSkidAcceleration(7);
         GeneralConstants.Swerve.kDriverSpeedFactor = 0.3;
     }
 

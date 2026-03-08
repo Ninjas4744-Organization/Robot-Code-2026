@@ -15,14 +15,14 @@ import org.littletonrobotics.junction.Logger;
 
 public class IntakeOpen extends SubsystemBase implements
         ISubsystem.Resettable,
-        ISubsystem.PositionControlled,
-        ISubsystem.GoalOriented<Double>
+        ISubsystem.GoalOriented<Integer>
 {
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
+    private int goal = 0;
 
-    private BackgroundCommand slowCloseCommand = new BackgroundCommand();
+    private BackgroundCommand backgroundCommand = new BackgroundCommand();
 
     public IntakeOpen(boolean enabled) {
         this.enabled = enabled;
@@ -46,56 +46,65 @@ public class IntakeOpen extends SubsystemBase implements
 
     @Override
     public boolean isReset() {
-        return !enabled || inputs.LimitSwitch || GeneralConstants.kRobotMode.isSim();
+        return !enabled || inputs.LimitSwitches[0] || GeneralConstants.kRobotMode.isSim();
     }
 
     @Override
     public Command reset() {
         if (!enabled) return Commands.none();
         return Commands.runOnce(() -> {
-                slowCloseCommand.stop();
-                io.setPercent(-0.3);
-            })
-            .andThen(Commands.waitUntil(this::isReset))
-            .finallyDo(io::stopMotor);
+            goal = 0;
+            backgroundCommand.stop();
+            io.setPercent(-0.3);
+        })
+        .andThen(Commands.waitUntil(this::isReset))
+        .finallyDo(io::stopMotor);
     }
 
     @Override
     public boolean atGoal() {
-        return !enabled || Math.abs(getGoal() - getPosition()) < SubsystemConstants.kIntakeOpen.real.control.positionGoalTolerance;
+        return !enabled || inputs.LimitSwitches[goal];
     }
 
     @Override
-    public Double getGoal() {
-        return enabled ? inputs.Goal : 0;
+    public Integer getGoal() {
+        return enabled ? goal : 0;
     }
 
-    @Override
-    public double getPosition() {
-        return enabled ? inputs.Position : 0;
-    }
-
-    @Override
-    public void setPosition(double position) {
-        if (!enabled) return;
-        slowCloseCommand.stop();
-        io.setPosition(position);
-    }
-
-    @Override
-    public Command setPositionCmd(double position) {
-        return Commands.runOnce(() -> setPosition(position));
-    }
-
-    public void slowClose() {
+    public void open() {
         if (!enabled)
             return;
 
-        slowCloseCommand.setNewTask(Commands.sequence(
-            Commands.runOnce(() -> io.setVelocity(-0.3)),
-            Commands.waitUntil(this::isReset),
+        backgroundCommand.setNewTask(Commands.sequence(
+            Commands.runOnce(() -> goal = 1),
+            Commands.runOnce(() -> io.setPercent(0.75)),
+            Commands.waitUntil(() -> inputs.LimitSwitches[1]),
+            Commands.runOnce(io::stopMotor)
+        ));
+    }
+
+    public void close() {
+        if (!enabled)
+            return;
+
+        backgroundCommand.setNewTask(Commands.sequence(
+            Commands.runOnce(() -> goal = 0),
+            Commands.runOnce(() -> io.setPercent(-0.75)),
+            Commands.waitUntil(() -> inputs.LimitSwitches[0]),
+            Commands.runOnce(io::stopMotor)
+        ));
+    }
+
+    public void shootClose() {
+        if (!enabled)
+            return;
+
+        backgroundCommand.setNewTask(Commands.sequence(
+            Commands.runOnce(() -> goal = 0),
+            Commands.runOnce(() -> io.setPercent(-0.75)),
+            Commands.waitUntil(() -> inputs.LimitSwitches[0]),
+            Commands.runOnce(io::stopMotor),
             Commands.runOnce(() -> RobotState.setIntake(true))
-//            setPositionCmd(PositionsConstants.IntakeOpen.kClose.get())
         ));
     }
 }

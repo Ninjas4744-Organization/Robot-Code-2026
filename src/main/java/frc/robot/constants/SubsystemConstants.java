@@ -55,13 +55,12 @@ public class SubsystemConstants {
         kIntakeOpen.real.base.isBrakeMode = false;
 
         /* Control */
-        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(120, 0, 0.03, 0);
+//        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(120, 0, 0.03, 0);
         kIntakeOpen.real.control.conversionFactor = 0.00864;
         kIntakeOpen.real.control.positionGoalTolerance = 0.01;
         kIntakeOpen.real.control.enableFOC = false;
 
         /* Soft Limits */
-        kIntakeOpen.real.softLimits.max = 0.3;
 
         /* Hard Limit */
         kIntakeOpen.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit(), new RealControllerConstants.HardLimits.HardLimit() };
@@ -72,9 +71,9 @@ public class SubsystemConstants {
         kIntakeOpen.real.hardLimits.limits[0].homePosition = 0;
 
         kIntakeOpen.real.hardLimits.limits[1].isVirtual = true;
-        kIntakeOpen.real.hardLimits.limits[1].virtualStallThreshold = 18;
+        kIntakeOpen.real.hardLimits.limits[1].virtualStallThreshold = 20;
         kIntakeOpen.real.hardLimits.limits[1].virtualMinPos = 0.27;
-        kIntakeOpen.real.hardLimits.limits[1].virtualFrames = 5;
+        kIntakeOpen.real.hardLimits.limits[1].virtualFrames = 2;
         kIntakeOpen.real.hardLimits.limits[1].direction = 1;
         kIntakeOpen.real.hardLimits.limits[1].autoStopReset = true;
         kIntakeOpen.real.hardLimits.limits[1].homePosition = 0.3;
@@ -138,7 +137,7 @@ public class SubsystemConstants {
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
+        kShooter.real.control.controlConstants = ControlConstants.createPIDF(0.5, 1, 0, Double.POSITIVE_INFINITY, 0.1175, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kShooter.real.control.velocityGoalTolerance = 6;
         kShooter.real.control.enableFOC = false;
 

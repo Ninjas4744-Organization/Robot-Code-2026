@@ -68,8 +68,6 @@ public class StateMachine extends StateMachineBase<States> {
         addOmniEdge(States.RESET, () -> new DetachedCommand(Commands.parallel(
             Commands.runOnce(shootCommand::stop),
             swerve.reset(),
-            intake.reset(),
-            intakeOpen.reset(),
             indexer.reset(),
             indexer2.reset(),
             shooter.reset(),
@@ -79,7 +77,12 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.runOnce(() -> {
                 RobotState.setIntake(false);
                 RobotState.setAutoReadyToShoot(false);
-            })
+            }),
+            intake.reset(),
+            intakeOpen.reset(),
+            intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get()),
+            Commands.waitUntil(intakeOpen::isReset),
+            intake.reset()
         )));
 
         addEdge(States.RESET, States.IDLE);
@@ -99,18 +102,18 @@ public class StateMachine extends StateMachineBase<States> {
             }),
 
             intakeOpen.reset(),
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
+            Commands.runOnce(intakeOpen::open),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 
         addEdge(States.BALLS_READY, States.IDLE, Commands.sequence(
             Commands.runOnce(() -> RobotState.setIntake(false)),
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
+            Commands.runOnce(intakeOpen::close),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 
         addEdge(States.IDLE, States.BALLS_READY, Commands.sequence(
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
+            Commands.runOnce(intakeOpen::open),
             Commands.waitUntil(intakeOpen::atGoal),
             Commands.runOnce(() -> RobotState.setIntake(true))
         ));
@@ -129,7 +132,7 @@ public class StateMachine extends StateMachineBase<States> {
     private void intakeCommands() {
         addEdge(List.of(States.IDLE, States.BALLS_READY), States.INTAKE, () -> Commands.sequence(
             intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get()),
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
+            Commands.runOnce(intakeOpen::open),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 
@@ -138,7 +141,7 @@ public class StateMachine extends StateMachineBase<States> {
         addEdge(States.INTAKE, States.IDLE, Commands.sequence(
             Commands.runOnce(() -> RobotState.setIntake(false)),
             intake.stopCmd(),
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
+            Commands.runOnce(intakeOpen::close),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 
@@ -208,7 +211,7 @@ public class StateMachine extends StateMachineBase<States> {
             stopShooting(),
 
             intake.stopCmd(),
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
+            Commands.runOnce(intakeOpen::close),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 
@@ -220,7 +223,7 @@ public class StateMachine extends StateMachineBase<States> {
             stopShooting(),
 
             intake.stopCmd(),
-            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
+            Commands.runOnce(intakeOpen::open),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 
@@ -327,9 +330,9 @@ public class StateMachine extends StateMachineBase<States> {
             if (RobotState.isIntake() != lastIsIntake) {
                 System.out.println(RobotState.isIntake());
                 if (RobotState.isIntake())
-                    intakeOpen.setPosition(PositionsConstants.IntakeOpen.kOpen.get());
+                    intakeOpen.open();
                 else if (RobotState.get().getRobotState() == States.SHOOT)
-                    intakeOpen.slowClose();
+                    intakeOpen.shootClose();
 
                 lastIsIntake = RobotState.isIntake();
             }
@@ -341,8 +344,33 @@ public class StateMachine extends StateMachineBase<States> {
             Commands.runOnce(() -> {
                 accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get());
                 intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get());
-                shootSwitch();
                 lastShootMode = RobotState.getShootingMode();
+
+                switch (RobotState.getShootingMode()) {
+                    case LOCK:
+                        swerve.unSlow();
+                        swerve.lock();
+                        break;
+
+                    case ON_MOVE:
+                        swerve.slowForShoot();
+                        swerve.lookHub();
+                        break;
+
+                    case SNAP_RING:
+                        swerve.unSlow();
+                        swerve.snapRing();
+                        break;
+
+                    case DELIVERY:
+                        swerve.unSlow();
+                        swerve.delivery();
+                        break;
+                }
+            }),
+            Commands.waitUntil(swerve::atGoal),
+            Commands.runOnce(() -> {
+                shooter.autoVelocity(RobotState.getShootingMode() == States.ShootingMode.DELIVERY);
             }),
             Commands.run(() -> {
                 if (RobotState.getShootingMode() != lastShootMode) {
@@ -353,34 +381,6 @@ public class StateMachine extends StateMachineBase<States> {
                 }
             })
         ));
-    }
-
-    private void shootSwitch() {
-        switch (RobotState.getShootingMode()) {
-            case LOCK:
-                swerve.unSlow();
-                swerve.lock();
-                shooter.autoVelocity(false);
-                break;
-
-            case ON_MOVE:
-                swerve.slowForShoot();
-                swerve.lookHub();
-                shooter.autoVelocity(false);
-                break;
-
-            case SNAP_RING:
-                swerve.unSlow();
-                swerve.snapRing();
-                shooter.autoVelocity(false);
-                break;
-
-            case DELIVERY:
-                swerve.unSlow();
-                swerve.delivery();
-                shooter.autoVelocity(true);
-                break;
-        }
     }
 
     private Command stopShooting() {
