@@ -15,6 +15,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.constants.ControlConstants;
 import frc.lib.NinjasLib.controllers.constants.ControllerConstants;
+import frc.lib.NinjasLib.controllers.constants.RealControllerConstants;
 import frc.lib.NinjasLib.controllers.constants.RealControllerConstants.Base.SimpleControllerConstants;
 import frc.lib.NinjasLib.localization.vision.VisionConstants;
 import frc.lib.NinjasLib.swerve.constants.SwerveConstants;
@@ -36,6 +37,7 @@ public class SubsystemConstants {
 
         /* Control */
         kIntake.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, 0, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
+        kIntake.real.control.enableFOC = false;
 
         /* Simulation */
         kIntake.simMotor = DCMotor.getKrakenX60(1);
@@ -50,24 +52,32 @@ public class SubsystemConstants {
         kIntakeOpen.real.base.main.id = 21;
         kIntakeOpen.real.base.main.inverted = true;
         kIntakeOpen.real.base.currentLimit = 60;
+        kIntakeOpen.real.base.isBrakeMode = false;
 
         /* Control */
-        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(80, 0, 0.03, 0);
-        kIntakeOpen.real.control.conversionFactor = 0.0086457822992017;
+        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(120, 0, 0.03, 0);
+        kIntakeOpen.real.control.conversionFactor = 0.00864;
         kIntakeOpen.real.control.positionGoalTolerance = 0.01;
+        kIntakeOpen.real.control.enableFOC = false;
 
         /* Soft Limits */
         kIntakeOpen.real.softLimits.max = 0.3;
 
         /* Hard Limit */
-        kIntakeOpen.real.hardLimit.enable = true;
-//        kIntakeOpen.real.hardLimit.id = 0;
-//        kIntakeOpen.real.hardLimit.inverted = false;
-        kIntakeOpen.real.hardLimit.isVirtual = true;
-        kIntakeOpen.real.hardLimit.virtualStallThreshold = 40;
-        kIntakeOpen.real.hardLimit.direction = -1;
-        kIntakeOpen.real.hardLimit.autoStopReset = true;
-        kIntakeOpen.real.hardLimit.homePosition = 0;
+        kIntakeOpen.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit(), new RealControllerConstants.HardLimits.HardLimit() };
+        kIntakeOpen.real.hardLimits.limits[0].id = 0;
+        kIntakeOpen.real.hardLimits.limits[0].inverted = true;
+        kIntakeOpen.real.hardLimits.limits[0].direction = -1;
+        kIntakeOpen.real.hardLimits.limits[0].autoStopReset = true;
+        kIntakeOpen.real.hardLimits.limits[0].homePosition = 0;
+
+        kIntakeOpen.real.hardLimits.limits[1].isVirtual = true;
+        kIntakeOpen.real.hardLimits.limits[1].virtualStallThreshold = 18;
+        kIntakeOpen.real.hardLimits.limits[1].virtualMinPos = 0.27;
+        kIntakeOpen.real.hardLimits.limits[1].virtualFrames = 5;
+        kIntakeOpen.real.hardLimits.limits[1].direction = 1;
+        kIntakeOpen.real.hardLimits.limits[1].autoStopReset = true;
+        kIntakeOpen.real.hardLimits.limits[1].homePosition = 0.3;
 
         /* Simulation */
         kIntakeOpen.simMotor = DCMotor.getKrakenX60(1);
@@ -86,6 +96,7 @@ public class SubsystemConstants {
 
         /* Control */
         kIndexer.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
+        kIndexer.real.control.enableFOC = false;
 
         /* Simulation */
         kIndexer.simMotor = DCMotor.getKrakenX60(1);
@@ -104,6 +115,7 @@ public class SubsystemConstants {
 
         /* Control */
         kIndexer2.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
+        kIndexer2.real.control.enableFOC = false;
 
         /* Simulation */
         kIndexer2.simMotor = DCMotor.getKrakenX60(1);
@@ -128,6 +140,7 @@ public class SubsystemConstants {
         /* Control */
         kShooter.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kShooter.real.control.velocityGoalTolerance = 6;
+        kShooter.real.control.enableFOC = false;
 
         /* Simulation */
         kShooter.simMotor = DCMotor.getKrakenX60(2);
@@ -147,6 +160,7 @@ public class SubsystemConstants {
         /* Control */
         kAccelerator.real.control.controlConstants = ControlConstants.createPIDF(0, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kAccelerator.real.control.velocityGoalTolerance = 10;
+        kAccelerator.real.control.enableFOC = false;
 
         /* Simulation */
         kAccelerator.simMotor = DCMotor.getKrakenX60(1);
@@ -166,8 +180,6 @@ public class SubsystemConstants {
         kClimber.real.control.gearRatio = 2;
 
         /* Limit Switch */
-        kClimber.real.hardLimit.id = 3;
-        kClimber.real.hardLimit.homePosition = PositionsConstants.Climber.kLeftClimb.get();
 
         /* Simulation */
         kClimber.simMotor = DCMotor.getKrakenX60(2);

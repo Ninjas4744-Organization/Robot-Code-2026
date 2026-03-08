@@ -28,7 +28,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     private boolean resettedGyro = false;
     private boolean resettedPose = false;
-    private int framesSinceGyroUpdate = 25;
+    private int framesSinceGyroUpdate = 75;
 
     public VisionSubsystem() {
         Vision.setInstance(new Vision(SubsystemConstants.kVision));
@@ -48,7 +48,7 @@ public class VisionSubsystem extends SubsystemBase {
 
         if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
             framesSinceGyroUpdate++;
-            if (framesSinceGyroUpdate >= 25 && getMegaTag1Pose() != null) {
+            if (framesSinceGyroUpdate >= 75 && getMegaTag1Pose() != null) {
                 RobotState.get().resetGyro(getMegaTag1Pose().getRotation());
                 resettedGyro = true;
                 framesSinceGyroUpdate = 0;

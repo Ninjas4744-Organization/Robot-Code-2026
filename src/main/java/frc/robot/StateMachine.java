@@ -104,6 +104,7 @@ public class StateMachine extends StateMachineBase<States> {
         ));
 
         addEdge(States.BALLS_READY, States.IDLE, Commands.sequence(
+            Commands.runOnce(() -> RobotState.setIntake(false)),
             intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
@@ -135,6 +136,7 @@ public class StateMachine extends StateMachineBase<States> {
         addEdge(States.INTAKE, States.BALLS_READY, intake.stopCmd());
 
         addEdge(States.INTAKE, States.IDLE, Commands.sequence(
+            Commands.runOnce(() -> RobotState.setIntake(false)),
             intake.stopCmd(),
             intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
             Commands.waitUntil(intakeOpen::atGoal)
@@ -323,6 +325,7 @@ public class StateMachine extends StateMachineBase<States> {
     private Command updateIntake() {
         return Commands.run(() -> {
             if (RobotState.isIntake() != lastIsIntake) {
+                System.out.println(RobotState.isIntake());
                 if (RobotState.isIntake())
                     intakeOpen.setPosition(PositionsConstants.IntakeOpen.kOpen.get());
                 else if (RobotState.get().getRobotState() == States.SHOOT)

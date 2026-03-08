@@ -60,7 +60,7 @@ public class ShootCalculator extends SubsystemBase {
         Translation2d virtualTarget;
         if (predictSec > 0) {
             Prediction prediction = predict(RobotState.get().getRobotPose(),
-                Swerve.getInstance().getSpeeds(),
+                Swerve.getInstance().getSpeeds().getAsFieldRelative(),
                 new SwerveSpeeds(RobotContainer.getSwerve().getAcceleration(), 0, true),
                 predictSec);
 

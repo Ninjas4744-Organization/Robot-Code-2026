@@ -10,7 +10,6 @@ import frc.lib.NinjasLib.subsystem.IO;
 import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.robot.RobotState;
 import frc.robot.constants.GeneralConstants;
-import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
@@ -55,7 +54,6 @@ public class IntakeOpen extends SubsystemBase implements
         if (!enabled) return Commands.none();
         return Commands.runOnce(() -> {
                 slowCloseCommand.stop();
-                io.resetVirtualLimit();
                 io.setPercent(-0.3);
             })
             .andThen(Commands.waitUntil(this::isReset))
@@ -64,7 +62,7 @@ public class IntakeOpen extends SubsystemBase implements
 
     @Override
     public boolean atGoal() {
-        return !enabled || inputs.AtGoal;
+        return !enabled || Math.abs(getGoal() - getPosition()) < SubsystemConstants.kIntakeOpen.real.control.positionGoalTolerance;
     }
 
     @Override
@@ -94,10 +92,10 @@ public class IntakeOpen extends SubsystemBase implements
             return;
 
         slowCloseCommand.setNewTask(Commands.sequence(
-            Commands.runOnce(() -> io.setVelocity(-0.1)),
+            Commands.runOnce(() -> io.setVelocity(-0.3)),
             Commands.waitUntil(this::isReset),
-            setPositionCmd(PositionsConstants.IntakeOpen.kClose.get()),
             Commands.runOnce(() -> RobotState.setIntake(true))
+//            setPositionCmd(PositionsConstants.IntakeOpen.kClose.get())
         ));
     }
 }

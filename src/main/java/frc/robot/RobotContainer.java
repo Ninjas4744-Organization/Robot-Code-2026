@@ -52,7 +52,7 @@ public class RobotContainer {
         shootCalculator = new ShootCalculator();
 
         intake = new Intake(true);
-        intakeOpen = new IntakeOpen(false);
+        intakeOpen = new IntakeOpen(true);
         indexer = new Indexer(true);
         indexer2 = new Indexer2(true);
         shooter = new Shooter(true);
