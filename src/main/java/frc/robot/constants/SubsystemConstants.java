@@ -174,39 +174,23 @@ public class SubsystemConstants {
         /* Base */
         kClimber.real.base.main.id = 40;
         kClimber.real.base.currentLimit = 60;
+        kClimber.real.base.followers = new SimpleControllerConstants[1];
+        kClimber.real.base.followers[0].id = 41;
 
         /* Control */
         kClimber.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
         kClimber.real.control.gearRatio = 2;
 
         /* Limit Switch */
+        kIntakeOpen.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit(), new RealControllerConstants.HardLimits.HardLimit() };
+        kIntakeOpen.real.hardLimits.limits[0].id = 1;
+        kIntakeOpen.real.hardLimits.limits[0].direction = -1;
+        kIntakeOpen.real.hardLimits.limits[0].autoStopReset = true;
+        kIntakeOpen.real.hardLimits.limits[0].homePosition = 0;
 
         /* Simulation */
         kClimber.simMotor = DCMotor.getKrakenX60(2);
         kClimber.simSystem = LinearSystemId.createElevatorSystem(kClimber.simMotor, 8, 0.04, kClimber.real.control.gearRatio);
-    }
-
-
-
-    public static final ControllerConstants kClimberAngle = new ControllerConstants();
-    static {
-        /* Base */
-        kClimberAngle.real.base.main.id = 41;
-        kClimberAngle.real.base.currentLimit = 40;
-
-        /* Control */
-        kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPIDF(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
-        kClimberAngle.real.control.gearRatio = 1;
-        kClimberAngle.real.control.conversionFactor = 1;
-        kClimberAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);
-
-        /* Soft Limits */
-        kClimberAngle.real.softLimits.min = Units.degreesToRadians(0);
-        kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
-
-        /* Simulation */
-        kClimberAngle.simMotor = DCMotor.getKrakenX60(2);
-        kClimberAngle.simSystem = LinearSystemId.createSingleJointedArmSystem(kClimberAngle.simMotor, 1, kClimberAngle.real.control.gearRatio);
     }
 
 

@@ -18,9 +18,7 @@ public enum States {
     CLIMB_DOWN,
     CLIMB1_READY,
     CLIMB1_AUTO,
-    CLIMB1,
-    CLIMB2,
-    CLIMB3;
+    CLIMB1;
 
     public enum ShootingMode {
         LOCK,

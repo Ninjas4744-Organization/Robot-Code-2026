@@ -23,7 +23,6 @@ public class StateMachine extends StateMachineBase<States> {
     private Shooter shooter;
     private Accelerator accelerator;
     private Climber climber;
-    private ClimberAngle climberAngle;
     private Leds leds;
 
     private BackgroundCommand shootCommand = new BackgroundCommand();
@@ -52,7 +51,6 @@ public class StateMachine extends StateMachineBase<States> {
         shooter = RobotContainer.getShooter();
         accelerator = RobotContainer.getAccelerator();
         climber = RobotContainer.getClimber();
-        climberAngle = RobotContainer.getClimberAngle();
         leds = RobotContainer.getLeds();
 
         resetCommands();
@@ -75,8 +73,7 @@ public class StateMachine extends StateMachineBase<States> {
             shooter.reset(),
             accelerator.reset(),
             climber.reset(),
-            climberAngle.reset(),
-            Commands.runOnce(() -> {
+                Commands.runOnce(() -> {
                 RobotState.setIntake(false);
                 RobotState.setAutoReadyToShoot(false);
             })
@@ -121,8 +118,7 @@ public class StateMachine extends StateMachineBase<States> {
             && indexer2.isReset()
             && shooter.isReset()
             && accelerator.isReset()
-            && climber.isReset()
-            && climberAngle.isReset(),
+            && climber.isReset(),
             States.IDLE);
     }
 
@@ -255,44 +251,32 @@ public class StateMachine extends StateMachineBase<States> {
 
     private void climbingCommands() {
         addEdge(States.IDLE, States.CLIMB1_READY ,Commands.sequence(
-            climberAngle.setAngleCmd(Rotation2d.fromDegrees(PositionsConstants.ClimberAngle.kOpen.getAsDouble())),
-            Commands.waitUntil(climberAngle::atGoal),
-            climber.setPositionCmd(PositionsConstants.Climber.kClimbReady.get()),
+            climber.setPositionCmd(PositionsConstants.Climber.kClimbPrepare.get()),
             Commands.waitUntil(climber::atGoal)
         ));
 
         addEdge(States.CLIMB1_READY, States.CLIMB1_AUTO ,Commands.sequence(
-            climber.setPositionCmd(PositionsConstants.Climber.kRightAutoClimb.get()),
+            climber.setPositionCmd(PositionsConstants.Climber.kClimbZero.get()),
             Commands.waitUntil(climber::atGoal)
         ));
 
 
         addEdge(States.CLIMB1_AUTO, States.CLIMB_DOWN ,Commands.sequence(
-            climber.setPositionCmd(PositionsConstants.Climber.kLeftClimb.get()),
+            climber.setPositionCmd(PositionsConstants.Climber.kClimbPrepare.get()),
             Commands.waitUntil(climber::atGoal)
         ));
 
         addEdge(States.CLIMB_DOWN, States.IDLE ,Commands.sequence(
-            climberAngle.setAngleCmd(Rotation2d.fromDegrees(PositionsConstants.ClimberAngle.kClose.getAsDouble())),
-            Commands.waitUntil(climberAngle::atGoal)
+            // TODO: Check that this command  won't run when the robot is still "holding" level 1 on of the tower
+            climber.setPositionCmd(PositionsConstants.Climber.kClimbZero.get()),
+            Commands.waitUntil(climber::atGoal)
         ));
 
 
         addEdge(States.CLIMB1_READY, States.CLIMB1 ,Commands.sequence(
-            climber.setPositionCmd(PositionsConstants.Climber.kRightClimb.get()),
+            climber.setPositionCmd(PositionsConstants.Climber.kClimbZero.get()),
             Commands.waitUntil(climber::atGoal)
         ));
-
-        addEdge(States.CLIMB1, States.CLIMB2 ,Commands.sequence(
-            climber.setPositionCmd(PositionsConstants.Climber.kLeftClimb.get()),
-            Commands.waitUntil(climber::atGoal)
-        ));
-
-        addEdge(States.CLIMB2, States.CLIMB3 ,Commands.sequence(
-            climber.setPositionCmd(PositionsConstants.Climber.kRightClimb.get()),
-            Commands.waitUntil(climber::atGoal)
-        ));
-
 
         addStateEnd(States.CLIMB1_READY,
             RobotState::isTeleop,
@@ -302,16 +286,6 @@ public class StateMachine extends StateMachineBase<States> {
         addStateEnd(States.CLIMB1_READY,
             () -> !RobotState.isTeleop(),
             States.CLIMB1_AUTO
-        );
-
-        addStateEnd(States.CLIMB1,
-            () -> true,
-            States.CLIMB2
-        );
-
-        addStateEnd(States.CLIMB2,
-            () -> true,
-            States.CLIMB3
         );
 
         addStateEnd(States.CLIMB_DOWN,

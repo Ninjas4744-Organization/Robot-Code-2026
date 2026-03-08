@@ -31,7 +31,6 @@ public class RobotContainer {
     private static Shooter shooter;
     private static Accelerator accelerator;
     private static Climber climber;
-    private static ClimberAngle climberAngle;
     private static Leds leds;
     private static ShootCalculator shootCalculator;
 
@@ -58,7 +57,6 @@ public class RobotContainer {
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
         climber = new Climber(false);
-        climberAngle = new ClimberAngle(false);
         leds = new Leds(false);
 
         StateMachineBase.setInstance(new StateMachine());
@@ -85,7 +83,6 @@ public class RobotContainer {
     public static Shooter getShooter() { return shooter; }
     public static Accelerator getAccelerator() { return accelerator; }
     public static Climber getClimber() { return climber; }
-    public static ClimberAngle getClimberAngle() { return climberAngle; }
     public static Leds getLeds() { return leds; }
 
     private void configureAuto() {
