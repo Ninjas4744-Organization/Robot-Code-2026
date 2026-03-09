@@ -46,7 +46,7 @@ public class IntakeOpen extends SubsystemBase implements
 
     @Override
     public boolean isReset() {
-        return !enabled || inputs.LimitSwitches[0] || GeneralConstants.kRobotMode.isSim();
+        return !enabled || inputs.LimitSwitches[0];
     }
 
     @Override
@@ -78,7 +78,7 @@ public class IntakeOpen extends SubsystemBase implements
         backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> goal = 1),
             Commands.runOnce(() -> io.setPercent(0.75)),
-            Commands.waitUntil(() -> inputs.LimitSwitches[1]),
+            Commands.waitUntil(this::atGoal),
             Commands.runOnce(io::stopMotor)
         ));
     }
@@ -90,7 +90,7 @@ public class IntakeOpen extends SubsystemBase implements
         backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> goal = 0),
             Commands.runOnce(() -> io.setPercent(-0.75)),
-            Commands.waitUntil(() -> inputs.LimitSwitches[0]),
+            Commands.waitUntil(this::atGoal),
             Commands.runOnce(io::stopMotor)
         ));
     }
@@ -102,7 +102,7 @@ public class IntakeOpen extends SubsystemBase implements
         backgroundCommand.setNewTask(Commands.sequence(
             Commands.runOnce(() -> goal = 0),
             Commands.runOnce(() -> io.setPercent(-0.75)),
-            Commands.waitUntil(() -> inputs.LimitSwitches[0]),
+            Commands.waitUntil(this::atGoal),
             Commands.runOnce(io::stopMotor),
             Commands.runOnce(() -> RobotState.setIntake(true))
         ));

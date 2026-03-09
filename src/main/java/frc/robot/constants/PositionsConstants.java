@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.lib.NinjasLib.LoggedTunableNumber;
+import frc.robot.RobotState;
 
 public class PositionsConstants {
     public static class ClimberAngle {
@@ -157,16 +158,15 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 3, false);
 
         private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 2.5, false);
-        private static final LoggedTunableNumber kDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery Target Y", 5.5, false);
-        public static final LoggedTunableNumber kDeliveryYThreshold = new LoggedTunableNumber("Swerve/Delivery Y Threshold", 3.5, false);
-
-//        public static final LoggedTunableNumber kAccelerationFactor = new LoggedTunableNumber("Swerve/Acceleration Factor", 0, true);
+        private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Left Delivery Target Y", 5.5, false);
+        private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Right Delivery Target Y", 2.5, false);
+        public static final LoggedTunableNumber kDeliveryYDistThreshold = new LoggedTunableNumber("Swerve/Delivery Y Dist Threshold", 1.5, false);
 
         public static final LoggedTunableNumber kAutoTrenchThreshold = new LoggedTunableNumber("Swerve/Auto Trench Threshold", 1.5, false);
         public static final LoggedTunableNumber kAutoTrenchYThreshold = new LoggedTunableNumber("Swerve/Auto Trench Y Threshold", 1.5, false);
 
         public static Pose2d getDeliveryTarget() {
-            return new Pose2d(kDeliveryTargetX.get(), kDeliveryTargetY.get(), Rotation2d.kZero);
+            return new Pose2d(kDeliveryTargetX.get(), RobotState.get().getRobotPose().getY() > 4 ? kLeftDeliveryTargetY.get() : kRightDeliveryTargetY.get(), Rotation2d.kZero);
         }
     }
 }

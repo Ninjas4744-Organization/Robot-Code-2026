@@ -57,7 +57,7 @@ public class SubsystemConstants {
         /* Control */
 //        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(120, 0, 0.03, 0);
         kIntakeOpen.real.control.conversionFactor = 0.00864;
-        kIntakeOpen.real.control.positionGoalTolerance = 0.01;
+        kIntakeOpen.real.control.positionGoalTolerance = 0.06;
         kIntakeOpen.real.control.enableFOC = false;
 
         /* Soft Limits */
@@ -80,7 +80,7 @@ public class SubsystemConstants {
 
         /* Simulation */
         kIntakeOpen.simMotor = DCMotor.getKrakenX60(1);
-        kIntakeOpen.simSystem = LinearSystemId.createElevatorSystem(kIntakeOpen.simMotor, 3, 0.02, kIntakeOpen.real.control.gearRatio);
+        kIntakeOpen.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100000 * 2 * Math.PI / 0.5));
     }
 
 
@@ -99,7 +99,7 @@ public class SubsystemConstants {
 
         /* Simulation */
         kIndexer.simMotor = DCMotor.getKrakenX60(1);
-        kIndexer.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (50 * 2 * Math.PI / 0.5));
+        kIndexer.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (500 * 2 * Math.PI / 0.5));
     }
 
 
@@ -118,7 +118,7 @@ public class SubsystemConstants {
 
         /* Simulation */
         kIndexer2.simMotor = DCMotor.getKrakenX60(1);
-        kIndexer2.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (50 * 2 * Math.PI / 0.5));
+        kIndexer2.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (500 * 2 * Math.PI / 0.5));
     }
 
 
@@ -143,7 +143,7 @@ public class SubsystemConstants {
 
         /* Simulation */
         kShooter.simMotor = DCMotor.getKrakenX60(2);
-        kShooter.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100 * 2 * Math.PI / 0.5));
+        kShooter.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (1000 * 2 * Math.PI / 0.5));
     }
 
 
@@ -163,7 +163,7 @@ public class SubsystemConstants {
 
         /* Simulation */
         kAccelerator.simMotor = DCMotor.getKrakenX60(1);
-        kAccelerator.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100 * 2 * Math.PI / 0.5));
+        kAccelerator.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (1000 * 2 * Math.PI / 0.5));
     }
 
 

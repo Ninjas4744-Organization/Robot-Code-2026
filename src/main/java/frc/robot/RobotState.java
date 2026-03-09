@@ -14,7 +14,7 @@ import java.util.Optional;
 public class RobotState extends RobotStateWithSwerve<States> {
     private static States.ShootingMode shootingMode;
     private static boolean isIntake;
-    private static boolean autoReadyToShoot = false;
+    private static boolean autoSwitchShootReadyToShoot = false;
 
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
@@ -43,10 +43,19 @@ public class RobotState extends RobotStateWithSwerve<States> {
             && RobotContainer.getShooter().atGoal();
 //            && RobotContainer.getAccelerator().atGoal();
 
-        if (shootingMode == States.ShootingMode.DELIVERY)
-            return (!GeneralConstants.enableAutoTiming || !RobotState.isHubActive()) && RobotState.get().getRobotPose().getY() > PositionsConstants.Swerve.kDeliveryYThreshold.get();
-        else
-            return isReady && (!GeneralConstants.enableAutoTiming || RobotState.isHubActive());
+        if (shootingMode == States.ShootingMode.DELIVERY) return isReady
+                && (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds))
+                && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.kDeliveryYDistThreshold.get()
+                && RobotState.get().getRobotPose().getX() > 4.6;
+        else return isReady
+                && (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds))
+                && RobotState.get().getRobotPose().getX() < 4.6;
+    }
+
+    public static boolean isDeliveryReadyWhileShooting() {
+        return (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds))
+            && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.kDeliveryYDistThreshold.get()
+            && RobotState.get().getRobotPose().getX() > 4.6;
     }
 
     public static States.ShootingMode getShootingMode() {
@@ -58,18 +67,22 @@ public class RobotState extends RobotStateWithSwerve<States> {
         RobotState.shootingMode = shootingMode;
     }
 
-
-    public static boolean isAutoReadyToShoot() {
-        return autoReadyToShoot;
+    public static boolean isAutoSwitchShootReadyToShoot() {
+        return autoSwitchShootReadyToShoot;
     }
 
-    public static void setAutoReadyToShoot(boolean autoReadyToShoot) {
-        RobotState.autoReadyToShoot = autoReadyToShoot;
-        Logger.recordOutput("Robot/Shooting/Auto Ready To Shoot", autoReadyToShoot);
+    public static void setAutoSwitchShootReadyToShoot(boolean autoSwitchShootReadyToShoot) {
+        RobotState.autoSwitchShootReadyToShoot = autoSwitchShootReadyToShoot;
+        Logger.recordOutput("Robot/Shooting/Auto Switch ShootReady To Shoot", autoSwitchShootReadyToShoot);
     }
 
     public static double getMatchTime() {
-        return 140 - (RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000;
+        if (DriverStation.isAutonomousEnabled()) {
+            return 160 - (RobotController.getFPGATime() - Robot.autoStartTime) / 1000000.0;
+        } else if (DriverStation.isTeleopEnabled()) {
+            return 140 - (RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000.0;
+        }
+        return 0;
     }
 
     public static boolean isWonAuto() {
@@ -91,48 +104,34 @@ public class RobotState extends RobotStateWithSwerve<States> {
     }
 
     public static boolean isHubActiveAtTime(double matchTime) {
+        if (matchTime > 130) return true; // Auto
+        if (matchTime <= 30) return true; // End Game
+
         Optional<DriverStation.Alliance> alliance = DriverStation.getAlliance();
-        if (alliance.isEmpty()) return false;
+        if (alliance.isEmpty()) return true;
 
-        boolean shift1Active = false;
-        if (!GeneralConstants.kRobotMode.isSim()) {
-            String gameData = DriverStation.getGameSpecificMessage();
-            if (gameData.isEmpty()) return true;
+        boolean shift1Active = !isWonAuto();
 
-            boolean redInactiveFirst;
-
-            switch (gameData.charAt(0)) {
-                case 'R' -> redInactiveFirst = true;
-                case 'B' -> redInactiveFirst = false;
-                default -> { return true; }
-            }
-
-            shift1Active = switch (alliance.get()) {
-                case Red -> redInactiveFirst;
-                case Blue -> !redInactiveFirst;
-            };
-        }
-
-        if (matchTime > 130) return true;
-        else if (matchTime > 105) return shift1Active;
-        else if (matchTime > 80) return !shift1Active;
-        else if (matchTime > 55) return shift1Active;
-        else if (matchTime > 30) return !shift1Active;
+        if (matchTime > 105) return shift1Active;      // Shift 1: 130 to 105
+        else if (matchTime > 80) return !shift1Active; // Shift 2: 105 to 80
+        else if (matchTime > 55) return shift1Active;  // Shift 3: 80 to 55
+        else if (matchTime > 30) return !shift1Active; // Shift 4: 55 to 30
         else return true;
     }
 
-    public static double timeUntilHubChange() {
-        if (!DriverStation.isTeleopEnabled())
+    public static double timeUntilShiftChange() {
+        if (DriverStation.isDisabled())
             return Double.POSITIVE_INFINITY;
 
         double matchTime = getMatchTime();
 
-        if (matchTime > 130) return matchTime - 130;
+        if (matchTime > 140) return matchTime - 140;
+        else if (matchTime > 130) return matchTime - 130;
         else if (matchTime > 105) return matchTime - 105;
         else if (matchTime > 80) return matchTime - 80;
         else if (matchTime > 55) return matchTime - 55;
         else if (matchTime > 30) return matchTime - 30;
-        else return Double.POSITIVE_INFINITY;
+        else return matchTime;
     }
 
     public static boolean isHubActive() {
@@ -143,7 +142,7 @@ public class RobotState extends RobotStateWithSwerve<States> {
     }
 
     public static boolean isHubAboutToBe(boolean active, double warningSeconds) {
-        if (!DriverStation.isTeleopEnabled())
+        if (DriverStation.isDisabled())
             return false;
 
         double currentTime = getMatchTime();
@@ -151,13 +150,13 @@ public class RobotState extends RobotStateWithSwerve<States> {
 
         if (futureTime < 0) return false;
 
-        boolean activeNow = isHubActiveAtTime(currentTime);
+//        boolean activeNow = isHubActiveAtTime(currentTime);
         boolean activeFuture = isHubActiveAtTime(futureTime);
 
-        return active ? !activeNow && activeFuture : activeNow && !activeFuture;
+        return active == activeFuture;
     }
 
     public static boolean isHubAboutToChange(double warningSeconds) {
-        return isHubAboutToBe(true, warningSeconds) || isHubAboutToBe(false, warningSeconds);
+        return (!isHubActive() && isHubAboutToBe(true, warningSeconds)) || (isHubActive() && isHubAboutToBe(false, warningSeconds));
     }
 }

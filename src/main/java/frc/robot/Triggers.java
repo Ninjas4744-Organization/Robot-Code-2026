@@ -30,13 +30,8 @@ public class Triggers {
                 StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
         }));
 
-        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToChange(GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
-            if (RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds))
-                RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
-            else
-                RobotState.setShootingMode(States.ShootingMode.DELIVERY);
-
-            RobotState.setIntake(true);
+        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
+            RobotState.setShootingMode(States.ShootingMode.DELIVERY);
 
             if (Set.of(States.SHOOT_HEATED,
                     States.SHOOT_PREPARE,
@@ -62,7 +57,7 @@ public class Triggers {
         driverController.options().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
 
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
-            RobotState.setAutoReadyToShoot(false);
+            RobotState.setAutoSwitchShootReadyToShoot(false);
             RobotContainer.getSwerve().stop();
             RobotState.setIntake(true);
             StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
@@ -79,7 +74,7 @@ public class Triggers {
 //                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
                 RobotState.setIntake(false);
             } else {
-                RobotState.setAutoReadyToShoot(true);
+                RobotState.setAutoSwitchShootReadyToShoot(true);
                 StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
             }
         })));

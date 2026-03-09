@@ -100,12 +100,12 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> {
-            RobotState.setAutoReadyToShoot(true);
+            RobotState.setAutoSwitchShootReadyToShoot(true);
             StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
         }));
 
         NamedCommands.registerCommand("Stop", Commands.runOnce(() -> {
-            RobotState.setAutoReadyToShoot(false);
+            RobotState.setAutoSwitchShootReadyToShoot(false);
 //            RobotState.setIntake(false);
             StateMachine.getInstance().changeRobotState(States.IDLE);
         }));
@@ -140,7 +140,7 @@ public class RobotContainer {
         Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.get().getOdometryOnlyRobotPose().getTranslation()));
 
         Logger.recordOutput("Robot/Timing/Active", RobotState.isHubActive());
-        Logger.recordOutput("Robot/Timing/Time Until Hub Change", RobotState.timeUntilHubChange());
+        Logger.recordOutput("Robot/Timing/Shift Time", Math.ceil(RobotState.timeUntilShiftChange()));
 
         logField.setRobotPose(RobotState.get().getRobotPose());
         logField.getObject("Target").setPose(new Pose2d(ShootCalculator.getShootParams().virtualTarget(), Rotation2d.kZero));

@@ -155,7 +155,7 @@ public class Simulation {
             balls[simFlyingBalls.size() + i] = simFieldBalls.get(i).getPose3d();
         }
 
-        Logger.recordOutput("Robot/Shooting/Balls", balls);
+        Logger.recordOutput("Simulation/Balls", balls);
     }
 
     private static boolean simBallColliding(

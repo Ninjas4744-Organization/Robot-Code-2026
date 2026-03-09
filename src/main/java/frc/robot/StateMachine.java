@@ -76,13 +76,13 @@ public class StateMachine extends StateMachineBase<States> {
             climberAngle.reset(),
             Commands.runOnce(() -> {
                 RobotState.setIntake(false);
-                RobotState.setAutoReadyToShoot(false);
+                RobotState.setAutoSwitchShootReadyToShoot(false);
             }),
-            intake.reset(),
-            intakeOpen.reset(),
-            intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get()),
-            Commands.waitUntil(intakeOpen::isReset),
-            intake.reset()
+            Commands.sequence(
+                intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get()),
+                intakeOpen.reset(),
+                intake.reset()
+            )
         )));
 
         addEdge(States.RESET, States.IDLE);
@@ -97,7 +97,7 @@ public class StateMachine extends StateMachineBase<States> {
 
             Commands.runOnce(() -> {
                 RobotState.setIntake(true);
-                RobotState.setAutoReadyToShoot(false);
+                RobotState.setAutoSwitchShootReadyToShoot(false);
                 RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
             }),
 
@@ -246,12 +246,12 @@ public class StateMachine extends StateMachineBase<States> {
         );
 
         addStateEnd(States.SHOOT,
-            () -> !RobotState.isShootReady(),
+            () -> RobotState.getShootingMode() != States.ShootingMode.DELIVERY ? !RobotState.isShootReady() : !RobotState.isDeliveryReadyWhileShooting(),
             States.SHOOT_PREPARE
         );
 
         addStateEnd(States.SHOOT_READY,
-            RobotState::isAutoReadyToShoot,
+            RobotState::isAutoSwitchShootReadyToShoot,
             States.SHOOT
         );
     }
