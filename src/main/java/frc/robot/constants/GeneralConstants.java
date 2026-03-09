@@ -54,7 +54,7 @@ public class GeneralConstants {
         public static double kDriverSpeedFactor = 1;
         public static double kDriverRotationSpeedFactor = 1;
         public static double kDriverPowFactor = 0.75;
-        public static double kDriverRotationPowFactor = 0.5;
+        public static double kDriverRotationPowFactor = 0.75;
         public static double kJoystickDeadband = 0.04;
         public static boolean kDriverFieldRelative = true;
     }
