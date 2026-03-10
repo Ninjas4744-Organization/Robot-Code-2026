@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 
 import java.util.Set;
@@ -19,26 +20,24 @@ public class Triggers {
     }
 
     public static void configureTriggers() {
-        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingStopDeliverySeconds)).onTrue(Commands.runOnce(() -> {
+        new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingStopDeliverySeconds)).onTrue(Commands.runOnce(() -> {
             RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
 
-            if (Set.of(States.SHOOT_HEATED,
-                    States.SHOOT_PREPARE,
+            if (Set.of(States.SHOOT_PREPARE,
                     States.SHOOT_READY,
                     States.SHOOT)
                 .contains(RobotState.get().getRobotState()))
-                StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
+                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_OPENED);
         }));
 
-        new Trigger(() -> GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
+        new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
             RobotState.setShootingMode(States.ShootingMode.DELIVERY);
 
-            if (Set.of(States.SHOOT_HEATED,
-                    States.SHOOT_PREPARE,
+            if (Set.of(States.SHOOT_PREPARE,
                     States.SHOOT_READY,
                     States.SHOOT)
                 .contains(RobotState.get().getRobotState()))
-                StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
+                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_CLOSED);
         }));
 
 //        new Trigger(() -> RobotState.isTeleop() && RobotContainer.getVision().isResettedPose() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && (RobotContainer.getSwerve().nearRightTrench() || RobotContainer.getSwerve().nearLeftTrench()))
@@ -54,37 +53,37 @@ public class Triggers {
         driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateForceCommand(States.RESET)));
         driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
 
-        driverController.options().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.DUMP)));
-
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
             RobotState.setAutoSwitchShootReadyToShoot(false);
             RobotContainer.getSwerve().stop();
-            RobotState.setIntake(true);
-            StateMachine.getInstance().changeRobotStateForce(States.BALLS_READY);
+
+            if (FieldConstants.atNeutralZone())
+                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_OPENED);
+            else
+                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_CLOSED);
         })));
 
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> RobotState.setIntake(true))));
+        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
+            if (RobotState.get().getRobotState() == States.INTAKE_BOX_CLOSED)
+                StateMachine.getInstance().changeRobotState(States.INTAKE_BOX_OPENED);
+            else
+                StateMachine.getInstance().changeRobotState(States.INTAKE_BOX_CLOSED);
+        })));
 
         driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
             if (!RobotContainer.getVision().isResettedPose())
                 return;
 
-            if (RobotState.get().getRobotState() == States.SHOOT) {
-//                RobotState.setAutoReadyToShoot(false);
-//                StateMachine.getInstance().changeRobotState(States.SHOOT_READY);
-                RobotState.setIntake(false);
-            } else {
+            if (RobotState.get().getRobotState() != States.SHOOT) {
                 RobotState.setAutoSwitchShootReadyToShoot(true);
                 StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
             }
         })));
 
-        driverController.L2().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.CLIMB1_READY)));
-
         driverController.R3().onTrue(notTest(Commands.runOnce(RobotContainer.getSwerve()::snapAngle)
             .andThen(Commands.waitUntil(RobotContainer.getSwerve()::atGoal))
             .finallyDo(RobotContainer.getSwerve()::stop)
-            .onlyIf(() -> RobotContainer.getVision().isResettedPose() && Set.of(States.IDLE, States.BALLS_READY, States.INTAKE, States.DUMP).contains(RobotState.get().getRobotState()))));
+            .onlyIf(() -> RobotContainer.getVision().isResettedPose() && Set.of(States.IDLE, States.INTAKE_BOX_CLOSED, States.INTAKE_BOX_OPENED).contains(RobotState.get().getRobotState()))));
 
         driverController.cross().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE))));
         driverController.square().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.DELIVERY))));
@@ -99,7 +98,42 @@ public class Triggers {
     }
 
     public static void configureTestBindings() {
-        driverController.L2().toggleOnTrue(inTest(Commands.startEnd(() -> RobotContainer.getVision().setEnabled(false), () -> RobotContainer.getVision().setEnabled(true))));
-        driverController.R2().onTrue(inTest(Commands.runOnce(() -> RobotState.get().setOdometryOnlyRobotPose(RobotContainer.getVision().getLastVisionPose()))));
+        driverController.L1().toggleOnTrue(inTest(Commands.startEnd(() -> RobotContainer.getVision().setEnabled(false), () -> RobotContainer.getVision().setEnabled(true))));
+        driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.get().setOdometryOnlyRobotPose(RobotContainer.getVision().getLastVisionPose()))));
+
+        driverController.triangle().whileTrue(inTest(Commands.startEnd(
+            () -> RobotContainer.getBox().setPercent(0.1),
+            () -> RobotContainer.getBox().setPercent(0)
+        )));
+
+        driverController.cross().whileTrue(inTest(Commands.startEnd(
+            () -> RobotContainer.getBox().setPercent(-0.1),
+            () -> RobotContainer.getBox().setPercent(0)
+        )));
+
+        driverController.circle().whileTrue(inTest(Commands.startEnd(
+            () -> RobotContainer.getIntakeOpen().setPercent(0.1),
+            () -> RobotContainer.getIntakeOpen().setPercent(0)
+        )));
+
+        driverController.square().whileTrue(inTest(Commands.startEnd(
+            () -> RobotContainer.getIntakeOpen().setPercent(-0.1),
+            () -> RobotContainer.getIntakeOpen().setPercent(0)
+        )));
+
+        driverController.R2().whileTrue(inTest(Commands.startEnd(
+            () -> {
+                RobotContainer.getShooter().setVelocity(20);
+                RobotContainer.getAccelerator().setVelocity(20);
+                RobotContainer.getIndexer().setVelocity(20);
+                RobotContainer.getIntake().setVelocity(20);
+            },
+            () -> {
+                RobotContainer.getShooter()    .stop();
+                RobotContainer.getAccelerator().stop();
+                RobotContainer.getIndexer()    .stop();
+                RobotContainer.getIntake()     .stop();
+            }
+        )));
     }
 }

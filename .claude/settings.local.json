@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew build:*)",
+      "Bash(ls \"C:\\\\Users\\\\ninja\\\\Desktop\\\\Code\\\\Robot-Code-2026\"/*.gradle)",
+      "Read(//c/Users/ninja/.gradle/wrapper/dists//**)",
+      "Bash(where java)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/ninja/**)",
+      "Bash(JAVA_HOME=\"C:/Users/Public/wpilib/2026/jdk\" ./gradlew build:*)"
+    ]
+  }
+}

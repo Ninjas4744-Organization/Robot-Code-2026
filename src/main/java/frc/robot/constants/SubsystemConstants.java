@@ -11,7 +11,6 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.util.Units;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.constants.ControlConstants;
 import frc.lib.NinjasLib.controllers.constants.ControllerConstants;
@@ -32,7 +31,6 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIntake.real.base.main.id = 20;
-        kIntake.real.base.currentLimit = 60;
         kIntake.real.base.isBrakeMode = false;
 
         /* Control */
@@ -51,7 +49,6 @@ public class SubsystemConstants {
         /* Base */
         kIntakeOpen.real.base.main.id = 21;
         kIntakeOpen.real.base.main.inverted = true;
-        kIntakeOpen.real.base.currentLimit = 60;
         kIntakeOpen.real.base.isBrakeMode = false;
 
         /* Control */
@@ -85,13 +82,43 @@ public class SubsystemConstants {
 
 
 
+    public static final ControllerConstants kBox = new ControllerConstants();
+    static {
+        /* Base */
+        kBox.real.base.main.id = 22;
+        kBox.real.base.main.inverted = true;
+        kBox.real.base.isBrakeMode = false;
+
+        /* Control */
+        kBox.real.control.controlConstants = ControlConstants.createPID(120, 0, 0.03, 0);
+        kBox.real.control.conversionFactor = 0.00864;
+        kBox.real.control.positionGoalTolerance = 0.06;
+        kBox.real.control.enableFOC = false;
+
+        /* Hard Limit */
+        kBox.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit() };
+        kBox.real.hardLimits.limits[0].id = 1;
+        kBox.real.hardLimits.limits[0].direction = -1;
+        kBox.real.hardLimits.limits[0].autoStopReset = true;
+        kBox.real.hardLimits.limits[0].homePosition = 0;
+
+        /* Simulation */
+        kBox.simMotor = DCMotor.getKrakenX60(1);
+        kBox.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100000 * 2 * Math.PI / 0.5));
+    }
+
+
+
     public static final ControllerConstants kIndexer = new ControllerConstants();
     static {
         /* Base */
-        kIndexer.real.base.main.id = 22;
+        kIndexer.real.base.main.id = 40;
         kIndexer.real.base.main.inverted = true;
-        kIndexer.real.base.currentLimit = 60;
         kIndexer.real.base.isBrakeMode = false;
+
+        kIndexer.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
+        kIndexer.real.base.followers[0].id = 41;
+        kIndexer.real.base.followers[0].inverted = true;
 
         /* Control */
         kIndexer.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
@@ -100,25 +127,6 @@ public class SubsystemConstants {
         /* Simulation */
         kIndexer.simMotor = DCMotor.getKrakenX60(1);
         kIndexer.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (500 * 2 * Math.PI / 0.5));
-    }
-
-
-
-    public static final ControllerConstants kIndexer2 = new ControllerConstants();
-    static {
-        /* Base */
-        kIndexer2.real.base.main.id = 23;
-        kIndexer2.real.base.main.inverted = false;
-        kIndexer2.real.base.currentLimit = 60;
-        kIndexer2.real.base.isBrakeMode = false;
-
-        /* Control */
-        kIndexer2.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
-        kIndexer2.real.control.enableFOC = false;
-
-        /* Simulation */
-        kIndexer2.simMotor = DCMotor.getKrakenX60(1);
-        kIndexer2.simSystem = LinearSystemId.createDCMotorSystem(12 / (50 * 2 * Math.PI), 12 / (500 * 2 * Math.PI / 0.5));
     }
 
 
@@ -133,7 +141,6 @@ public class SubsystemConstants {
         kShooter.real.base.followers[0].inverted = false;
         kShooter.real.base.followers[1].id = 32;
         kShooter.real.base.followers[1].inverted = false;
-        kShooter.real.base.currentLimit = 60;
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
@@ -153,7 +160,6 @@ public class SubsystemConstants {
         /* Base */
         kAccelerator.real.base.main.id = 33;
         kAccelerator.real.base.main.inverted = true;
-        kAccelerator.real.base.currentLimit = 60;
         kAccelerator.real.base.isBrakeMode = false;
 
         /* Control */
@@ -164,48 +170,6 @@ public class SubsystemConstants {
         /* Simulation */
         kAccelerator.simMotor = DCMotor.getKrakenX60(1);
         kAccelerator.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (1000 * 2 * Math.PI / 0.5));
-    }
-
-
-
-    public static final ControllerConstants kClimber = new ControllerConstants();
-    static {
-        /* Base */
-        kClimber.real.base.main.id = 40;
-        kClimber.real.base.currentLimit = 60;
-
-        /* Control */
-        kClimber.real.control.controlConstants = ControlConstants.createTorqueCurrent(10, 1, 0.2);
-        kClimber.real.control.gearRatio = 2;
-
-        /* Limit Switch */
-
-        /* Simulation */
-        kClimber.simMotor = DCMotor.getKrakenX60(2);
-        kClimber.simSystem = LinearSystemId.createElevatorSystem(kClimber.simMotor, 8, 0.04, kClimber.real.control.gearRatio);
-    }
-
-
-
-    public static final ControllerConstants kClimberAngle = new ControllerConstants();
-    static {
-        /* Base */
-        kClimberAngle.real.base.main.id = 41;
-        kClimberAngle.real.base.currentLimit = 40;
-
-        /* Control */
-        kClimberAngle.real.control.controlConstants = ControlConstants.createProfiledPIDF(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, GravityTypeValue.Arm_Cosine);
-        kClimberAngle.real.control.gearRatio = 1;
-        kClimberAngle.real.control.conversionFactor = 1;
-        kClimberAngle.real.control.positionGoalTolerance = Units.degreesToRadians(3);
-
-        /* Soft Limits */
-        kClimberAngle.real.softLimits.min = Units.degreesToRadians(0);
-        kClimberAngle.real.softLimits.max = Units.degreesToRadians(90);
-
-        /* Simulation */
-        kClimberAngle.simMotor = DCMotor.getKrakenX60(2);
-        kClimberAngle.simSystem = LinearSystemId.createSingleJointedArmSystem(kClimberAngle.simMotor, 1, kClimberAngle.real.control.gearRatio);
     }
 
 
@@ -238,14 +202,15 @@ public class SubsystemConstants {
         double wheelRadius = 0.049;
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
-        kSwerve.modules.driveMotorConstants.real.base.currentLimit = 100;
+        kSwerve.modules.driveMotorConstants.real.base.statorCurrentLimit = 100;
+        kSwerve.modules.driveMotorConstants.real.base.supplyCurrentLimit = 60;
         kSwerve.modules.driveMotorConstants.real.control.gearRatio = 5.9;
         kSwerve.modules.driveMotorConstants.real.control.conversionFactor = wheelRadius * 2 * Math.PI;
-//        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createTorqueCurrent(60, 5, 3);
-        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPIDF(1, 0, 0, 0.5, 2.35, 0.25, 0.3, 0, GravityTypeValue.Elevator_Static);
+        kSwerve.modules.driveMotorConstants.real.control.controlConstants = ControlConstants.createPIDF(1, 0, 0, 0.5, 2.35, 0, 0.3, 0, GravityTypeValue.Elevator_Static);
 
         kSwerve.modules.steerMotorConstants = new ControllerConstants();
-        kSwerve.modules.steerMotorConstants.real.base.currentLimit = 60;
+        kSwerve.modules.steerMotorConstants.real.base.statorCurrentLimit = 40;
+        kSwerve.modules.steerMotorConstants.real.base.supplyCurrentLimit = 30;
         kSwerve.modules.steerMotorConstants.real.control.gearRatio = 18.75;
         kSwerve.modules.steerMotorConstants.real.control.conversionFactor = 2 * Math.PI;
         kSwerve.modules.steerMotorConstants.real.control.controlConstants = ControlConstants.createPID(25, 30, 0.25, Math.PI);

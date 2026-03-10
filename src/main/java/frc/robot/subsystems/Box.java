@@ -12,84 +12,103 @@ import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeOpen extends SubsystemBase implements
-        ISubsystem.Resettable,
-        ISubsystem.PercentControlled,
-        ISubsystem.GoalOriented<Integer>
+public class Box extends SubsystemBase implements
+    ISubsystem.Resettable,
+    ISubsystem.PositionControlled,
+    ISubsystem.PercentControlled,
+    ISubsystem.GoalOriented<Double>
 {
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
-    private int goal = 0;
-
     private BackgroundCommand backgroundCommand = new BackgroundCommand();
 
-    public IntakeOpen(boolean enabled) {
+    public Box(boolean enabled) {
         this.enabled = enabled;
 
         if (enabled) {
             if (!GeneralConstants.kRobotMode.isReplay())
-                this.io = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kIntakeOpen);
+                this.io = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kBox);
             else
-                this.io = new IO.All<>() {};
+                this.io = new IO.All<>(){};
             io.setup();
         }
     }
 
     @Override
     public void periodic() {
-        if (!enabled) return;
+        if (!enabled)
+            return;
+
         io.periodic();
         io.updateInputs(inputs);
-        Logger.processInputs("Intake Open", inputs);
+        Logger.processInputs("Box", inputs);
     }
 
     @Override
     public boolean isReset() {
-        return !enabled || inputs.LimitSwitches[0];
+        if (!enabled)
+            return true;
+
+        return inputs.LimitSwitch;
     }
 
     @Override
     public Command reset() {
-        if (!enabled) return Commands.none();
-        return Commands.runOnce(() -> {
-            goal = 0;
-            backgroundCommand.stop();
-            io.setPercent(-0.3);
-        })
-        .andThen(Commands.waitUntil(this::isReset))
-        .finallyDo(io::stopMotor);
+        if (!enabled)
+            return Commands.none();
+
+        return Commands.sequence(
+            Commands.runOnce(() -> {
+                backgroundCommand.stop();
+                io.setPercent(-0.3);
+            }),
+            Commands.waitUntil(this::isReset),
+            Commands.runOnce(io::stopMotor)
+        );
     }
 
     @Override
     public boolean atGoal() {
-        return !enabled || inputs.LimitSwitches[goal];
+        if (!enabled)
+            return true;
+
+        return inputs.AtGoal;
     }
 
     @Override
-    public Integer getGoal() {
-        return enabled ? goal : 0;
+    public Double getGoal() {
+        if (!enabled)
+            return 0.0;
+
+        return inputs.Goal;
     }
 
-    public void open() {
+    public double getPosition() {
+        if (!enabled)
+            return 0.0;
+
+        return inputs.Position;
+    }
+
+    public void setPosition(double position) {
+        if (!enabled)
+            return;
+
+        backgroundCommand.stop();
+        io.setPosition(position);
+    }
+
+    public Command setPositionCmd(double position) {
+        return Commands.runOnce(() -> setPosition(position));
+    }
+
+    public void slowClose() {
         if (!enabled)
             return;
 
         backgroundCommand.setNewTask(Commands.sequence(
-            Commands.runOnce(() -> goal = 1),
-            Commands.runOnce(() -> io.setPercent(0.75)),
-            Commands.waitUntil(this::atGoal),
-            Commands.runOnce(io::stopMotor)
-        ));
-    }
-
-    public void close() {
-        if (!enabled)
-            return;
-
-        backgroundCommand.setNewTask(Commands.sequence(
-            Commands.runOnce(() -> goal = 0),
-            Commands.runOnce(() -> io.setPercent(-0.75)),
+            Commands.runOnce(() -> io.setPercent(-0.1)),
             Commands.waitUntil(this::atGoal),
             Commands.runOnce(io::stopMotor)
         ));

@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.lib.NinjasLib.statemachine.RobotStateWithSwerve;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
@@ -13,7 +14,6 @@ import java.util.Optional;
 
 public class RobotState extends RobotStateWithSwerve<States> {
     private static States.ShootingMode shootingMode;
-    private static boolean isIntake;
     private static boolean autoSwitchShootReadyToShoot = false;
 
     public RobotState(SwerveDriveKinematics kinematics) {
@@ -29,33 +29,30 @@ public class RobotState extends RobotStateWithSwerve<States> {
         return (RobotState) RobotStateBase.get();
     }
 
-    public static boolean isIntake() {
-        return isIntake;
-    }
-
-    public static void setIntake(boolean isIntake) {
-        RobotState.isIntake = isIntake;
-        Logger.recordOutput("Robot/Is Intake", isIntake);
-    }
-
     public static boolean isShootReady() {
         boolean isReady = RobotContainer.getSwerve().atGoal()
-            && RobotContainer.getShooter().atGoal();
-//            && RobotContainer.getAccelerator().atGoal();
+            && RobotContainer.getShooter().atGoal()
+            && RobotContainer.getAccelerator().atGoal();
 
-        if (shootingMode == States.ShootingMode.DELIVERY) return isReady
-                && (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds))
-                && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.kDeliveryYDistThreshold.get()
-                && RobotState.get().getRobotPose().getX() > 4.6;
-        else return isReady
-                && (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds))
-                && RobotState.get().getRobotPose().getX() < 4.6;
+        boolean hubActiveInTime = RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds);
+
+        boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.kDeliveryYDistThreshold.get();
+
+        if (shootingMode == States.ShootingMode.DELIVERY)
+            return isReady
+                && (!GeneralConstants.enableAutoTiming || !hubActiveInTime)
+                && FieldConstants.atNeutralZone()
+                && !atHubY;
+        else
+            return isReady
+                && (!GeneralConstants.enableAutoTiming || hubActiveInTime)
+                && FieldConstants.atAllianceZone();
     }
 
     public static boolean isDeliveryReadyWhileShooting() {
         return (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds))
             && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.kDeliveryYDistThreshold.get()
-            && RobotState.get().getRobotPose().getX() > 4.6;
+            && FieldConstants.atNeutralZone();
     }
 
     public static States.ShootingMode getShootingMode() {

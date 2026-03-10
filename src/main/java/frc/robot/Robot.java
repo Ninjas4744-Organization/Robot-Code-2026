@@ -138,12 +138,14 @@ public class Robot extends LoggedRobot {
         Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
         Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
 
+        StateMachine.getInstance().forceRobotState(States.IDLE);
+
         CommandScheduler.getInstance().schedule(Commands.sequence(
             RobotContainer.getSwerve().reset(),
             RobotContainer.getShooter().stopCmd(),
             RobotContainer.getIndexer().stopCmd(),
-            RobotContainer.getIndexer2().stopCmd(),
-            RobotContainer.getAccelerator().stopCmd()
+            RobotContainer.getAccelerator().stopCmd(),
+            RobotContainer.getIntake().stopCmd()
         ));
     }
 

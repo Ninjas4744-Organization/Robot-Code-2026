@@ -5,22 +5,13 @@ public enum States {
     STARTING_POSE,
     RESET,
     IDLE,
-    BALLS_READY,
 
-    INTAKE,
+    INTAKE_BOX_CLOSED,
+    INTAKE_BOX_OPENED,
 
-    SHOOT_HEATED,
     SHOOT_PREPARE,
     SHOOT_READY,
-    SHOOT,
-    DUMP,
-
-    CLIMB_DOWN,
-    CLIMB1_READY,
-    CLIMB1_AUTO,
-    CLIMB1,
-    CLIMB2,
-    CLIMB3;
+    SHOOT;
 
     public enum ShootingMode {
         LOCK,

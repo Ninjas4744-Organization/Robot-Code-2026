@@ -7,18 +7,9 @@ import frc.lib.NinjasLib.LoggedTunableNumber;
 import frc.robot.RobotState;
 
 public class PositionsConstants {
-    public static class ClimberAngle {
-        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Climber Angle/Close", 90, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Climber Angle/Open", 0, false);
-    }
-
-    public static class Climber {
-        // I considered LeftClimb is the starting pos, so the system starts with the left hook down
-        public static final LoggedTunableNumber kLeftClimb = new LoggedTunableNumber("Climber/Left Climb", -90, false);
-        public static final LoggedTunableNumber kRightClimb = new LoggedTunableNumber("Climber/Right Climb", 90, false);
-        public static final LoggedTunableNumber kClimbReady = new LoggedTunableNumber("Climber/Left Climb", -45, false);
-        // half climb for auto, so the second hook wouldn't lock and the robot could go down
-        public static final LoggedTunableNumber kRightAutoClimb = new LoggedTunableNumber("Climber/Right Climb", -60, false);
+    public static class Box {
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 1.0, false);
+        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Box/Closed", 0, false);
     }
 
     public static class Intake {
@@ -28,11 +19,6 @@ public class PositionsConstants {
     public static class Indexer {
         public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 60, false);
         public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index", -20, false);
-    }
-
-    public static class Indexer2 {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer2/Index", 60, false);
-        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer2/Index", -20, false);
     }
 
     public static class IntakeOpen {
@@ -151,11 +137,13 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kAngleThreshold = new LoggedTunableNumber("Swerve/Angle Thresh", 3, false);
         public static final LoggedTunableNumber kAngleThresholdBase = new LoggedTunableNumber("Swerve/Angle Base Threshold", 12, false);
         public static final LoggedTunableNumber kAngleThresholdCoefficient = new LoggedTunableNumber("Swerve/Angle Coefficient", -1.9, false);
-        public static final LoggedTunableNumber kMaxAcceleration = new LoggedTunableNumber("Swerve/ Max Acceleration", 5, false);
-        public static final LoggedTunableNumber kTargetMinThreshold = new LoggedTunableNumber("Swerve/Target Min Thresh", 1.25, false);
+        public static final LoggedTunableNumber kMaxAcceleration = new LoggedTunableNumber("Swerve/ Max Acceleration", 100, false);
 
         public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub Min Dist", 2, false);
         public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 3, false);
+
+        public static final LoggedTunableNumber kAllianceXThreshold = new LoggedTunableNumber("Swerve/Alliance X Threshold", 3.6, false);
+        public static final LoggedTunableNumber kNeutralXThreshold = new LoggedTunableNumber("Swerve/Neutral X Threshold", 5.6, false);
 
         private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 2.5, false);
         private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Left Delivery Target Y", 5.5, false);

@@ -81,4 +81,12 @@ public class FieldConstants {
     public static Pose2d getRightTrenchPose() {
         return new Pose2d(4.65, 0.6, Rotation2d.kZero);
     }
+
+    public static boolean atAllianceZone() {
+        return RobotState.get().getRobotPose().getX() < PositionsConstants.Swerve.kAllianceXThreshold.get();
+    }
+
+    public static boolean atNeutralZone() {
+        return RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get();
+    }
 }
