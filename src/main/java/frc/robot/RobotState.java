@@ -4,7 +4,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
-import frc.lib.NinjasLib.statemachine.RobotStateWithSwerve;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
@@ -12,14 +11,12 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
 
-public class RobotState extends RobotStateWithSwerve<States> {
+public class RobotState extends RobotStateBase<States> {
     private static States.ShootingMode shootingMode;
     private static boolean autoSwitchShootReadyToShoot = false;
 
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
-        robotState = States.UNKNOWN;
-        setRobotState(States.UNKNOWN);
 
         shootingMode = States.ShootingMode.ON_MOVE;
         setShootingMode(States.ShootingMode.ON_MOVE);

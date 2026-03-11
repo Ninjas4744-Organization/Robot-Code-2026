@@ -4,7 +4,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.subsystem.IO;
@@ -24,7 +23,6 @@ public class Shooter extends SubsystemBase implements
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
-    private BackgroundCommand backgroundCommand;
 
     public Shooter(boolean enabled) {
         this.enabled = enabled;
@@ -35,8 +33,6 @@ public class Shooter extends SubsystemBase implements
             else
                 this.io = new IO.All<>(){};
             io.setup();
-
-            backgroundCommand = new BackgroundCommand();
         }
     }
 
@@ -48,8 +44,6 @@ public class Shooter extends SubsystemBase implements
         io.periodic();
         io.updateInputs(inputs);
         Logger.processInputs("Shooter", inputs);
-
-        Logger.recordOutput("Shooter/Shooter Command", backgroundCommand.isRunning());
     }
 
     @Override
@@ -94,7 +88,6 @@ public class Shooter extends SubsystemBase implements
         if (!enabled)
             return;
 
-        backgroundCommand.stop();
         io.stopMotor();
     }
 
@@ -108,7 +101,7 @@ public class Shooter extends SubsystemBase implements
         if (!enabled)
             return true;
 
-        return Math.abs(inputs.Velocity) < 5 && !backgroundCommand.isRunning();
+        return Math.abs(inputs.Velocity) < 5;
     }
 
     @Override
@@ -119,11 +112,11 @@ public class Shooter extends SubsystemBase implements
         return stopCmd();
     }
 
-    public void autoVelocity(boolean isDelivery) {
+    public Command autoVelocity(boolean isDelivery) {
         if (!enabled)
-            return;
+            return Commands.none();
 
-        backgroundCommand.setNewTask(Commands.run(() -> {
+        return Commands.run(() -> {
             double speed;
             double virtualDist = ShootCalculator.getShootParams().virtualDist();
 
@@ -133,6 +126,6 @@ public class Shooter extends SubsystemBase implements
                 speed = PositionsConstants.Shooter.getShootSpeed(virtualDist);
 
             io.setVelocity(MathUtil.clamp(speed, 0, 95));
-        }));
+        });
     }
 }

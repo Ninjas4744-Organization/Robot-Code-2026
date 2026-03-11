@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,7 +13,6 @@ import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
-import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.lib.NinjasLib.swerve.SwerveSpeeds;
 import frc.robot.constants.GeneralConstants;
@@ -45,7 +45,7 @@ public class RobotContainer {
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
 
         swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
-        RobotStateBase.setInstance(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
+        RobotStateBase.set(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
         visionSubsystem = new VisionSubsystem();
         shootCalculator = new ShootCalculator();
 
@@ -56,8 +56,6 @@ public class RobotContainer {
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
         leds = new Leds(false);
-
-        StateMachineBase.setInstance(new StateMachine());
 
         configureAuto();
         Triggers.setControllers(driverController);
@@ -148,7 +146,7 @@ public class RobotContainer {
         if (GeneralConstants.kRobotMode.isSim())
             Simulation.reset();
 
-        if (RobotState.isTeleop()) {
+        if (DriverStation.isTeleop()) {
             Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
             Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
 
