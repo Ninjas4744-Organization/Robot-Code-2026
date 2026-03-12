@@ -30,7 +30,7 @@ public class FieldConstants {
     public static AprilTagFieldLayout getFieldLayoutWithIgnored(List<Integer> ignoredTags) {
         AprilTagFieldLayout layout;
 
-        layout = RobotState.getAlliance() == DriverStation.Alliance.Blue
+        layout = DriverStation.getAlliance().get() == DriverStation.Alliance.Blue
             ? kBlueFieldLayout
             : kRedFieldLayout;
 

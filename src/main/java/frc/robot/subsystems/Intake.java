@@ -2,20 +2,26 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
+import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.subsystem.IO;
-import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class Intake extends SubsystemBase implements
-        ISubsystem.Resettable,
-        ISubsystem.VelocityControlled,
-        ISubsystem.Stoppable
-{
+import static frc.robot.subsystems.Intake.IntakeStates.*;
+
+public class Intake extends StateMachineBase<Intake.IntakeStates> {
+    public enum IntakeStates {
+        RESET,
+        IDLE,
+        INTAKE,
+    }
+
+    private IntakeStates state = IntakeStates.IDLE;
+
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
@@ -27,6 +33,8 @@ public class Intake extends SubsystemBase implements
 //    private double velocityBeforeSave;
 
     public Intake(boolean enabled) {
+        super(IntakeStates.class);
+
         this.enabled = enabled;
 
         if (enabled) {
@@ -70,6 +78,18 @@ public class Intake extends SubsystemBase implements
     }
 
     @Override
+    protected void define() {
+        addOmniEdge(RESET, () -> setVelocityCmd(0));
+
+        addEdge(RESET, IDLE);
+
+        addEdge(IDLE, INTAKE, setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
+
+        addEdge(INTAKE, IDLE, setVelocityCmd(0));
+
+        addStateEnd(RESET, () -> true, IDLE);
+    }
+
     public void setVelocity(double velocity) {
         if (!enabled)
             return;
@@ -77,12 +97,10 @@ public class Intake extends SubsystemBase implements
         io.setVelocity(velocity);
     }
 
-    @Override
     public Command setVelocityCmd(double velocity) {
         return Commands.runOnce(() -> setVelocity(velocity));
     }
 
-    @Override
     public double getVelocity() {
         if (!enabled)
             return 0;
@@ -90,7 +108,6 @@ public class Intake extends SubsystemBase implements
         return inputs.Velocity;
     }
 
-    @Override
     public void stop() {
         if (!enabled)
             return;
@@ -100,12 +117,10 @@ public class Intake extends SubsystemBase implements
         io.stopMotor();
     }
 
-    @Override
     public Command stopCmd() {
         return Commands.runOnce(this::stop);
     }
 
-    @Override
     public boolean isReset() {
         if (!enabled)
             return true;
@@ -113,7 +128,6 @@ public class Intake extends SubsystemBase implements
         return Math.abs(inputs.Velocity) < 5;
     }
 
-    @Override
     public Command reset() {
         return stopCmd();
     }

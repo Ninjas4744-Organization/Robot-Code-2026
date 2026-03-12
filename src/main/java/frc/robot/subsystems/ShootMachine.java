@@ -8,10 +8,10 @@ import frc.robot.constants.PositionsConstants;
 
 import java.util.List;
 
-import static frc.robot.subsystems.ShootMachine.ShootState.*;
+import static frc.robot.subsystems.ShootMachine.ShootStates.*;
 
-public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
-    public enum ShootState {
+public class ShootMachine extends StateMachineBase<ShootMachine.ShootStates> {
+    public enum ShootStates {
         UNKNOWN,
         RESET,
         IDLE,
@@ -21,14 +21,13 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         DELIVERY,
     }
 
-    private ShootState state = ShootState.IDLE;
+    private ShootStates state = ShootStates.IDLE;
     private final Shooter shooter;
     private final Accelerator accelerator;
     private final Indexer indexer;
 
     public ShootMachine() {
-        super(ShootState.class);
-        setStateMethods(() -> state, state -> this.state = state);
+        super(ShootStates.class);
 
         shooter = RobotContainer.getShooter();
         accelerator = RobotContainer.getAccelerator();

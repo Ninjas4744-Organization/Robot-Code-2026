@@ -13,11 +13,7 @@ import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeRail extends StateMachineBase implements
-        ISubsystem.Resettable,
-        ISubsystem.PercentControlled,
-        ISubsystem.PositionControlled,
-        ISubsystem.GoalOriented<Double>
+public class IntakeRail extends StateMachineBase
 {
     public enum IntakeRailStates {
         RESET,
@@ -72,12 +68,10 @@ public class IntakeRail extends StateMachineBase implements
         Logger.recordOutput("Intake Open/Save System Command", saveSystemCommand);
     }
 
-    @Override
     public boolean isReset() {
         return !enabled || inputs.LimitSwitches[0];
     }
 
-    @Override
     public Command reset() {
         if (!enabled) return Commands.none();
         return Commands.runOnce(() -> {
@@ -93,13 +87,11 @@ public class IntakeRail extends StateMachineBase implements
         });
     }
 
-    @Override
     public boolean atGoal() {
 //        return !enabled || inputs.LimitSwitches[goal];
         return !enabled || inputs.AtGoal;
     }
 
-    @Override
     public Double getGoal() {
         return enabled ? inputs.Goal : 0;
     }
