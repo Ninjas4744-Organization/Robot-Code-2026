@@ -25,7 +25,7 @@ public class RobotContainer {
     private static SwerveSubsystem swerveSubsystem;
     private static VisionSubsystem visionSubsystem;
     private static Intake intake;
-    private static IntakeOpen intakeOpen;
+    private static IntakeRail intakeOpen;
     private static Box box;
     private static Indexer indexer;
     private static Shooter shooter;
@@ -50,7 +50,7 @@ public class RobotContainer {
         shootCalculator = new ShootCalculator();
 
         intake = new Intake(true);
-        intakeOpen = new IntakeOpen(true);
+        intakeOpen = new IntakeRail(true);
         box = new Box(false);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
@@ -73,7 +73,7 @@ public class RobotContainer {
     public static SwerveSubsystem getSwerve() { return swerveSubsystem; }
     public static VisionSubsystem getVision() { return visionSubsystem; }
     public static Intake getIntake() { return intake; }
-    public static IntakeOpen getIntakeOpen() { return intakeOpen; }
+    public static IntakeRail getIntakeOpen() { return intakeOpen; }
     public static Box getBox() { return box; }
     public static Indexer getIndexer() { return indexer; }
     public static Shooter getShooter() { return shooter; }

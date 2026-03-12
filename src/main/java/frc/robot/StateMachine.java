@@ -11,7 +11,7 @@ import java.util.List;
 public class StateMachine extends StateMachineBase<States> {
     private SwerveSubsystem swerve;
     private Intake intake;
-    private IntakeOpen intakeOpen;
+    private IntakeRail intakeOpen;
     private Box box;
     private Indexer indexer;
     private Shooter shooter;

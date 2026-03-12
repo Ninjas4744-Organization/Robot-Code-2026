@@ -2,10 +2,10 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
+import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.subsystem.IO;
 import frc.lib.NinjasLib.subsystem.ISubsystem;
 import frc.robot.constants.GeneralConstants;
@@ -13,12 +13,20 @@ import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class IntakeOpen extends SubsystemBase implements
+public class IntakeRail extends StateMachineBase implements
         ISubsystem.Resettable,
         ISubsystem.PercentControlled,
         ISubsystem.PositionControlled,
         ISubsystem.GoalOriented<Double>
 {
+    public enum IntakeRailStates {
+        RESET,
+        CLOSED,
+        OPENED,
+        SLOW_CLOSE,
+        SAVE_OPEN
+    }
+
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
@@ -29,7 +37,7 @@ public class IntakeOpen extends SubsystemBase implements
     private static final int HIGH_CURRENT_THRESHOLD_FRAMES = 12;
     private boolean isResetting = false;
 
-    public IntakeOpen(boolean enabled) {
+    public IntakeRail(boolean enabled) {
         this.enabled = enabled;
 
         if (enabled) {
