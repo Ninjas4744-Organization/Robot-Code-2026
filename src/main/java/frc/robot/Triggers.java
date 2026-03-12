@@ -50,7 +50,10 @@ public class Triggers {
     public static void configureBindings() {
         driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(RobotContainer.getVision().getMegaTag1Pose() == null ? Rotation2d.kZero : RobotContainer.getVision().getMegaTag1Pose().getRotation())));
         driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(Rotation2d.kZero)));
-        driverController.povRight().onTrue(notTest(StateMachine.getInstance().changeRobotStateForceCommand(States.RESET)));
+        driverController.povRight().onTrue(notTest(Commands.runOnce(() -> {
+            StateMachine.getInstance().forceRobotState(States.UNKNOWN);
+            StateMachine.getInstance().changeRobotStateForce(States.RESET);
+        })));
         driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
 
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
