@@ -20,6 +20,12 @@ public class Intake extends SubsystemBase implements
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
 
+//    private boolean saveSystemCommand = false;
+//    private int highCurrentFrames = 0;
+//    private static final int HIGH_CURRENT_THRESHOLD_FRAMES = 12;
+//    private BackgroundCommand saveCommand = new BackgroundCommand();
+//    private double velocityBeforeSave;
+
     public Intake(boolean enabled) {
         this.enabled = enabled;
 
@@ -38,8 +44,29 @@ public class Intake extends SubsystemBase implements
             return;
 
         io.periodic();
+
+//        if (Math.abs(inputs.StatorCurrent) >= 25 && !saveSystemCommand) {
+//            highCurrentFrames++;
+//            if (highCurrentFrames >= HIGH_CURRENT_THRESHOLD_FRAMES) {
+//                highCurrentFrames = 0;
+//                saveSystemCommand = true;
+//                velocityBeforeSave = inputs.Goal;
+//                saveCommand.setNewTask(Commands.sequence(
+//                    Commands.runOnce(() -> io.setPercent(-0.5)),
+//                    Commands.waitSeconds(0.5),
+//                    Commands.runOnce(() -> {
+//                        io.setVelocity(velocityBeforeSave);
+//                        saveSystemCommand = false;
+//                    })
+//                ));
+//            }
+//        } else {
+//            highCurrentFrames = 0;
+//        }
+
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
+//        Logger.recordOutput("Intake/Save System Command", saveSystemCommand);
     }
 
     @Override
@@ -68,6 +95,8 @@ public class Intake extends SubsystemBase implements
         if (!enabled)
             return;
 
+//        saveSystemCommand = false;
+//        saveCommand.stop();
         io.stopMotor();
     }
 

@@ -13,7 +13,7 @@ public class PositionsConstants {
     }
 
     public static class Intake {
-        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 80, false);
+        public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 90, false);
     }
 
     public static class Indexer {
@@ -22,12 +22,14 @@ public class PositionsConstants {
     }
 
     public static class IntakeOpen {
+        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Open/Close", 0, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Open/Open", 34.6, false);
     }
 
     public static class Shooter {
-        public static final LoggedTunableNumber kShootHeat = new LoggedTunableNumber("Shooter/Shoot Heat", 40, false);
+//        public static final LoggedTunableNumber kShootHeat = new LoggedTunableNumber("Shooter/Shoot Heat", 40, false);
 //        public static final LoggedTunableNumber kDelivery = new LoggedTunableNumber("Shooter/Delivery", 80, false);
-        public static final LoggedTunableNumber kDump = new LoggedTunableNumber("Shooter/Dump", 20, false);
+//        public static final LoggedTunableNumber kDump = new LoggedTunableNumber("Shooter/Dump", 20, false);
 
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 44, true);
@@ -46,7 +48,9 @@ public class PositionsConstants {
         private static final LoggedTunableNumber kShoot5 = new LoggedTunableNumber("Shooter/Shoot/5", 78, true);
         private static final LoggedTunableNumber kShoot6 = new LoggedTunableNumber("Shooter/Shoot/6", 88, true);
 
-        public static double getShootSpeed(double dist) {
+        private static final int kShootMapId = "ShootMap".hashCode();
+
+        static {
             kShootMap.put(0.0, kShoot0.get());
             kShootMap.put(2.0, kShoot2.get());
             kShootMap.put(2.25, kShoot225.get());
@@ -62,6 +66,26 @@ public class PositionsConstants {
             kShootMap.put(4.75, kShoot475.get());
             kShootMap.put(5.0, kShoot5.get());
             kShootMap.put(6.0, kShoot6.get());
+        }
+
+        public static double getShootSpeed(double dist) {
+            LoggedTunableNumber.ifChanged(kShootMapId, () -> {
+                kShootMap.put(0.0, kShoot0.get());
+                kShootMap.put(2.0, kShoot2.get());
+                kShootMap.put(2.25, kShoot225.get());
+                kShootMap.put(2.5, kShoot25.get());
+                kShootMap.put(2.75, kShoot275.get());
+                kShootMap.put(3.0, kShoot3.get());
+                kShootMap.put(3.25, kShoot325.get());
+                kShootMap.put(3.5, kShoot35.get());
+                kShootMap.put(3.75, kShoot375.get());
+                kShootMap.put(4.0, kShoot4.get());
+                kShootMap.put(4.25, kShoot425.get());
+                kShootMap.put(4.5, kShoot45.get());
+                kShootMap.put(4.75, kShoot475.get());
+                kShootMap.put(5.0, kShoot5.get());
+                kShootMap.put(6.0, kShoot6.get());
+            }, kShoot0, kShoot2, kShoot225, kShoot25, kShoot275, kShoot3, kShoot325, kShoot35, kShoot375, kShoot4, kShoot425, kShoot45, kShoot475, kShoot5, kShoot6);
 
             return kShootMap.get(dist);
         }
@@ -78,7 +102,8 @@ public class PositionsConstants {
         private static final LoggedTunableNumber kAirTime55 = new LoggedTunableNumber( "Shooter/Air Time/5.5",   1.4, false);
         private static final LoggedTunableNumber kAirTime6 = new LoggedTunableNumber( "Shooter/Air Time/6",   1.47, false);
 
-        public static double getAirTime(double dist) {
+        private static final int kAirTimeMapId = "AirTimeMap".hashCode();
+        static {
             kAirTimeMap.put(0.0,  kAirTime0.get());
             kAirTimeMap.put(2.0,  kAirTime2.get());
             kAirTimeMap.put(2.5,  kAirTime25.get());
@@ -89,7 +114,21 @@ public class PositionsConstants {
             kAirTimeMap.put(5.0,  kAirTime5.get());
             kAirTimeMap.put(5.5,  kAirTime55.get());
             kAirTimeMap.put(6.0,  kAirTime6.get());
+        }
 
+        public static double getAirTime(double dist) {
+            LoggedTunableNumber.ifChanged(kAirTimeMapId, () -> {
+                kAirTimeMap.put(0.0,  kAirTime0.get());
+                kAirTimeMap.put(2.0,  kAirTime2.get());
+                kAirTimeMap.put(2.5,  kAirTime25.get());
+                kAirTimeMap.put(3.0,  kAirTime3.get());
+                kAirTimeMap.put(3.5,  kAirTime35.get());
+                kAirTimeMap.put(4.0,  kAirTime4.get());
+                kAirTimeMap.put(4.5,  kAirTime45.get());
+                kAirTimeMap.put(5.0,  kAirTime5.get());
+                kAirTimeMap.put(5.5,  kAirTime55.get());
+                kAirTimeMap.put(6.0,  kAirTime6.get());
+            }, kAirTime0, kAirTime2, kAirTime25, kAirTime3, kAirTime35, kAirTime4, kAirTime45, kAirTime5, kAirTime55, kAirTime6);
             return kAirTimeMap.get(dist);
         }
 
