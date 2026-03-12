@@ -8,8 +8,8 @@ import frc.robot.RobotState;
 
 public class PositionsConstants {
     public static class Box {
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 1.0, false);
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Box/Closed", 0, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 34.6, false);
     }
 
     public static class Intake {
@@ -21,7 +21,7 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index", -20, false);
     }
 
-    public static class IntakeOpen {
+    public static class IntakeRail {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Open/Close", 0, false);
         public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Open/Open", 34.6, false);
     }

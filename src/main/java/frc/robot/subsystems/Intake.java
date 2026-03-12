@@ -20,20 +20,13 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
         INTAKE,
     }
 
-    private IntakeStates state = IntakeStates.IDLE;
-
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
 
-//    private boolean saveSystemCommand = false;
-//    private int highCurrentFrames = 0;
-//    private static final int HIGH_CURRENT_THRESHOLD_FRAMES = 12;
-//    private BackgroundCommand saveCommand = new BackgroundCommand();
-//    private double velocityBeforeSave;
-
     public Intake(boolean enabled) {
         super(IntakeStates.class);
+        currentState = IDLE;
 
         this.enabled = enabled;
 
@@ -52,42 +45,23 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
             return;
 
         io.periodic();
-
-//        if (Math.abs(inputs.StatorCurrent) >= 25 && !saveSystemCommand) {
-//            highCurrentFrames++;
-//            if (highCurrentFrames >= HIGH_CURRENT_THRESHOLD_FRAMES) {
-//                highCurrentFrames = 0;
-//                saveSystemCommand = true;
-//                velocityBeforeSave = inputs.Goal;
-//                saveCommand.setNewTask(Commands.sequence(
-//                    Commands.runOnce(() -> io.setPercent(-0.5)),
-//                    Commands.waitSeconds(0.5),
-//                    Commands.runOnce(() -> {
-//                        io.setVelocity(velocityBeforeSave);
-//                        saveSystemCommand = false;
-//                    })
-//                ));
-//            }
-//        } else {
-//            highCurrentFrames = 0;
-//        }
-
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
-//        Logger.recordOutput("Intake/Save System Command", saveSystemCommand);
+
+        super.periodic();
     }
 
     @Override
     protected void define() {
-        addOmniEdge(RESET, () -> setVelocityCmd(0));
+        addOmniEdge(RESET, () -> setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
 
-        addEdge(RESET, IDLE);
+        addEdge(RESET, INTAKE);
 
         addEdge(IDLE, INTAKE, setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
 
         addEdge(INTAKE, IDLE, setVelocityCmd(0));
 
-        addStateEnd(RESET, () -> true, IDLE);
+        addStateEnd(RESET, () -> true, INTAKE);
     }
 
     public void setVelocity(double velocity) {
@@ -112,23 +86,10 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
         if (!enabled)
             return;
 
-//        saveSystemCommand = false;
-//        saveCommand.stop();
         io.stopMotor();
     }
 
     public Command stopCmd() {
         return Commands.runOnce(this::stop);
-    }
-
-    public boolean isReset() {
-        if (!enabled)
-            return true;
-
-        return Math.abs(inputs.Velocity) < 5;
-    }
-
-    public Command reset() {
-        return stopCmd();
     }
 }

@@ -81,14 +81,14 @@ public class ShootCalculator extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (RobotState.getShootingMode() == States.ShootingMode.DELIVERY)
+        if (RobotState.getShootingMode() == ShootingMode.DELIVERY)
             calculateShootParams(PositionsConstants.Swerve.getDeliveryTarget().getTranslation());
         else
-            calculateShootParams(FieldConstants.getHubPose().toPose2d().getTranslation());
+            calculateShootParams(FieldConstants.getHubPose().get().toPose2d().getTranslation());
 
         Logger.recordOutput("Robot/Shooting/Virtual Target", new Pose2d(getShootParams().virtualTarget, Rotation2d.kZero));
         Logger.recordOutput("Robot/Shooting/Shooting Ready", RobotState.isShootReady());
-        Logger.recordOutput("Robot/Shooting/Distance Hub", FieldConstants.getDistToHub());
+        Logger.recordOutput("Robot/Shooting/Distance Hub", FieldConstants.getDistToHub().get());
         Logger.recordOutput("Robot/Shooting/Distance Virtual Target", getShootParams().virtualDist);
     }
 }

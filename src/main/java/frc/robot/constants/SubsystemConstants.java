@@ -44,40 +44,40 @@ public class SubsystemConstants {
 
 
 
-    public static final ControllerConstants kIntakeOpen = new ControllerConstants();
+    public static final ControllerConstants kIntakeRail = new ControllerConstants();
     static {
         /* Base */
-        kIntakeOpen.real.base.main.id = 21;
-        kIntakeOpen.real.base.main.inverted = true;
-        kIntakeOpen.real.base.isBrakeMode = false;
+        kIntakeRail.real.base.main.id = 21;
+        kIntakeRail.real.base.main.inverted = true;
+        kIntakeRail.real.base.isBrakeMode = false;
 
         /* Control */
-        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(11, 4, 0.3, 1);
-        kIntakeOpen.real.control.conversionFactor = 1;//0.0089768737241178;
-        kIntakeOpen.real.control.positionGoalTolerance = 0.01;
-        kIntakeOpen.real.control.enableFOC = false;
+        kIntakeRail.real.control.controlConstants = ControlConstants.createPID(11, 4, 0.3, 1);
+        kIntakeRail.real.control.conversionFactor = 1;//0.0089768737241178;
+        kIntakeRail.real.control.positionGoalTolerance = 0.5;
+        kIntakeRail.real.control.enableFOC = false;
 
         /* Soft Limits */
 
         /* Hard Limit */
-        kIntakeOpen.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit(), new RealControllerConstants.HardLimits.HardLimit() };
-        kIntakeOpen.real.hardLimits.limits[0].id = 0;
-        kIntakeOpen.real.hardLimits.limits[0].inverted = true;
-        kIntakeOpen.real.hardLimits.limits[0].direction = -1;
-        kIntakeOpen.real.hardLimits.limits[0].autoStopReset = true;
-        kIntakeOpen.real.hardLimits.limits[0].homePosition = 0;
+        kIntakeRail.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit(), new RealControllerConstants.HardLimits.HardLimit() };
+        kIntakeRail.real.hardLimits.limits[0].id = 0;
+        kIntakeRail.real.hardLimits.limits[0].inverted = true;
+        kIntakeRail.real.hardLimits.limits[0].direction = -1;
+        kIntakeRail.real.hardLimits.limits[0].autoStopReset = true;
+        kIntakeRail.real.hardLimits.limits[0].homePosition = 0;
 
-        kIntakeOpen.real.hardLimits.limits[1].isVirtual = true;
-        kIntakeOpen.real.hardLimits.limits[1].virtualStallThreshold = 25;
-        kIntakeOpen.real.hardLimits.limits[1].minPos = 31;
-        kIntakeOpen.real.hardLimits.limits[1].frames = 12;
-        kIntakeOpen.real.hardLimits.limits[1].direction = 1;
-        kIntakeOpen.real.hardLimits.limits[1].autoStopReset = true;
-        kIntakeOpen.real.hardLimits.limits[1].homePosition = 34.6;
+        kIntakeRail.real.hardLimits.limits[1].isVirtual = true;
+        kIntakeRail.real.hardLimits.limits[1].virtualStallThreshold = 25;
+        kIntakeRail.real.hardLimits.limits[1].minPos = 31;
+        kIntakeRail.real.hardLimits.limits[1].frames = 12;
+        kIntakeRail.real.hardLimits.limits[1].direction = 1;
+        kIntakeRail.real.hardLimits.limits[1].autoStopReset = true;
+        kIntakeRail.real.hardLimits.limits[1].homePosition = 34.6;
 
         /* Simulation */
-        kIntakeOpen.simMotor = DCMotor.getKrakenX60(1);
-        kIntakeOpen.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100000 * 2 * Math.PI / 0.5));
+        kIntakeRail.simMotor = DCMotor.getKrakenX60(1);
+        kIntakeRail.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (1000 * 2 * Math.PI / 0.5));
     }
 
 
@@ -90,9 +90,9 @@ public class SubsystemConstants {
         kBox.real.base.isBrakeMode = false;
 
         /* Control */
-        kBox.real.control.controlConstants = ControlConstants.createPID(120, 0, 0.03, 0);
-        kBox.real.control.conversionFactor = 0.00864;
-        kBox.real.control.positionGoalTolerance = 0.06;
+        kBox.real.control.controlConstants = ControlConstants.createPID(11, 4, 0.3, 1);
+        kBox.real.control.conversionFactor = 1;
+        kBox.real.control.positionGoalTolerance = 0.5;
         kBox.real.control.enableFOC = false;
 
         /* Hard Limit */
@@ -104,7 +104,7 @@ public class SubsystemConstants {
 
         /* Simulation */
         kBox.simMotor = DCMotor.getKrakenX60(1);
-        kBox.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (100000 * 2 * Math.PI / 0.5));
+        kBox.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (1000 * 2 * Math.PI / 0.5));
     }
 
 

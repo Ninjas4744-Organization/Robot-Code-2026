@@ -11,15 +11,14 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
 
-public class RobotState extends RobotStateBase<States> {
-    private static States.ShootingMode shootingMode;
-    private static boolean autoSwitchShootReadyToShoot = false;
+public class RobotState extends RobotStateBase {
+    private static ShootingMode shootingMode;
 
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
 
-        shootingMode = States.ShootingMode.ON_MOVE;
-        setShootingMode(States.ShootingMode.ON_MOVE);
+        shootingMode = ShootingMode.ON_MOVE;
+        setShootingMode(ShootingMode.ON_MOVE);
     }
 
     public static RobotState get() {
@@ -35,7 +34,7 @@ public class RobotState extends RobotStateBase<States> {
 
         boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.kDeliveryYDistThreshold.get();
 
-        if (shootingMode == States.ShootingMode.DELIVERY)
+        if (shootingMode == ShootingMode.DELIVERY)
             return isReady
                 && (!GeneralConstants.enableAutoTiming || !hubActiveInTime)
                 && FieldConstants.atNeutralZone()
@@ -52,22 +51,13 @@ public class RobotState extends RobotStateBase<States> {
             && FieldConstants.atNeutralZone();
     }
 
-    public static States.ShootingMode getShootingMode() {
+    public static ShootingMode getShootingMode() {
         return shootingMode;
     }
 
-    public static void setShootingMode(States.ShootingMode shootingMode) {
+    public static void setShootingMode(ShootingMode shootingMode) {
         Logger.recordOutput("Robot/Shooting/Shoot Mode", shootingMode.name());
         RobotState.shootingMode = shootingMode;
-    }
-
-    public static boolean isAutoSwitchShootReadyToShoot() {
-        return autoSwitchShootReadyToShoot;
-    }
-
-    public static void setAutoSwitchShootReadyToShoot(boolean autoSwitchShootReadyToShoot) {
-        RobotState.autoSwitchShootReadyToShoot = autoSwitchShootReadyToShoot;
-        Logger.recordOutput("Robot/Shooting/Auto Switch ShootReady To Shoot", autoSwitchShootReadyToShoot);
     }
 
     public static double getMatchTime() {
