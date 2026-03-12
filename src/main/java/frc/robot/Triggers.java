@@ -77,6 +77,8 @@ public class Triggers {
             if (RobotState.get().getRobotState() != States.SHOOT) {
                 RobotState.setAutoSwitchShootReadyToShoot(true);
                 StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
+            } else {
+                RobotContainer.getIntakeOpen().manualClose();
             }
         })));
 
@@ -112,12 +114,12 @@ public class Triggers {
         )));
 
         driverController.circle().whileTrue(inTest(Commands.startEnd(
-            () -> RobotContainer.getIntakeOpen().setPercent(0.1),
+            () -> RobotContainer.getIntakeOpen().setPercent(0.5),
             () -> RobotContainer.getIntakeOpen().setPercent(0)
         )));
 
         driverController.square().whileTrue(inTest(Commands.startEnd(
-            () -> RobotContainer.getIntakeOpen().setPercent(-0.1),
+            () -> RobotContainer.getIntakeOpen().setPercent(-0.5),
             () -> RobotContainer.getIntakeOpen().setPercent(0)
         )));
 

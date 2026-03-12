@@ -64,7 +64,7 @@ public class StateMachine extends StateMachineBase<States> {
             box.reset(),
             intakeOpen.reset(),
             intake.reset(),
-            Commands.runOnce(intakeOpen::open),
+            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 
@@ -84,7 +84,7 @@ public class StateMachine extends StateMachineBase<States> {
             intake.setVelocityCmd(PositionsConstants.Intake.kIntake.get()),
             box.reset(),
             intakeOpen.reset(),
-            Commands.runOnce(intakeOpen::open),
+            intakeOpen.setPositionCmd(PositionsConstants.IntakeOpen.kOpen.get()),
             Commands.waitUntil(intakeOpen::atGoal)
         ));
 

@@ -52,9 +52,9 @@ public class SubsystemConstants {
         kIntakeOpen.real.base.isBrakeMode = false;
 
         /* Control */
-//        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(120, 0, 0.03, 0);
-        kIntakeOpen.real.control.conversionFactor = 0.00864;
-        kIntakeOpen.real.control.positionGoalTolerance = 0.06;
+        kIntakeOpen.real.control.controlConstants = ControlConstants.createPID(11, 4, 0.3, 1);
+        kIntakeOpen.real.control.conversionFactor = 1;//0.0089768737241178;
+        kIntakeOpen.real.control.positionGoalTolerance = 0.01;
         kIntakeOpen.real.control.enableFOC = false;
 
         /* Soft Limits */
@@ -68,12 +68,12 @@ public class SubsystemConstants {
         kIntakeOpen.real.hardLimits.limits[0].homePosition = 0;
 
         kIntakeOpen.real.hardLimits.limits[1].isVirtual = true;
-        kIntakeOpen.real.hardLimits.limits[1].virtualStallThreshold = 20;
-        kIntakeOpen.real.hardLimits.limits[1].virtualMinPos = 0.27;
-        kIntakeOpen.real.hardLimits.limits[1].virtualFrames = 2;
+        kIntakeOpen.real.hardLimits.limits[1].virtualStallThreshold = 25;
+        kIntakeOpen.real.hardLimits.limits[1].minPos = 31;
+        kIntakeOpen.real.hardLimits.limits[1].frames = 12;
         kIntakeOpen.real.hardLimits.limits[1].direction = 1;
         kIntakeOpen.real.hardLimits.limits[1].autoStopReset = true;
-        kIntakeOpen.real.hardLimits.limits[1].homePosition = 0.3;
+        kIntakeOpen.real.hardLimits.limits[1].homePosition = 34.6;
 
         /* Simulation */
         kIntakeOpen.simMotor = DCMotor.getKrakenX60(1);
@@ -284,7 +284,8 @@ public class SubsystemConstants {
     public static final VisionConstants kVision = new VisionConstants();
     static {
         kVision.cameras = Map.of(
-            "limelight", Pair.of(new Transform3d(0, 0, 0, Rotation3d.kZero), VisionConstants.CameraType.Limelight)
+            "limelight-front", Pair.of(new Transform3d(0, 0, 0, Rotation3d.kZero), VisionConstants.CameraType.Limelight),
+            "limelight-right", Pair.of(new Transform3d(0, 0, 0, Rotation3d.kZero), VisionConstants.CameraType.Limelight)
         );
 
         kVision.fieldLayoutGetter = FieldConstants::getFieldLayoutWithIgnored;

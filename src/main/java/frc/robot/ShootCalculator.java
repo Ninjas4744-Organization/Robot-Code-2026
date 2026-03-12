@@ -12,7 +12,7 @@ import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
 public class ShootCalculator extends SubsystemBase {
-    private static final double iterations = 20;
+    private static final double iterations = 5;
     private static final double predictSec = 0;
     private static ShootParams shootParams;
 
