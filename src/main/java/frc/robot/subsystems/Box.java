@@ -126,4 +126,15 @@ public class Box extends StateMachineBase<Box.BoxState> {
     public Command setPercentCmd(double percent) {
         return Commands.runOnce(() -> setPercent(percent));
     }
+
+    public void stop() {
+        if (!enabled)
+            return;
+
+        io.stopMotor();
+    }
+
+    public Command stopCmd() {
+        return Commands.runOnce(this::stop);
+    }
 }

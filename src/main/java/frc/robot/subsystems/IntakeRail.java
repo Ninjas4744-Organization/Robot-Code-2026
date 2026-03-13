@@ -141,4 +141,15 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
     private Command setPositionCmd(double position) {
         return Commands.runOnce(() -> setPosition(position));
     }
+
+    public void stop() {
+        if (!enabled)
+            return;
+
+        io.stopMotor();
+    }
+
+    public Command stopCmd() {
+        return Commands.runOnce(this::stop);
+    }
 }

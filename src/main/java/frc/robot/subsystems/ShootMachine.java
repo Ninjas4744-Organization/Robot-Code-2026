@@ -14,9 +14,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
     public enum ShootState {
         RESET,
         IDLE,
-        PREPARE_HUB_WAIT_SWERVE,
         PREPARE_HUB,
-        PREPARE_DELIVERY_WAIT_SWERVE,
         PREPARE_DELIVERY,
         HUB,
         DELIVERY,
@@ -45,9 +43,9 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
 
         addEdge(RESET, IDLE);
 
-        addEdge(IDLE, PREPARE_HUB_WAIT_SWERVE);
-
-        addEdge(List.of(IDLE, PREPARE_HUB_WAIT_SWERVE, HUB), PREPARE_HUB, () -> Commands.sequence(
+        addEdge(List.of(IDLE, HUB), PREPARE_HUB, () -> Commands.sequence(
+            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.LOOK_HUB),
+            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.LOOK_HUB && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
             indexer.stopCmd()
         ));
@@ -64,10 +62,9 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             shooter.autoVelocity(false)
         ));
 
-        addEdge(IDLE, PREPARE_DELIVERY_WAIT_SWERVE);
-
-        addEdge(List.of(IDLE, PREPARE_DELIVERY_WAIT_SWERVE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
-            Commands.waitUntil(() -> RobotContainer.getSwerve().atGoal()),
+        addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
+            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.LOOK_HUB),
+            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.LOOK_HUB && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
             indexer.stopCmd()
         ));
@@ -87,7 +84,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addEdge(PREPARE_DELIVERY, PREPARE_HUB);
         addEdge(DELIVERY, HUB);
 
-        addEdge(List.of(PREPARE_HUB_WAIT_SWERVE, PREPARE_DELIVERY_WAIT_SWERVE, PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY), IDLE, () -> Commands.parallel(
+        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY), IDLE, () -> Commands.parallel(
             shooter.stopCmd(),
             accelerator.stopCmd(),
             indexer.stopCmd()
@@ -95,9 +92,6 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
 
 
         addStateEnd(RESET, () -> true, IDLE);
-
-        addStateEnd(PREPARE_HUB_WAIT_SWERVE, () -> RobotContainer.getSwerve().atGoal(), PREPARE_HUB);
-        addStateEnd(PREPARE_DELIVERY_WAIT_SWERVE, () -> RobotContainer.getSwerve().atGoal(), PREPARE_DELIVERY);
 
         addStateEnd(PREPARE_HUB,
             () -> RobotState.isShootReady(),

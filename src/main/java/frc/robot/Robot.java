@@ -152,7 +152,9 @@ public class Robot extends LoggedRobot {
             RobotContainer.getShooter().stopCmd(),
             RobotContainer.getIndexer().stopCmd(),
             RobotContainer.getAccelerator().stopCmd(),
-            RobotContainer.getIntake().stopCmd()
+            RobotContainer.getIntake().stopCmd(),
+            RobotContainer.getIntakeRail().stopCmd(),
+            RobotContainer.getBox().stopCmd()
         ));
     }
 

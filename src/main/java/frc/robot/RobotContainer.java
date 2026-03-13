@@ -52,7 +52,7 @@ public class RobotContainer {
 
         intake = new Intake(true);
         intakeRail = new IntakeRail(true);
-        box = new Box(true);
+        box = new Box(false);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
@@ -96,8 +96,7 @@ public class RobotContainer {
         );
 
         NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> {
-            shootMachine.changeState(ShootMachine.ShootState.PREPARE_HUB_WAIT_SWERVE);
-            swerveSubsystem.changeState(SwerveSubsystem.SwerveState.LOOK_HUB);
+            shootMachine.changeState(ShootMachine.ShootState.PREPARE_HUB);
             RobotContainer.getBox().changeState(Box.BoxState.SLOW_CLOSE);
             RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE);
         }));

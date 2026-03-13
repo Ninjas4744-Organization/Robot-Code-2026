@@ -76,111 +76,124 @@ public class SwerveSubsystem extends StateMachineBase<SwerveSubsystem.SwerveStat
             SwerveController.getInstance().setControl(getDriveInput(), "Auto");
         }));
 
-        addStateCommand(LOOK_HUB, Commands.sequence(
-            Commands.runOnce(() -> {
-                lastLookHubTargetAngle = ShootCalculator.getShootParams().angle();
-                slowForShoot();
-                SwerveController.getInstance().setChannel("Look Hub");
-            }),
-            Commands.run(() -> {
-                target = new Pose2d(RobotState.get().getTranslation(), ShootCalculator.getShootParams().angle());
+        addStateCommand(LOOK_HUB, Commands.run(() -> {
+            target = new Pose2d(RobotState.get().getTranslation(), ShootCalculator.getShootParams().angle());
 
-                double FF = target.getRotation().minus(lastLookHubTargetAngle).div(0.02).times(lookHubFF).getRadians();
-                Logger.recordOutput("Robot/Shooting/Virtual Target Rotational Velocity", target.getRotation().minus(lastLookHubTargetAngle).div(0.02).getRadians());
-                Logger.recordOutput("Robot/Shooting/Look Hub FF", FF);
-                lastLookHubTargetAngle = target.getRotation();
+            double FF = target.getRotation().minus(lastLookHubTargetAngle).div(0.02).times(lookHubFF).getRadians();
+            Logger.recordOutput("Robot/Shooting/Virtual Target Rotational Velocity", target.getRotation().minus(lastLookHubTargetAngle).div(0.02).getRadians());
+            Logger.recordOutput("Robot/Shooting/Look Hub FF", FF);
+            lastLookHubTargetAngle = target.getRotation();
 
-                SwerveController.getInstance().setControl(new SwerveSpeeds(
-                    getDriveInput().vxMetersPerSecond,
-                    getDriveInput().vyMetersPerSecond,
-                    SwerveController.getInstance().lookAt(target.getRotation()) + FF,
-                    GeneralConstants.Swerve.kDriverFieldRelative
-                ), "Look Hub");
-            })
-        ).finallyDo(this::unSlow));
+            SwerveController.getInstance().setControl(new SwerveSpeeds(
+                getDriveInput().vxMetersPerSecond,
+                getDriveInput().vyMetersPerSecond,
+                SwerveController.getInstance().lookAt(target.getRotation()) + FF,
+                GeneralConstants.Swerve.kDriverFieldRelative
+            ), "Look Hub");
+        }).finallyDo(this::unSlow));
 
-        addStateCommand(DELIVERY, Commands.sequence(
-            Commands.runOnce(() -> {
-                SwerveController.getInstance().setChannel("Delivery");
-            }),
-            Commands.run(() -> {
-                Rotation2d angleToDelivery = ShootCalculator.getShootParams().angle();
-                target = new Pose2d(RobotState.get().getRobotPose().getX(), RobotState.get().getRobotPose().getY(), angleToDelivery);
+        addStateCommand(DELIVERY, Commands.run(() -> {
+            target = new Pose2d(RobotState.get().getRobotPose().getX(), RobotState.get().getRobotPose().getY(), ShootCalculator.getShootParams().angle());
 
-                SwerveController.getInstance().setControl(new SwerveSpeeds(
-                    getDriveInput().vxMetersPerSecond,
-                    getDriveInput().vyMetersPerSecond,
-                    SwerveController.getInstance().lookAt(target.getRotation()),
-                    GeneralConstants.Swerve.kDriverFieldRelative
-                ), "Delivery");
-            })
-        ));
+            SwerveController.getInstance().setControl(new SwerveSpeeds(
+                getDriveInput().vxMetersPerSecond,
+                getDriveInput().vyMetersPerSecond,
+                SwerveController.getInstance().lookAt(target.getRotation()),
+                GeneralConstants.Swerve.kDriverFieldRelative
+            ), "Delivery");
+        }));
 
-        addStateCommand(SNAP_ANGLE, Commands.sequence(
-            Commands.runOnce(() -> {
-                target = RobotState.get().getRobotPose();
-                target = new Pose2d(target.getX(), target.getY(), Rotation2d.fromDegrees(Math.round(target.getRotation().getDegrees() / 90.0) * 90.0));
-                SwerveController.getInstance().setChannel("Snap Angle");
-            }),
-            Commands.run(() -> {
-                target = new Pose2d(RobotState.get().getRobotPose().getX(),
-                    RobotState.get().getRobotPose().getY(),
-                    Rotation2d.fromDegrees(Math.round(target.getRotation().getDegrees() / 90.0) * 90.0));
+        addStateCommand(SNAP_ANGLE, Commands.run(() -> {
+            target = new Pose2d(
+                RobotState.get().getRobotPose().getX(),
+                RobotState.get().getRobotPose().getY(),
+                Rotation2d.fromDegrees(Math.round(target.getRotation().getDegrees() / 90.0) * 90.0)
+            );
 
-                SwerveController.getInstance().setControl(new SwerveSpeeds(
-                    getDriveInput().vxMetersPerSecond,
-                    getDriveInput().vyMetersPerSecond,
-                    SwerveController.getInstance().lookAt(target.getRotation()),
-                    GeneralConstants.Swerve.kDriverFieldRelative
-                ), "Snap Angle");
-            })
-        ));
+            SwerveController.getInstance().setControl(new SwerveSpeeds(
+                getDriveInput().vxMetersPerSecond,
+                getDriveInput().vyMetersPerSecond,
+                SwerveController.getInstance().lookAt(target.getRotation()),
+                GeneralConstants.Swerve.kDriverFieldRelative
+            ), "Snap Angle");
+        }));
 
-        addStateCommand(AUTO_TRENCH, Commands.sequence(
-            Commands.runOnce(() -> {
-                SwerveController.getInstance().setChannel("Auto Trench");
-            }),
-            Commands.run(() -> {
-                if (!FieldConstants.nearLeftTrench() && !FieldConstants.nearRightTrench())
-                    return;
+        addStateCommand(AUTO_TRENCH, Commands.run(() -> {
+            if (!FieldConstants.nearLeftTrench() && !FieldConstants.nearRightTrench())
+                return;
 
-                boolean isRightTrench = FieldConstants.nearRightTrench();
+            boolean isRightTrench = FieldConstants.nearRightTrench();
 
-                target = isRightTrench ? FieldConstants.getRightTrenchPose() : FieldConstants.getLeftTrenchPose();
-                target = new Pose2d(
-                    RobotState.get().getRobotPose().getX(),
-                    target.getY(),
-                    Rotation2d.fromDegrees(Math.round(RobotState.get().getRobotPose().getRotation().getDegrees() / 90) * 90)
-                );
+            target = isRightTrench ? FieldConstants.getRightTrenchPose() : FieldConstants.getLeftTrenchPose();
+            target = new Pose2d(
+                RobotState.get().getRobotPose().getX(),
+                target.getY(),
+                Rotation2d.fromDegrees(Math.round(RobotState.get().getRobotPose().getRotation().getDegrees() / 90) * 90)
+            );
 
-                Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
-                if (!getDriveInput().fieldRelative) {
-                    ChassisSpeeds pidRobotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(pid.getX(), pid.getY(), 0), RobotState.get().getRobotPose().getRotation());
-                    pid = new Translation2d(pidRobotRelative.vxMetersPerSecond, pidRobotRelative.vyMetersPerSecond);
-                }
+            Translation2d pid = SwerveController.getInstance().pidTo(target.getTranslation());
+            if (!getDriveInput().fieldRelative) {
+                ChassisSpeeds pidRobotRelative = ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(pid.getX(), pid.getY(), 0), RobotState.get().getRobotPose().getRotation());
+                pid = new Translation2d(pidRobotRelative.vxMetersPerSecond, pidRobotRelative.vyMetersPerSecond);
+            }
 
-                double dist = FieldConstants.nearRightTrench()
-                    ? RobotState.get().getDistance(FieldConstants.getRightTrenchPose())
-                    : RobotState.get().getDistance(FieldConstants.getLeftTrenchPose());
-                double strength = Math.pow(Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) - Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) * (dist / PositionsConstants.Swerve.kAutoTrenchThreshold.get()), autoTrenchExp);
-                strength = MathUtil.clamp(strength, 0, 1);
-                Logger.recordOutput("Robot/Swerve/Trench Strength", strength);
+            double dist = FieldConstants.nearRightTrench()
+                ? RobotState.get().getDistance(FieldConstants.getRightTrenchPose())
+                : RobotState.get().getDistance(FieldConstants.getLeftTrenchPose());
+            double strength = Math.pow(Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) - Math.pow(autoTrenchMaxStrength, 1 / autoTrenchExp) * (dist / PositionsConstants.Swerve.kAutoTrenchThreshold.get()), autoTrenchExp);
+            strength = MathUtil.clamp(strength, 0, 1);
+            Logger.recordOutput("Robot/Swerve/Trench Strength", strength);
 
-                SwerveController.getInstance().setControl(new SwerveSpeeds(
-                    getDriveInput().vxMetersPerSecond,
-                    getDriveInput().vyMetersPerSecond * (1 - strength) + pid.getY() * strength,
-                    getDriveInput().omegaRadiansPerSecond * (1 - strength) + SwerveController.getInstance().lookAt(target.getRotation()) * strength,
-                    getDriveInput().fieldRelative
-                ), "Auto Trench");
-            })
-        ));
+            SwerveController.getInstance().setControl(new SwerveSpeeds(
+                getDriveInput().vxMetersPerSecond,
+                getDriveInput().vyMetersPerSecond * (1 - strength) + pid.getY() * strength,
+                getDriveInput().omegaRadiansPerSecond * (1 - strength) + SwerveController.getInstance().lookAt(target.getRotation()) * strength,
+                getDriveInput().fieldRelative
+            ), "Auto Trench");
+        }));
 
-        addOmniEdge(DRIVER, Commands::none);
-        addOmniEdge(AUTO, Commands::none);
-        addOmniEdge(LOOK_HUB, Commands::none);
-        addOmniEdge(DELIVERY, Commands::none);
-        addOmniEdge(SNAP_ANGLE, Commands::none);
-        addOmniEdge(AUTO_TRENCH, Commands::none);
+        addOmniEdge(DRIVER, () -> Commands.runOnce(() -> {
+            SwerveController.getInstance().setChannel("Driver");
+        }));
+
+        addOmniEdge(AUTO, () -> Commands.runOnce(() -> {
+            SwerveController.getInstance().setChannel("Auto");
+        }));
+
+        addOmniEdge(LOOK_HUB, () -> Commands.runOnce(() -> {
+            target = new Pose2d(RobotState.get().getTranslation(), ShootCalculator.getShootParams().angle());
+            lastLookHubTargetAngle = target.getRotation();
+            slowForShoot();
+            SwerveController.getInstance().setChannel("Look Hub");
+        }));
+
+        addOmniEdge(DELIVERY, () -> Commands.runOnce(() -> {
+            target = new Pose2d(RobotState.get().getRobotPose().getX(), RobotState.get().getRobotPose().getY(), ShootCalculator.getShootParams().angle());
+            SwerveController.getInstance().setChannel("Delivery");
+        }));
+
+        addOmniEdge(SNAP_ANGLE, () -> Commands.runOnce(() -> {
+            target = new Pose2d(
+                RobotState.get().getRobotPose().getX(),
+                RobotState.get().getRobotPose().getY(),
+                Rotation2d.fromDegrees(Math.round(RobotState.get().getRotation().getDegrees() / 90.0) * 90.0)
+            );
+            SwerveController.getInstance().setChannel("Snap Angle");
+        }));
+
+        addOmniEdge(AUTO_TRENCH, () -> Commands.runOnce(() -> {
+            boolean isRightTrench = FieldConstants.nearRightTrench();
+
+            target = isRightTrench ? FieldConstants.getRightTrenchPose() : FieldConstants.getLeftTrenchPose();
+            target = new Pose2d(
+                RobotState.get().getRobotPose().getX(),
+                target.getY(),
+                Rotation2d.fromDegrees(Math.round(RobotState.get().getRobotPose().getRotation().getDegrees() / 90) * 90)
+            );
+            SwerveController.getInstance().setChannel("Auto Trench");
+        }));
+
+        addStateEnd(SNAP_ANGLE, this::atGoal, DRIVER);
     }
 
     public boolean atGoal() {

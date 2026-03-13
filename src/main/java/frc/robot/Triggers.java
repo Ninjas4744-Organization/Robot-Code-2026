@@ -73,24 +73,22 @@ public class Triggers {
             Commands.runOnce(() -> {
                 switch (RobotState.getShootingMode()) {
                     case ON_MOVE:
-                        RobotContainer.getSwerve().changeState(SwerveSubsystem.SwerveState.LOOK_HUB);
-                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_HUB_WAIT_SWERVE);
+                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_HUB);
                         break;
 
                     case DELIVERY:
-                        RobotContainer.getSwerve().changeState(SwerveSubsystem.SwerveState.DELIVERY);
-                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_DELIVERY_WAIT_SWERVE);
+                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_DELIVERY);
                         break;
                 }
                 RobotContainer.getBox().changeState(Box.BoxState.SLOW_CLOSE);
             }),
             RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
-            () -> RobotContainer.getShootMachine().getCurrentState() != ShootMachine.ShootState.HUB && RobotContainer.getShootMachine().getCurrentState() != ShootMachine.ShootState.DELIVERY
+            () -> !RobotContainer.getShootMachine().isInStates(ShootMachine.ShootState.HUB, ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.DELIVERY)
         )));
 
         driverController.R3().onTrue(notTest(RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.SNAP_ANGLE)
-            .andThen(Commands.waitUntil(RobotContainer.getSwerve()::atGoal))
-            .finallyDo(RobotContainer.getSwerve()::stop)
+//            .andThen(Commands.waitUntil(RobotContainer.getSwerve()::atGoal))
+//            .finallyDo(RobotContainer.getSwerve()::stop)
             .onlyIf(() -> RobotContainer.getShootMachine().getCurrentState() == ShootMachine.ShootState.IDLE)));
 
         driverController.cross().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(ShootingMode.ON_MOVE))));
