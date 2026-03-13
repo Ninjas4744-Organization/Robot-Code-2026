@@ -2,28 +2,37 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.NinjasLib.commands.BackgroundCommand;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
+import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.subsystem.IO;
-import frc.lib.NinjasLib.subsystem.ISubsystem;
+import frc.robot.RobotState;
 import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
-public class Box extends SubsystemBase implements
-    ISubsystem.Resettable,
-    ISubsystem.PositionControlled,
-    ISubsystem.PercentControlled,
-    ISubsystem.GoalOriented<Double>
-{
+import java.util.List;
+
+import static frc.robot.subsystems.Box.BoxState.*;
+
+public class Box extends StateMachineBase<Box.BoxState> {
+    public enum BoxState {
+        UNKNOWN,
+        RESET,
+        CLOSED,
+        OPENED,
+        SLOW_CLOSE,
+    }
+
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
-    private BackgroundCommand backgroundCommand = new BackgroundCommand();
 
     public Box(boolean enabled) {
+        super(Box.BoxState.class);
+        currentState = UNKNOWN;
+
         this.enabled = enabled;
 
         if (enabled) {
@@ -31,6 +40,7 @@ public class Box extends SubsystemBase implements
                 this.io = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kBox);
             else
                 this.io = new IO.All<>(){};
+
             io.setup();
         }
     }
@@ -43,9 +53,44 @@ public class Box extends SubsystemBase implements
         io.periodic();
         io.updateInputs(inputs);
         Logger.processInputs("Box", inputs);
+
+        super.periodic();
     }
 
     @Override
+    protected void define() {
+        addOmniEdge(RESET, () -> Commands.sequence(
+            setPercentCmd(-0.3),
+            Commands.waitUntil(this::isReset),
+            setPositionCmd(PositionsConstants.Box.kClose.get())
+        ));
+
+        addEdge(RESET, CLOSED);
+
+        addEdge(List.of(CLOSED, SLOW_CLOSE), OPENED, () -> Commands.sequence(
+            setPositionCmd(PositionsConstants.Box.kOpen.get()),
+            Commands.waitUntil(this::atGoal)
+        ));
+
+        addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
+            setPercentCmd(-0.2),
+            Commands.waitUntil(this::isReset),
+            setPositionCmd(PositionsConstants.Box.kClose.get())
+        ));
+
+        addEdge(SLOW_CLOSE, CLOSED);
+
+
+        addStateEnd(RESET, () -> true, CLOSED);
+
+        addStateEnd(SLOW_CLOSE, () -> true, CLOSED);
+
+        addStateEnd(CLOSED,
+            () -> RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get(),
+            OPENED
+        );
+    }
+
     public boolean isReset() {
         if (!enabled)
             return true;
@@ -53,22 +98,6 @@ public class Box extends SubsystemBase implements
         return inputs.LimitSwitch;
     }
 
-    @Override
-    public Command reset() {
-        if (!enabled)
-            return Commands.none();
-
-        return Commands.sequence(
-            Commands.runOnce(() -> {
-                backgroundCommand.stop();
-                io.setPercent(-0.3);
-            }),
-            Commands.waitUntil(this::isReset),
-            Commands.runOnce(io::stopMotor)
-        );
-    }
-
-    @Override
     public boolean atGoal() {
         if (!enabled)
             return true;
@@ -76,49 +105,15 @@ public class Box extends SubsystemBase implements
         return inputs.AtGoal;
     }
 
-    @Override
-    public Double getGoal() {
-        if (!enabled)
-            return 0.0;
-
-        return inputs.Goal;
-    }
-
-    public double getPosition() {
-        if (!enabled)
-            return 0.0;
-
-        return inputs.Position;
-    }
-
-    public void setPosition(double position) {
+    private void setPosition(double position) {
         if (!enabled)
             return;
 
-        backgroundCommand.stop();
         io.setPosition(position);
     }
 
-    public Command setPositionCmd(double position) {
+    private Command setPositionCmd(double position) {
         return Commands.runOnce(() -> setPosition(position));
-    }
-
-    public void slowClose() {
-        if (!enabled)
-            return;
-
-        backgroundCommand.setNewTask(Commands.sequence(
-            Commands.runOnce(() -> io.setPercent(-0.1)),
-            Commands.waitUntil(this::atGoal),
-            Commands.runOnce(io::stopMotor)
-        ));
-    }
-
-    public double getOutput() {
-        if (!enabled)
-            return 0;
-
-        return inputs.Output;
     }
 
     public void setPercent(double percent) {
@@ -130,5 +125,16 @@ public class Box extends SubsystemBase implements
 
     public Command setPercentCmd(double percent) {
         return Commands.runOnce(() -> setPercent(percent));
+    }
+
+    public void stop() {
+        if (!enabled)
+            return;
+
+        io.stopMotor();
+    }
+
+    public Command stopCmd() {
+        return Commands.runOnce(this::stop);
     }
 }

@@ -11,6 +11,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
+import frc.robot.subsystems.Box;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.IntakeRail;
+import frc.robot.subsystems.ShootMachine;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -138,14 +142,19 @@ public class Robot extends LoggedRobot {
         Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
         Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
 
-        StateMachine.getInstance().forceRobotState(States.IDLE);
+        RobotContainer.getShootMachine().forceState(ShootMachine.ShootState.IDLE);
+        RobotContainer.getIntakeRail().forceState(IntakeRail.IntakeRailState.CLOSED);
+        RobotContainer.getIntake().forceState(Intake.IntakeStates.IDLE);
+        RobotContainer.getBox().forceState(Box.BoxState.CLOSED);
 
         CommandScheduler.getInstance().schedule(Commands.sequence(
-            RobotContainer.getSwerve().reset(),
+            Commands.runOnce(RobotContainer.getSwerve()::reset),
             RobotContainer.getShooter().stopCmd(),
             RobotContainer.getIndexer().stopCmd(),
             RobotContainer.getAccelerator().stopCmd(),
-            RobotContainer.getIntake().stopCmd()
+            RobotContainer.getIntake().stopCmd(),
+            RobotContainer.getIntakeRail().stopCmd(),
+            RobotContainer.getBox().stopCmd()
         ));
     }
 

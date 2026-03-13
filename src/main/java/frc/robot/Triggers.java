@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
+import frc.robot.subsystems.*;
 
 import java.util.Set;
 
@@ -21,23 +22,27 @@ public class Triggers {
 
     public static void configureTriggers() {
         new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingStopDeliverySeconds)).onTrue(Commands.runOnce(() -> {
-            RobotState.setShootingMode(States.ShootingMode.ON_MOVE);
+            RobotState.setShootingMode(ShootingMode.ON_MOVE);
 
-            if (Set.of(States.SHOOT_PREPARE,
-                    States.SHOOT_READY,
-                    States.SHOOT)
-                .contains(RobotState.get().getRobotState()))
-                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_OPENED);
+            if (Set.of(ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY)
+                .contains(RobotContainer.getShootMachine().getCurrentState())) {
+
+                RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
+                RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
+                RobotContainer.getBox().changeStateForce(Box.BoxState.OPENED);
+            }
         }));
 
         new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
-            RobotState.setShootingMode(States.ShootingMode.DELIVERY);
+            RobotState.setShootingMode(ShootingMode.DELIVERY);
 
-            if (Set.of(States.SHOOT_PREPARE,
-                    States.SHOOT_READY,
-                    States.SHOOT)
-                .contains(RobotState.get().getRobotState()))
-                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_CLOSED);
+            if (Set.of(ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY)
+                .contains(RobotContainer.getShootMachine().getCurrentState())) {
+
+                RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
+                RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
+                RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
+            }
         }));
 
 //        new Trigger(() -> RobotState.isTeleop() && RobotContainer.getVision().isResettedPose() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && (RobotContainer.getSwerve().nearRightTrench() || RobotContainer.getSwerve().nearLeftTrench()))
@@ -48,50 +53,58 @@ public class Triggers {
     }
 
     public static void configureBindings() {
-        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(RobotContainer.getVision().getMegaTag1Pose() == null ? Rotation2d.kZero : RobotContainer.getVision().getMegaTag1Pose().getRotation())));
-        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(Rotation2d.kZero)));
-        driverController.povRight().onTrue(notTest(Commands.runOnce(() -> {
-            StateMachine.getInstance().forceRobotState(States.UNKNOWN);
-            StateMachine.getInstance().changeRobotStateForce(States.RESET);
-        })));
-        driverController.povUp().onTrue(notTest(StateMachine.getInstance().changeRobotStateCommand(States.IDLE)));
-
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
-            RobotState.setAutoSwitchShootReadyToShoot(false);
             RobotContainer.getSwerve().stop();
 
+            RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
+            RobotContainer.getIntake().changeStateForce(Intake.IntakeStates.INTAKE);
+            RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
             if (FieldConstants.atNeutralZone())
-                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_OPENED);
+                RobotContainer.getBox().changeStateForce(Box.BoxState.OPENED);
             else
-                StateMachine.getInstance().changeRobotStateForce(States.INTAKE_BOX_CLOSED);
+                RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
         })));
 
         driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
-            if (RobotState.get().getRobotState() == States.INTAKE_BOX_CLOSED)
-                StateMachine.getInstance().changeRobotState(States.INTAKE_BOX_OPENED);
-            else
-                StateMachine.getInstance().changeRobotState(States.INTAKE_BOX_CLOSED);
+            RobotContainer.getBox().changeState(Box.BoxState.OPENED);
         })));
 
-        driverController.R2().onTrue(notTest(Commands.runOnce(() -> {
-            if (!RobotContainer.getVision().isResettedPose())
-                return;
+        driverController.R2().onTrue(notTest(Commands.either(
+            Commands.runOnce(() -> {
+                switch (RobotState.getShootingMode()) {
+                    case ON_MOVE:
+                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_HUB);
+                        break;
 
-            if (RobotState.get().getRobotState() != States.SHOOT) {
-                RobotState.setAutoSwitchShootReadyToShoot(true);
-                StateMachine.getInstance().changeRobotState(States.SHOOT_PREPARE);
-            } else {
-                RobotContainer.getIntakeOpen().manualClose();
-            }
+                    case DELIVERY:
+                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_DELIVERY);
+                        break;
+                }
+                RobotContainer.getBox().changeState(Box.BoxState.SLOW_CLOSE);
+            }),
+            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
+            () -> !RobotContainer.getShootMachine().isInStates(ShootMachine.ShootState.HUB, ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.DELIVERY)
+        )));
+
+        driverController.R3().onTrue(notTest(RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.SNAP_ANGLE)
+//            .andThen(Commands.waitUntil(RobotContainer.getSwerve()::atGoal))
+//            .finallyDo(RobotContainer.getSwerve()::stop)
+            .onlyIf(() -> RobotContainer.getShootMachine().getCurrentState() == ShootMachine.ShootState.IDLE)));
+
+        driverController.cross().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(ShootingMode.ON_MOVE))));
+        driverController.square().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(ShootingMode.DELIVERY))));
+
+        driverController.povDown().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(RobotContainer.getVision().getMegaTag1Pose() == null ? Rotation2d.kZero : RobotContainer.getVision().getMegaTag1Pose().getRotation())));
+        driverController.povLeft().onTrue(Commands.runOnce(() -> RobotState.get().resetGyro(Rotation2d.kZero)));
+
+        driverController.povRight().onTrue(notTest(Commands.runOnce(RobotContainer::resetStatemachines)));
+
+        driverController.povUp().onTrue(notTest(Commands.runOnce(() -> {
+            RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.IDLE);
+            RobotContainer.getIntake().changeState(Intake.IntakeStates.IDLE);
+            RobotContainer.getIntakeRail().changeState(IntakeRail.IntakeRailState.CLOSED);
+            RobotContainer.getBox().changeState(Box.BoxState.CLOSED);
         })));
-
-        driverController.R3().onTrue(notTest(Commands.runOnce(RobotContainer.getSwerve()::snapAngle)
-            .andThen(Commands.waitUntil(RobotContainer.getSwerve()::atGoal))
-            .finallyDo(RobotContainer.getSwerve()::stop)
-            .onlyIf(() -> RobotContainer.getVision().isResettedPose() && Set.of(States.IDLE, States.INTAKE_BOX_CLOSED, States.INTAKE_BOX_OPENED).contains(RobotState.get().getRobotState()))));
-
-        driverController.cross().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.ON_MOVE))));
-        driverController.square().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(States.ShootingMode.DELIVERY))));
     }
 
     private static Command inTest(Command command) {
@@ -117,13 +130,13 @@ public class Triggers {
         )));
 
         driverController.circle().whileTrue(inTest(Commands.startEnd(
-            () -> RobotContainer.getIntakeOpen().setPercent(0.5),
-            () -> RobotContainer.getIntakeOpen().setPercent(0)
+            () -> RobotContainer.getIntakeRail().setPercent(0.5),
+            () -> RobotContainer.getIntakeRail().setPercent(0)
         )));
 
         driverController.square().whileTrue(inTest(Commands.startEnd(
-            () -> RobotContainer.getIntakeOpen().setPercent(-0.5),
-            () -> RobotContainer.getIntakeOpen().setPercent(0)
+            () -> RobotContainer.getIntakeRail().setPercent(-0.5),
+            () -> RobotContainer.getIntakeRail().setPercent(0)
         )));
 
         driverController.R2().whileTrue(inTest(Commands.startEnd(

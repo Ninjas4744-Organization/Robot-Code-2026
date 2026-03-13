@@ -6,10 +6,12 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.lib.NinjasLib.statemachine.RobotStateBase;
 import frc.robot.RobotState;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 public class FieldConstants {
     public static AprilTagFieldLayout kBlueFieldLayout;
@@ -27,10 +29,13 @@ public class FieldConstants {
         }
     }
 
-    public static AprilTagFieldLayout getFieldLayoutWithIgnored(List<Integer> ignoredTags) {
+    public static Optional<AprilTagFieldLayout> getFieldLayoutWithIgnored(List<Integer> ignoredTags) {
+        if (RobotStateBase.getAlliance().isEmpty())
+            return Optional.empty();
+
         AprilTagFieldLayout layout;
 
-        layout = RobotState.getAlliance() == DriverStation.Alliance.Blue
+        layout = RobotStateBase.getAlliance().get() == DriverStation.Alliance.Blue
             ? kBlueFieldLayout
             : kRedFieldLayout;
 
@@ -40,38 +45,53 @@ public class FieldConstants {
             layout = new AprilTagFieldLayout(tags, layout.getFieldLength(), layout.getFieldWidth());
         }
 
-        return layout;
+        return Optional.of(layout);
     }
 
-    public static AprilTagFieldLayout getFieldLayoutWithAllowed(List<Integer> allowedTags) {
-        AprilTagFieldLayout layout = getFieldLayout();
+    public static Optional<AprilTagFieldLayout> getFieldLayoutWithAllowed(List<Integer> allowedTags) {
+        if (getFieldLayout().isEmpty())
+            return Optional.empty();
+
+        AprilTagFieldLayout layout = getFieldLayout().get();
         if (!allowedTags.isEmpty()) {
             List<AprilTag> tags = layout.getTags();
             tags.removeIf(tag -> !allowedTags.contains(tag.ID));
             layout = new AprilTagFieldLayout(tags, layout.getFieldLength(), layout.getFieldWidth());
         }
 
-        return layout;
+        return Optional.of(layout);
     }
 
-    public static AprilTagFieldLayout getFieldLayout() {
+    public static Optional<AprilTagFieldLayout> getFieldLayout() {
         return getFieldLayoutWithIgnored(List.of());
     }
 
-    public static Pose3d getTagPose(int id) {
-        return getFieldLayout().getTagPose(id).get();
+    public static Optional<Pose3d> getTagPose(int id) {
+        if (getFieldLayout().isEmpty())
+            return Optional.empty();
+
+        return Optional.of(getFieldLayout().get().getTagPose(id).get());
     }
 
-    public static Pose3d getHubPose() {
-        return new Pose3d(Units.inchesToMeters(158.6 + 47 / 2.0), getFieldLayout().getFieldWidth() / 2, Units.inchesToMeters(72), new Rotation3d());
+    public static Optional<Pose3d> getHubPose() {
+        if (getFieldLayout().isEmpty())
+            return Optional.empty();
+
+        return Optional.of(new Pose3d(Units.inchesToMeters(158.6 + 47 / 2.0), getFieldLayout().get().getFieldWidth() / 2, Units.inchesToMeters(72), new Rotation3d()));
     }
 
-    public static Translation2d getTranslationToHub() {
-        return RobotState.get().getTranslation(getHubPose().toPose2d());
+    public static Optional<Translation2d> getTranslationToHub() {
+        if (getHubPose().isEmpty())
+            return Optional.empty();
+
+        return Optional.of(RobotState.get().getTranslation(getHubPose().get().toPose2d()));
     }
 
-    public static double getDistToHub() {
-        return RobotState.get().getDistance(getHubPose().toPose2d());
+    public static Optional<Double> getDistToHub() {
+        if (getHubPose().isEmpty())
+            return Optional.empty();
+
+        return Optional.of(RobotState.get().getDistance(getHubPose().get().toPose2d()));
     }
 
     public static Pose2d getLeftTrenchPose() {
@@ -88,5 +108,17 @@ public class FieldConstants {
 
     public static boolean atNeutralZone() {
         return RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get();
+    }
+
+    public static boolean nearLeftTrench() {
+        double leftTrenchDist = RobotState.get().getDistance(FieldConstants.getLeftTrenchPose());
+        double robotY = RobotState.get().getRobotPose().getY();
+        return leftTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getLeftTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
+    }
+
+    public static boolean nearRightTrench() {
+        double rightTrenchDist = RobotState.get().getDistance(FieldConstants.getRightTrenchPose());
+        double robotY = RobotState.get().getRobotPose().getY();
+        return rightTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getRightTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
     }
 }

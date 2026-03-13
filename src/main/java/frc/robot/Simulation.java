@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.swerve.Swerve;
+import frc.robot.subsystems.ShootMachine;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.gamepieces.GamePieceOnFieldSimulation;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
@@ -15,6 +16,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -56,7 +58,7 @@ public class Simulation {
         spawnBalls();
 
         CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
-            if (ballsCollected > 0 && Math.abs(RobotContainer.getShooter().getVelocity()) > 10 && RobotState.get().getRobotState() == States.SHOOT) {
+            if (ballsCollected > 0 && Set.of(ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY).contains(RobotContainer.getShootMachine().getCurrentState())) {
                 ballsCollected--;
                 Logger.recordOutput("Simulation/Balls Collected", ballsCollected);
 
