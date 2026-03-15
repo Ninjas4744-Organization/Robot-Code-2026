@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
+import frc.robot.constants.PositionsConstants;
 import frc.robot.subsystems.*;
 
 import java.util.Set;
@@ -142,9 +143,9 @@ public class Triggers {
         driverController.R2().whileTrue(inTest(Commands.startEnd(
             () -> {
                 RobotContainer.getShooter().setVelocity(20);
-                RobotContainer.getAccelerator().setVelocity(20);
-                RobotContainer.getIndexer().setVelocity(20);
-                RobotContainer.getIntake().setVelocity(20);
+                RobotContainer.getAccelerator().setVelocity(PositionsConstants.Accelerator.kAccelerate.get());
+                RobotContainer.getIndexer().setVelocity(PositionsConstants.Indexer.kIndex.get());
+                RobotContainer.getIntake().setVelocity(PositionsConstants.Intake.kIntake.get());
             },
             () -> {
                 RobotContainer.getShooter()    .stop();

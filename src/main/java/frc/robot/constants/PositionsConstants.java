@@ -17,13 +17,15 @@ public class PositionsConstants {
     }
 
     public static class Indexer {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 60, false);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 80, false);
         public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index", -20, false);
     }
 
     public static class IntakeRail {
-        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Open/Close", 0, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Open/Open", 34.6, false);
+        public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Rail/Close", 0, false);
+        public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 10, false);
+        public static final LoggedTunableNumber kSlowCloseHighThresh = new LoggedTunableNumber("Intake Rail/Slow Close High Thresh", 25, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 33.75, true);
     }
 
     public static class Shooter {

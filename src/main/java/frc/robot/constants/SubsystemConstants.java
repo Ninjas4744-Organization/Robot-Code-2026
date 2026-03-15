@@ -249,8 +249,8 @@ public class SubsystemConstants {
         kSwerve.simulation.gearRatioLevel = 2;
 
         /* Special */
-        kSwerve.special.enableOdometryThread = true;
-        kSwerve.special.odometryThreadFrequency = 250;
+        kSwerve.special.enableOdometryThread = false;
+        kSwerve.special.odometryThreadFrequency = 50;
         kSwerve.special.isReplay = GeneralConstants.kRobotMode.isReplay();
         kSwerve.special.robotStartPose = new Pose2d(2, 4, Rotation2d.kZero);
         kSwerve.special.CANBus = new CANBus("Swerve Bus");

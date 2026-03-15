@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.commands.LoopCommand;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
@@ -78,6 +79,7 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         addOmniEdge(RESET, () -> Commands.sequence(
             setPercentCmd(-0.5),
             Commands.waitUntil(this::isReset),
+            Commands.waitSeconds(0.06),
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
             Commands.waitUntil(this::atGoal)
         ));
@@ -94,10 +96,21 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             Commands.waitUntil(this::atGoal)
         ));
 
+        addStateCommand(OPENED, Commands.run(() -> {
+            setPosition(PositionsConstants.IntakeRail.kOpen.get());
+        }));
+
         addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
-            setPercentCmd(-0.4),
-            Commands.waitUntil(this::isReset),
-            setPositionCmd(PositionsConstants.IntakeRail.kClose.get())
+            new LoopCommand(
+                Commands.sequence(
+                    setPercentCmd(0.4),
+                    Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSlowCloseHighThresh.get()),
+                    setPercentCmd(-0.4),
+                    Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset())
+                ),
+                3
+            ),
+            setPositionCmd(PositionsConstants.IntakeRail.kSlowCloseLowThresh.get())
         ));
 
         addEdge(List.of(CLOSED, OPENED, SLOW_CLOSE), SAVE_OPEN, () -> Commands.sequence(
@@ -129,6 +142,13 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
 
     public Command setPercentCmd(double percent) {
         return Commands.runOnce(() -> setPercent(percent));
+    }
+
+    private double getPosition() {
+        if (!enabled)
+            return 0;
+
+        return inputs.Position;
     }
 
     private void setPosition(double position) {
