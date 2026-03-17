@@ -130,6 +130,8 @@ public class Triggers {
             () -> RobotContainer.getBox().setPercent(0)
         )));
 
+        driverController.options().onTrue(RobotContainer.getBox().resetEncoderCmd());
+
         driverController.circle().whileTrue(inTest(Commands.startEnd(
             () -> RobotContainer.getIntakeRail().setPercent(0.5),
             () -> RobotContainer.getIntakeRail().setPercent(0)

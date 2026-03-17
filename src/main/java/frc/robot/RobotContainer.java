@@ -50,7 +50,7 @@ public class RobotContainer {
         visionSubsystem = new VisionSubsystem();
         shootCalculator = new ShootCalculator();
 
-        intake = new Intake(false);
+        intake = new Intake(true);
         intakeRail = new IntakeRail(true);
         box = new Box(false);
         indexer = new Indexer(true);

@@ -31,7 +31,11 @@ public class SubsystemConstants {
     static {
         /* Base */
         kIntake.real.base.main.id = 20;
+        kIntake.real.base.main.inverted = false;
         kIntake.real.base.isBrakeMode = false;
+        kIntake.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
+        kIntake.real.base.followers[0].id = 21;
+        kIntake.real.base.followers[0].inverted = true;
 
         /* Control */
         kIntake.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, 0, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
@@ -47,7 +51,7 @@ public class SubsystemConstants {
     public static final ControllerConstants kIntakeRail = new ControllerConstants();
     static {
         /* Base */
-        kIntakeRail.real.base.main.id = 21;
+        kIntakeRail.real.base.main.id = 22;
         kIntakeRail.real.base.main.inverted = true;
         kIntakeRail.real.base.isBrakeMode = false;
 
@@ -85,9 +89,12 @@ public class SubsystemConstants {
     public static final ControllerConstants kBox = new ControllerConstants();
     static {
         /* Base */
-        kBox.real.base.main.id = 22;
+        kBox.real.base.main.id = 50;
         kBox.real.base.main.inverted = true;
         kBox.real.base.isBrakeMode = false;
+        kBox.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
+        kBox.real.base.followers[0].id = 51;
+        kBox.real.base.followers[0].inverted = true;
 
         /* Control */
         kBox.real.control.controlConstants = ControlConstants.createPID(11, 4, 0.3, 1);

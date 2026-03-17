@@ -60,9 +60,10 @@ public class Box extends StateMachineBase<Box.BoxState> {
     @Override
     protected void define() {
         addOmniEdge(RESET, () -> Commands.sequence(
-            setPercentCmd(-0.3),
-            Commands.waitUntil(this::isReset),
-            setPositionCmd(PositionsConstants.Box.kClose.get())
+//            setPercentCmd(-0.3),
+//            Commands.waitUntil(this::isReset),
+//            setPositionCmd(PositionsConstants.Box.kClose.get())
+//            resetEncoderCmd()
         ));
 
         addEdge(RESET, CLOSED);
@@ -74,7 +75,7 @@ public class Box extends StateMachineBase<Box.BoxState> {
 
         addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
             setPercentCmd(-0.2),
-            Commands.waitUntil(this::isReset),
+            Commands.waitUntil(() -> inputs.Position < 5),
             setPositionCmd(PositionsConstants.Box.kClose.get())
         ));
 
@@ -89,13 +90,6 @@ public class Box extends StateMachineBase<Box.BoxState> {
             () -> RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get(),
             OPENED
         );
-    }
-
-    public boolean isReset() {
-        if (!enabled)
-            return true;
-
-        return inputs.LimitSwitch;
     }
 
     public boolean atGoal() {
@@ -136,5 +130,16 @@ public class Box extends StateMachineBase<Box.BoxState> {
 
     public Command stopCmd() {
         return Commands.runOnce(this::stop);
+    }
+
+    public void resetEncoder() {
+        if (!enabled)
+            return;
+
+        io.setEncoder(0);
+    }
+
+    public Command resetEncoderCmd() {
+        return Commands.runOnce(this::resetEncoder);
     }
 }
