@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L - center 1"
+            "pathName": "R - center 1"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.5
+            "waitTime": 3.25
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L - depot"
+            "pathName": "R - center 2"
           }
         },
         {

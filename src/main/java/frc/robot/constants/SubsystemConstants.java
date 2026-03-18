@@ -77,7 +77,7 @@ public class SubsystemConstants {
         kIntakeRail.real.hardLimits.limits[1].frames = 12;
         kIntakeRail.real.hardLimits.limits[1].direction = 1;
         kIntakeRail.real.hardLimits.limits[1].autoStopReset = true;
-        kIntakeRail.real.hardLimits.limits[1].homePosition = 34.6;
+        kIntakeRail.real.hardLimits.limits[1].homePosition = 37;
 
         /* Simulation */
         kIntakeRail.simMotor = DCMotor.getKrakenX60(1);
@@ -289,7 +289,7 @@ public class SubsystemConstants {
 
     public static final PathFollowingController kAutonomyConfig = new PPHolonomicDriveController(
         new PIDConstants(3.5, 0, 0),
-        new PIDConstants(kSwerveController.rotationPIDConstants.P, kSwerveController.rotationPIDConstants.I, kSwerveController.rotationPIDConstants.D)
+        new PIDConstants(4.5, 0, 0)
     );
 
 

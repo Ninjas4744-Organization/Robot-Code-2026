@@ -49,7 +49,7 @@ public class VisionSubsystem extends SubsystemBase {
         if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
             framesSinceGyroUpdate++;
             if (framesSinceGyroUpdate >= 75 && getMegaTag1Pose() != null) {
-                RobotState.get().resetGyro(getMegaTag1Pose().getRotation());
+//                RobotState.get().resetGyro(getMegaTag1Pose().getRotation());
                 resettedGyro = true;
                 framesSinceGyroUpdate = 0;
             }

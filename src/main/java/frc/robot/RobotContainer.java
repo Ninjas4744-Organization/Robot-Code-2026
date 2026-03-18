@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.commands.DetachedCommand;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandController;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIO;
 import frc.lib.NinjasLib.loggedcontroller.LoggedCommandControllerIOPS5;
@@ -52,7 +53,7 @@ public class RobotContainer {
 
         intake = new Intake(true);
         intakeRail = new IntakeRail(true);
-        box = new Box(true);
+        box = new Box(false);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
@@ -95,15 +96,20 @@ public class RobotContainer {
             () -> false
         );
 
-        NamedCommands.registerCommand("Shoot", Commands.runOnce(() -> {
-            shootMachine.changeState(ShootMachine.ShootState.PREPARE_HUB);
-            RobotContainer.getBox().changeState(Box.BoxState.SLOW_CLOSE);
-            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE);
-        }));
+        NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
+            shootMachine.changeStateCommand(ShootMachine.ShootState.PREPARE_HUB),
+            Commands.waitSeconds(0.5),
+            RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE),
+            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE)
+        )));
 
         NamedCommands.registerCommand("Stop", Commands.runOnce(() -> {
             shootMachine.changeState(ShootMachine.ShootState.IDLE);
             swerveSubsystem.stop();
+        }));
+
+        NamedCommands.registerCommand("Open Intake", Commands.runOnce(() -> {
+            intakeRail.changeState(IntakeRail.IntakeRailState.OPENED);
         }));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
@@ -176,7 +182,8 @@ public class RobotContainer {
             shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
 
             intake.forceState(Intake.IntakeStates.IDLE);
-            intake.changeStateForce(Intake.IntakeStates.RESET);
+//            intake.changeStateForce(Intake.IntakeStates.RESET);
+            intake.changeStateForce(Intake.IntakeStates.INTAKE); // TEMP: change back to reset
 
             intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
             intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);

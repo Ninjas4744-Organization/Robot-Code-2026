@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.commands.LoopCommand;
 import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
@@ -96,17 +98,17 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         ));
 
         addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
-//            new LoopCommand(
-//                Commands.sequence(
-//                    setPercentCmd(0.4),
-//                    Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSlowCloseHighThresh.get()),
-//                    setPercentCmd(-0.4),
-//                    Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset())
-//                ),
-//                3
-//            ),
-            setPercentCmd(-0.4),
-            Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset()),
+            new LoopCommand(
+                Commands.sequence(
+                    setPercentCmd(0.4),
+                    Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSlowCloseHighThresh.get()),
+                    setPercentCmd(-0.4),
+                    Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset())
+                ),
+                3
+            ),
+//            setPercentCmd(-0.4),
+//            Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset()),
             setPositionCmd(PositionsConstants.IntakeRail.kSlowCloseLowThresh.get())
         ));
 
@@ -117,7 +119,7 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
 
         addStateEnd(RESET, () -> true, OPENED);
 
-        addStateEnd(SLOW_CLOSE, () -> true, OPENED);
+        addStateEnd(SLOW_CLOSE, () -> DriverStation.isTeleop(), OPENED);
 
         addStateEnd(SAVE_OPEN, () -> inputs.LimitSwitches[1], OPENED);
     }
