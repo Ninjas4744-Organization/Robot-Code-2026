@@ -53,15 +53,18 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
 
     @Override
     protected void define() {
-        addOmniEdge(RESET, () -> setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
+        addOmniEdge(RESET, () -> Commands.runOnce(() -> {
+//            setVelocity(PositionsConstants.Intake.kIntake.get()); // TEMP: uncomment
+        }));
 
         addEdge(RESET, INTAKE);
+        addEdge(RESET, IDLE); // TEMP: remove
 
         addEdge(IDLE, INTAKE, setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
 
-        addEdge(INTAKE, IDLE, setVelocityCmd(0));
+        addEdge(INTAKE, IDLE, stopCmd());
 
-        addStateEnd(RESET, () -> true, INTAKE);
+        addStateEnd(RESET, () -> true, IDLE); // TEMP: INTAKE
     }
 
     public void setVelocity(double velocity) {

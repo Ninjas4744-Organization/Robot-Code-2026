@@ -90,28 +90,34 @@ public class SubsystemConstants {
     static {
         /* Base */
         kBox.real.base.main.id = 50;
-        kBox.real.base.main.inverted = true;
+        kBox.real.base.main.inverted = false;
         kBox.real.base.isBrakeMode = false;
-        kBox.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
-        kBox.real.base.followers[0].id = 51;
-        kBox.real.base.followers[0].inverted = true;
+//        kBox.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
+//        kBox.real.base.followers[0].id = 51;
+//        kBox.real.base.followers[0].inverted = true;
 
         /* Control */
-        kBox.real.control.controlConstants = ControlConstants.createPID(11, 4, 0.3, 1);
+        kBox.real.control.controlConstants = ControlConstants.createPID(5, 2, 0.1, 3);
         kBox.real.control.conversionFactor = 1;
         kBox.real.control.positionGoalTolerance = 0.5;
         kBox.real.control.enableFOC = false;
 
         /* Hard Limit */
-        kBox.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit() };
-        kBox.real.hardLimits.limits[0].id = 1;
-        kBox.real.hardLimits.limits[0].direction = -1;
-        kBox.real.hardLimits.limits[0].autoStopReset = true;
-        kBox.real.hardLimits.limits[0].homePosition = 0;
+//        kBox.real.hardLimits.limits = new RealControllerConstants.HardLimits.HardLimit[] { new RealControllerConstants.HardLimits.HardLimit() };
+//        kBox.real.hardLimits.limits[0].id = 1;
+//        kBox.real.hardLimits.limits[0].direction = -1;
+//        kBox.real.hardLimits.limits[0].autoStopReset = true;
+//        kBox.real.hardLimits.limits[0].homePosition = 0;
 
         /* Simulation */
         kBox.simMotor = DCMotor.getKrakenX60(1);
         kBox.simSystem = LinearSystemId.createDCMotorSystem(12 / (100 * 2 * Math.PI), 12 / (1000 * 2 * Math.PI / 0.5));
+    }
+
+    public static ControllerConstants kRightBox = kBox.clone();
+    static {
+        kRightBox.real.base.main.id = 51;
+        kRightBox.real.base.main.inverted = true;
     }
 
 
@@ -129,7 +135,7 @@ public class SubsystemConstants {
 
         /* Control */
         kIndexer.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
-        kIndexer.real.control.enableFOC = false;
+        kIndexer.real.control.enableFOC = true;
 
         /* Simulation */
         kIndexer.simMotor = DCMotor.getKrakenX60(1);

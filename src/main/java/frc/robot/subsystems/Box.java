@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.controllers.Controller;
@@ -13,6 +14,7 @@ import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
+import java.util.Set;
 
 import static frc.robot.subsystems.Box.BoxState.*;
 
@@ -25,8 +27,10 @@ public class Box extends StateMachineBase<Box.BoxState> {
         SLOW_CLOSE,
     }
 
-    private IO.All<ControllerIOInputsAutoLogged> io;
-    private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
+    private IO.All<ControllerIOInputsAutoLogged> ioLeft;
+    private IO.All<ControllerIOInputsAutoLogged> ioRight;
+    private final ControllerIOInputsAutoLogged inputsLeft = new ControllerIOInputsAutoLogged();
+    private final ControllerIOInputsAutoLogged inputsRight = new ControllerIOInputsAutoLogged();
     private boolean enabled;
 
     public Box(boolean enabled) {
@@ -36,12 +40,17 @@ public class Box extends StateMachineBase<Box.BoxState> {
         this.enabled = enabled;
 
         if (enabled) {
-            if (!GeneralConstants.kRobotMode.isReplay())
-                this.io = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kBox);
-            else
-                this.io = new IO.All<>(){};
+            if (!GeneralConstants.kRobotMode.isReplay()) {
+                this.ioLeft = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kBox);
+                this.ioRight = new IO.BasicIOController(Controller.ControllerType.TalonFX, SubsystemConstants.kRightBox);
+            }
+            else {
+                this.ioLeft = new IO.All<>(){};
+                this.ioRight = new IO.All<>(){};
+            }
 
-            io.setup();
+            ioLeft.setup();
+            ioRight.setup();
         }
     }
 
@@ -50,9 +59,12 @@ public class Box extends StateMachineBase<Box.BoxState> {
         if (!enabled)
             return;
 
-        io.periodic();
-        io.updateInputs(inputs);
-        Logger.processInputs("Box", inputs);
+        ioLeft.periodic();
+        ioRight.periodic();
+        ioLeft.updateInputs(inputsLeft);
+        ioRight.updateInputs(inputsRight);
+        Logger.processInputs("Box Left", inputsLeft);
+        Logger.processInputs("Box Right", inputsRight);
 
         super.periodic();
     }
@@ -73,21 +85,26 @@ public class Box extends StateMachineBase<Box.BoxState> {
             Commands.waitUntil(this::atGoal)
         ));
 
+//        addStateCommand(OPENED, Commands.run(() -> {
+//            setPosition(PositionsConstants.Box.kOpen.get());
+//        }));
+
         addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
             setPercentCmd(-0.2),
-            Commands.waitUntil(() -> inputs.Position < 5),
-            setPositionCmd(PositionsConstants.Box.kClose.get())
+            Commands.waitUntil(() -> inputsLeft.Position < 2),
+            Commands.defer(() -> setPositionCmd(PositionsConstants.Box.kClose.get()), Set.of()),
+            Commands.waitUntil(this::atGoal)
         ));
 
         addEdge(SLOW_CLOSE, CLOSED);
 
 
-        addStateEnd(RESET, () -> true, CLOSED);
+        addStateEnd(RESET, () -> !DriverStation.isTest(), CLOSED);
 
-        addStateEnd(SLOW_CLOSE, () -> true, CLOSED);
+        addStateEnd(SLOW_CLOSE, () -> !DriverStation.isTest(), CLOSED);
 
         addStateEnd(CLOSED,
-            () -> RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get(),
+            () -> !DriverStation.isTest() && RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get(),
             OPENED
         );
     }
@@ -96,14 +113,15 @@ public class Box extends StateMachineBase<Box.BoxState> {
         if (!enabled)
             return true;
 
-        return inputs.AtGoal;
+        return inputsLeft.AtGoal && inputsRight.AtGoal;
     }
 
     private void setPosition(double position) {
         if (!enabled)
             return;
 
-        io.setPosition(position);
+        ioLeft.setPosition(position);
+        ioRight.setPosition(position);
     }
 
     private Command setPositionCmd(double position) {
@@ -114,7 +132,8 @@ public class Box extends StateMachineBase<Box.BoxState> {
         if (!enabled)
             return;
 
-        io.setPercent(percent);
+        ioLeft.setPercent(percent);
+        ioRight.setPercent(percent);
     }
 
     public Command setPercentCmd(double percent) {
@@ -125,7 +144,8 @@ public class Box extends StateMachineBase<Box.BoxState> {
         if (!enabled)
             return;
 
-        io.stopMotor();
+        ioLeft.stopMotor();
+        ioRight.stopMotor();
     }
 
     public Command stopCmd() {
@@ -136,7 +156,8 @@ public class Box extends StateMachineBase<Box.BoxState> {
         if (!enabled)
             return;
 
-        io.setEncoder(0);
+        ioLeft.setEncoder(0);
+        ioRight.setEncoder(0);
     }
 
     public Command resetEncoderCmd() {

@@ -52,7 +52,7 @@ public class RobotContainer {
 
         intake = new Intake(true);
         intakeRail = new IntakeRail(true);
-        box = new Box(false);
+        box = new Box(true);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);

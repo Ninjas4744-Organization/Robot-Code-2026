@@ -9,7 +9,7 @@ import frc.robot.RobotState;
 public class PositionsConstants {
     public static class Box {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Box/Closed", 0, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 34.6, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 30, false);
     }
 
     public static class Intake {
@@ -23,9 +23,9 @@ public class PositionsConstants {
 
     public static class IntakeRail {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Rail/Close", 0, false);
-        public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 10, false);
+        public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 15, false);
         public static final LoggedTunableNumber kSlowCloseHighThresh = new LoggedTunableNumber("Intake Rail/Slow Close High Thresh", 25, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 33.75, true);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 37, true);
     }
 
     public static class Shooter {

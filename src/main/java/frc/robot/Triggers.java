@@ -58,7 +58,7 @@ public class Triggers {
             RobotContainer.getSwerve().stop();
 
             RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
-            RobotContainer.getIntake().changeStateForce(Intake.IntakeStates.INTAKE);
+//            RobotContainer.getIntake().changeStateForce(Intake.IntakeStates.INTAKE); // TEMP: uncomment
             RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
             if (FieldConstants.atNeutralZone())
                 RobotContainer.getBox().changeStateForce(Box.BoxState.OPENED);
@@ -69,6 +69,11 @@ public class Triggers {
         driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
             RobotContainer.getBox().changeState(Box.BoxState.OPENED);
         })));
+
+        driverController.L2().toggleOnTrue(notTest(Commands.startEnd(
+            () -> RobotContainer.getIntake().changeState(Intake.IntakeStates.INTAKE),
+            () -> RobotContainer.getIntake().changeState(Intake.IntakeStates.IDLE)
+        )));
 
         driverController.R2().onTrue(notTest(Commands.either(
             Commands.runOnce(() -> {
@@ -81,9 +86,11 @@ public class Triggers {
                         RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_DELIVERY);
                         break;
                 }
-                RobotContainer.getBox().changeState(Box.BoxState.SLOW_CLOSE);
             }),
-            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
+            Commands.sequence(
+                RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
+                RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
+            ),
             () -> !RobotContainer.getShootMachine().isInStates(ShootMachine.ShootState.HUB, ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.DELIVERY)
         )));
 
@@ -121,16 +128,16 @@ public class Triggers {
         driverController.L2().onTrue(inTest(Commands.runOnce(() -> RobotState.get().setOdometryOnlyRobotPose(RobotContainer.getVision().getLastVisionPose()))));
 
         driverController.triangle().whileTrue(inTest(Commands.startEnd(
-            () -> RobotContainer.getBox().setPercent(0.1),
+            () -> RobotContainer.getBox().setPercent(0.4),
             () -> RobotContainer.getBox().setPercent(0)
         )));
 
         driverController.cross().whileTrue(inTest(Commands.startEnd(
-            () -> RobotContainer.getBox().setPercent(-0.1),
+            () -> RobotContainer.getBox().setPercent(-0.4),
             () -> RobotContainer.getBox().setPercent(0)
         )));
 
-        driverController.options().onTrue(RobotContainer.getBox().resetEncoderCmd());
+        driverController.options().onTrue(inTest(RobotContainer.getBox().resetEncoderCmd()));
 
         driverController.circle().whileTrue(inTest(Commands.startEnd(
             () -> RobotContainer.getIntakeRail().setPercent(0.5),
