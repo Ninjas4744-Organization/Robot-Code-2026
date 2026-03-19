@@ -19,13 +19,25 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.25
+            "waitTime": 4.0
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Open Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Close Box"
           }
         },
         {

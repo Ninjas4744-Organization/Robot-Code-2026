@@ -14,7 +14,6 @@ import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
-import java.util.Set;
 
 import static frc.robot.subsystems.Box.BoxState.*;
 
@@ -25,6 +24,7 @@ public class Box extends StateMachineBase<Box.BoxState> {
         CLOSED,
         OPENED,
         SLOW_CLOSE,
+        FORCE_CLOSE
     }
 
     private IO.All<ControllerIOInputsAutoLogged> ioLeft;
@@ -90,13 +90,23 @@ public class Box extends StateMachineBase<Box.BoxState> {
 //        }));
 
         addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
-            setPercentCmd(-0.2),
+            setPercentCmd(-0.1),
             Commands.waitUntil(() -> inputsLeft.Position < 2),
-            Commands.defer(() -> setPositionCmd(PositionsConstants.Box.kClose.get()), Set.of()),
+            setPositionCmd(PositionsConstants.Box.kClose.get()),
             Commands.waitUntil(this::atGoal)
         ));
 
-        addEdge(SLOW_CLOSE, CLOSED);
+        addEdge(SLOW_CLOSE, CLOSED, Commands.sequence(
+            setPositionCmd(PositionsConstants.Box.kClose.get()),
+            Commands.waitUntil(this::atGoal)
+        ));
+
+        addEdge(List.of(OPENED, SLOW_CLOSE), FORCE_CLOSE, () -> Commands.sequence(
+            setPositionCmd(PositionsConstants.Box.kClose.get()),
+            Commands.waitUntil(this::atGoal)
+        ));
+
+        addEdge(FORCE_CLOSE, CLOSED);
 
 
         addStateEnd(RESET, () -> !DriverStation.isTest(), CLOSED);
@@ -107,6 +117,8 @@ public class Box extends StateMachineBase<Box.BoxState> {
             () -> !DriverStation.isTest() && RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get(),
             OPENED
         );
+
+        addStateEnd(FORCE_CLOSE, () -> true, CLOSED);
     }
 
     public boolean atGoal() {
@@ -133,7 +145,7 @@ public class Box extends StateMachineBase<Box.BoxState> {
             return;
 
         ioLeft.setPercent(percent);
-        ioRight.setPercent(percent);
+        ioRight.setPercent(percent * 0.8);
     }
 
     public Command setPercentCmd(double percent) {

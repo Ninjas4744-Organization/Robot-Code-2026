@@ -100,9 +100,9 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
             new LoopCommand(
                 Commands.sequence(
-                    setPercentCmd(0.4),
+                    setPercentCmd(0.2),
                     Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSlowCloseHighThresh.get()),
-                    setPercentCmd(-0.4),
+                    setPercentCmd(-0.2),
                     Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset())
                 ),
                 3

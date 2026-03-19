@@ -11,6 +11,8 @@ import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.List;
+
 import static frc.robot.subsystems.Intake.IntakeStates.*;
 
 public class Intake extends StateMachineBase<Intake.IntakeStates> {
@@ -68,13 +70,13 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
 
     @Override
     protected void define() {
-        addEdge(IDLE, INTAKE, setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
+        addEdge(List.of(IDLE, SAVE_OUTTAKE), INTAKE, () -> setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
 
         addEdge(INTAKE, IDLE, stopCmd());
 
         addEdge(INTAKE, SAVE_OUTTAKE, setVelocityCmd(PositionsConstants.Intake.kOuttake.get()));
 
-        addStateEnd(SAVE_OUTTAKE, Commands.waitSeconds(0.1), INTAKE);
+        addStateEnd(SAVE_OUTTAKE, Commands.waitSeconds(0.04), INTAKE);
     }
 
     public void setVelocity(double velocity) {

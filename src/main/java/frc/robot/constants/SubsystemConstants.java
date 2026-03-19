@@ -97,7 +97,7 @@ public class SubsystemConstants {
 //        kBox.real.base.followers[0].inverted = true;
 
         /* Control */
-        kBox.real.control.controlConstants = ControlConstants.createPID(5, 2, 0.1, 3);
+        kBox.real.control.controlConstants = ControlConstants.createPID(7, 2, 0.1, 3);
         kBox.real.control.conversionFactor = 1;
         kBox.real.control.positionGoalTolerance = 0.5;
         kBox.real.control.enableFOC = false;
@@ -118,6 +118,8 @@ public class SubsystemConstants {
     static {
         kRightBox.real.base.main.id = 51;
         kRightBox.real.base.main.inverted = true;
+
+        kRightBox.real.control.controlConstants = ControlConstants.createPID(5, 2, 0.1, 3);
     }
 
 
@@ -289,7 +291,7 @@ public class SubsystemConstants {
 
     public static final PathFollowingController kAutonomyConfig = new PPHolonomicDriveController(
         new PIDConstants(3.5, 0, 0),
-        new PIDConstants(4.5, 0, 0)
+        new PIDConstants(3.5, 0, 0)
     );
 
 

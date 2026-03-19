@@ -28,6 +28,7 @@ public class Triggers {
             if (Set.of(ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY)
                 .contains(RobotContainer.getShootMachine().getCurrentState())) {
 
+                RobotContainer.getSwerve().stop();
                 RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
                 RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
                 RobotContainer.getBox().changeStateForce(Box.BoxState.OPENED);
@@ -40,6 +41,7 @@ public class Triggers {
             if (Set.of(ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY)
                 .contains(RobotContainer.getShootMachine().getCurrentState())) {
 
+                RobotContainer.getSwerve().stop();
                 RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
                 RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
                 RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
@@ -58,10 +60,12 @@ public class Triggers {
             RobotContainer.getSwerve().stop();
 
             RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
-//            RobotContainer.getIntake().changeStateForce(Intake.IntakeStates.INTAKE); // TEMP: uncomment
+            RobotContainer.getIntake().changeStateForce(Intake.IntakeStates.INTAKE);
             RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
             if (FieldConstants.atNeutralZone())
                 RobotContainer.getBox().changeStateForce(Box.BoxState.OPENED);
+            else if (RobotContainer.getShootMachine().getCurrentState() != ShootMachine.ShootState.IDLE)
+                RobotContainer.getBox().changeStateForce(Box.BoxState.FORCE_CLOSE);
             else
                 RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
         })));
@@ -70,26 +74,35 @@ public class Triggers {
             RobotContainer.getBox().changeState(Box.BoxState.OPENED);
         })));
 
-        driverController.L2().toggleOnTrue(notTest(Commands.startEnd(
-            () -> RobotContainer.getIntake().changeState(Intake.IntakeStates.INTAKE),
-            () -> RobotContainer.getIntake().changeState(Intake.IntakeStates.IDLE)
-        )));
+//        driverController.L2().toggleOnTrue(notTest(Commands.startEnd(
+//            () -> RobotContainer.getIntake().changeState(Intake.IntakeStates.INTAKE),
+//            () -> RobotContainer.getIntake().changeState(Intake.IntakeStates.IDLE)
+//        )));
 
         driverController.R2().onTrue(notTest(Commands.either(
-            Commands.runOnce(() -> {
-                switch (RobotState.getShootingMode()) {
-                    case ON_MOVE:
-                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_HUB);
-                        break;
-
-                    case DELIVERY:
-                        RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_DELIVERY);
-                        break;
-                }
-            }),
             Commands.sequence(
-                RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
-                RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
+                Commands.runOnce(() -> {
+                    switch (RobotState.getShootingMode()) {
+                        case ON_MOVE:
+                            RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_HUB);
+                            break;
+
+                        case DELIVERY:
+                            RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_DELIVERY);
+                            break;
+                    }
+                }),
+                Commands.either(
+                    Commands.sequence(
+                        Commands.waitSeconds(1),
+                        RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
+                    ),
+                    Commands.none(),
+                    () -> RobotState.getShootingMode() == ShootingMode.ON_MOVE
+                )
+            ),
+            Commands.sequence(
+                RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE)
             ),
             () -> !RobotContainer.getShootMachine().isInStates(ShootMachine.ShootState.HUB, ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.DELIVERY)
         )));

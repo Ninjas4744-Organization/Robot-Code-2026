@@ -53,7 +53,7 @@ public class RobotContainer {
 
         intake = new Intake(true);
         intakeRail = new IntakeRail(true);
-        box = new Box(false);
+        box = new Box(true);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
@@ -99,8 +99,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
             shootMachine.changeStateCommand(ShootMachine.ShootState.PREPARE_HUB),
             Commands.waitSeconds(0.5),
-            RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE),
-            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE)
+            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
+            Commands.waitSeconds(0.5),
+            RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
         )));
 
         NamedCommands.registerCommand("Stop", Commands.runOnce(() -> {
@@ -109,8 +110,13 @@ public class RobotContainer {
         }));
 
         NamedCommands.registerCommand("Open Intake", Commands.runOnce(() -> {
-            intakeRail.changeState(IntakeRail.IntakeRailState.OPENED);
+            intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
         }));
+
+        NamedCommands.registerCommand("Close Box", Commands.sequence(
+            box.changeStateForceCommand(Box.BoxState.CLOSED),
+            Commands.waitUntil(box::atGoal)
+        ));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
     }
@@ -161,7 +167,7 @@ public class RobotContainer {
                 shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
 
                 intake.forceState(Intake.IntakeStates.IDLE);
-//                intake.changeStateForce(Intake.IntakeStates.INTAKE);
+                intake.changeStateForce(Intake.IntakeStates.INTAKE);
 
                 intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
                 intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
@@ -182,8 +188,7 @@ public class RobotContainer {
             shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
 
             intake.forceState(Intake.IntakeStates.IDLE);
-//            intake.changeStateForce(Intake.IntakeStates.RESET);
-            intake.changeStateForce(Intake.IntakeStates.INTAKE); // TEMP: change back to reset
+            intake.changeStateForce(Intake.IntakeStates.INTAKE);
 
             intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
             intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
@@ -201,7 +206,7 @@ public class RobotContainer {
         shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
 
         intake.forceState(Intake.IntakeStates.IDLE);
-//        intake.changeStateForce(Intake.IntakeStates.INTAKE);
+        intake.changeStateForce(Intake.IntakeStates.INTAKE);
 
         intakeRail.forceState(IntakeRail.IntakeRailState.UNKNOWN);
         intakeRail.changeStateForce(IntakeRail.IntakeRailState.RESET);

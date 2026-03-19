@@ -40,13 +40,13 @@ public class GeneralConstants {
     }
 
     private static final RobotMode kSimMode = RobotMode.SIM;
-    private static final RobotMode kRealMode = RobotMode.WORKSHOP;
+    private static final RobotMode kRealMode = RobotMode.COMP;
     public static final RobotMode kRobotMode = Robot.isReal() ? kRealMode : kSimMode;
 
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
 
-    public static final boolean enableAutoTiming = false;
+    public static final boolean enableAutoTiming = true;
     public static final double autoTimingSeconds = 3;
     public static final double autoTimingStopDeliverySeconds = 6;
 
@@ -62,8 +62,8 @@ public class GeneralConstants {
     public static class Vision {
         public static final double kMaxDistanceFilter = 5;
         public static final double kMinDistanceFilter = 0.6;
-        public static final double kMaxSpeedFilter = 2;
-        public static final double kMaxAngularSpeedFilter = 2;
+        public static final double kMaxSpeedFilter = 3;
+        public static final double kMaxAngularSpeedFilter = 3;
         public static final double kMaxAmbiguityFilter = 0.2;
         public static final double kOdometryDriftPerMeter = 0.02316;
     }

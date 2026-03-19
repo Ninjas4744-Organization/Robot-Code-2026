@@ -14,7 +14,7 @@ public class PositionsConstants {
 
     public static class Intake {
         public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 90, false);
-        public static final LoggedTunableNumber kOuttake = new LoggedTunableNumber("Intake/Outtake", 20, false);
+        public static final LoggedTunableNumber kOuttake = new LoggedTunableNumber("Intake/Outtake", -20, false);
     }
 
     public static class Indexer {
@@ -37,15 +37,15 @@ public class PositionsConstants {
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 44, true);
         private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot/2", 53.75, true);
-        private static final LoggedTunableNumber kShoot225 = new LoggedTunableNumber("Shooter/Shoot/2.25", 55, true);
-        private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot/2.5", 57.5, true);
-        private static final LoggedTunableNumber kShoot275 = new LoggedTunableNumber("Shooter/Shoot/2.75", 58.5, true);
+        private static final LoggedTunableNumber kShoot225 = new LoggedTunableNumber("Shooter/Shoot/2.25", 54.25, true);
+        private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot/2.5", 55.75, true);
+        private static final LoggedTunableNumber kShoot275 = new LoggedTunableNumber("Shooter/Shoot/2.75", 57.5, true);
         private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot/3", 59.75, true);
-        private static final LoggedTunableNumber kShoot325 = new LoggedTunableNumber("Shooter/Shoot/3.25", 62.75, true);
-        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 65, true);
-        private static final LoggedTunableNumber kShoot375 = new LoggedTunableNumber("Shooter/Shoot/3.75", 67, true);
-        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 67.75, true);
-        private static final LoggedTunableNumber kShoot425 = new LoggedTunableNumber("Shooter/Shoot/4.25", 71, true);
+        private static final LoggedTunableNumber kShoot325 = new LoggedTunableNumber("Shooter/Shoot/3.25", 62, true);
+        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 63.5, true);
+        private static final LoggedTunableNumber kShoot375 = new LoggedTunableNumber("Shooter/Shoot/3.75", 66.75, true);
+        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 67.5, true);
+        private static final LoggedTunableNumber kShoot425 = new LoggedTunableNumber("Shooter/Shoot/4.25", 70.25, true);
         private static final LoggedTunableNumber kShoot45 = new LoggedTunableNumber("Shooter/Shoot/4.5", 73, true);
         private static final LoggedTunableNumber kShoot475 = new LoggedTunableNumber("Shooter/Shoot/4.75", 75, true);
         private static final LoggedTunableNumber kShoot5 = new LoggedTunableNumber("Shooter/Shoot/5", 78, true);
@@ -183,10 +183,11 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kAllianceXThreshold = new LoggedTunableNumber("Swerve/Alliance X Threshold", 3.6, false);
         public static final LoggedTunableNumber kNeutralXThreshold = new LoggedTunableNumber("Swerve/Neutral X Threshold", 5.6, false);
 
-        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 2.5, false);
-        private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Left Delivery Target Y", 5.5, false);
-        private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Right Delivery Target Y", 2.5, false);
+        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 2.25, true);
+        private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Left Delivery Target Y", 5.75, true);
+        private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Right Delivery Target Y", 2.25, true);
         public static final LoggedTunableNumber kDeliveryYDistThreshold = new LoggedTunableNumber("Swerve/Delivery Y Dist Threshold", 1.5, false);
+        public static final LoggedTunableNumber kDeliveryXThreshold = new LoggedTunableNumber("Swerve/Delivery X Threshold", 10, false);
 
         public static final LoggedTunableNumber kAutoTrenchThreshold = new LoggedTunableNumber("Swerve/Auto Trench Threshold", 1.5, false);
         public static final LoggedTunableNumber kAutoTrenchYThreshold = new LoggedTunableNumber("Swerve/Auto Trench Y Threshold", 1.5, false);

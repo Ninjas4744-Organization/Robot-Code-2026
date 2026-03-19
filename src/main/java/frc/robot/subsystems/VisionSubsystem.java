@@ -88,7 +88,7 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     public Matrix<N3, N1> getVisionStrength(VisionOutput estimation) {
-        double a = 0.5;
+        double a = 1.5;
         double epsilon = 0.05;
         double visionStrength = 1 / (1 + 1 / a / Math.max(Math.pow(odometryDrift + epsilon, 0.5), Math.pow(odometryDrift + epsilon, 2)) * Math.pow(estimation.closestTargetDist, 2));
 

@@ -48,6 +48,7 @@ public class RobotState extends RobotStateBase {
     public static boolean isDeliveryReadyWhileShooting() {
         return (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds))
             && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.kDeliveryYDistThreshold.get()
+            && RobotState.get().getRobotPose().getX() < PositionsConstants.Swerve.kDeliveryXThreshold.get()
             && FieldConstants.atNeutralZone();
     }
 
