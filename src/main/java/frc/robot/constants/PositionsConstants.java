@@ -14,25 +14,26 @@ public class PositionsConstants {
 
     public static class Intake {
         public static final LoggedTunableNumber kIntake = new LoggedTunableNumber("Intake/Intake", 90, false);
+        public static final LoggedTunableNumber kOuttake = new LoggedTunableNumber("Intake/Outtake", 20, false);
     }
 
     public static class Indexer {
         public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 80, false);
-        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index", -20, false);
+        public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index Back", -20, false);
+    }
+
+    public static class Accelerator {
+        public static final LoggedTunableNumber kAccelerate = new LoggedTunableNumber("Accelerator/Accelerate", 80, false);
     }
 
     public static class IntakeRail {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Rail/Close", 0, false);
         public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 15, false);
         public static final LoggedTunableNumber kSlowCloseHighThresh = new LoggedTunableNumber("Intake Rail/Slow Close High Thresh", 25, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 37, true);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 35.34, true);
     }
 
     public static class Shooter {
-//        public static final LoggedTunableNumber kShootHeat = new LoggedTunableNumber("Shooter/Shoot Heat", 40, false);
-//        public static final LoggedTunableNumber kDelivery = new LoggedTunableNumber("Shooter/Delivery", 80, false);
-//        public static final LoggedTunableNumber kDump = new LoggedTunableNumber("Shooter/Dump", 20, false);
-
         private static final InterpolatingDoubleTreeMap kShootMap = new InterpolatingDoubleTreeMap();
         private static final LoggedTunableNumber kShoot0 = new LoggedTunableNumber("Shooter/Shoot/0", 44, true);
         private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot/2", 53.75, true);
@@ -167,10 +168,6 @@ public class PositionsConstants {
 //            return kDeliveryMap.get(dist);
             return 1.14 * dist * dist + 0.423 * dist + 30;
         }
-    }
-
-    public static class Accelerator {
-        public static final LoggedTunableNumber kAccelerate = new LoggedTunableNumber("Accelerator/Accelerate", 80, false);
     }
 
     public static class Swerve {

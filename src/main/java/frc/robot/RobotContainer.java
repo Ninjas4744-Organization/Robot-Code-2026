@@ -161,7 +161,7 @@ public class RobotContainer {
                 shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
 
                 intake.forceState(Intake.IntakeStates.IDLE);
-                intake.changeStateForce(Intake.IntakeStates.RESET);
+//                intake.changeStateForce(Intake.IntakeStates.INTAKE);
 
                 intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
                 intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
@@ -201,7 +201,7 @@ public class RobotContainer {
         shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
 
         intake.forceState(Intake.IntakeStates.IDLE);
-        intake.changeStateForce(Intake.IntakeStates.RESET);
+//        intake.changeStateForce(Intake.IntakeStates.INTAKE);
 
         intakeRail.forceState(IntakeRail.IntakeRailState.UNKNOWN);
         intakeRail.changeStateForce(IntakeRail.IntakeRailState.RESET);

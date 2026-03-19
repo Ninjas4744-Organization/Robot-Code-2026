@@ -15,14 +15,18 @@ import static frc.robot.subsystems.Intake.IntakeStates.*;
 
 public class Intake extends StateMachineBase<Intake.IntakeStates> {
     public enum IntakeStates {
-        RESET,
         IDLE,
         INTAKE,
+        SAVE_OUTTAKE
     }
 
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
+
+    private int highCurrentFrames = 0;
+    private static final int kHighCurrentThreshold = 75;
+    private static final int kHighCurrentThresholdFrames = 6;
 
     public Intake(boolean enabled) {
         super(IntakeStates.class);
@@ -45,6 +49,17 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
             return;
 
         io.periodic();
+
+        if (Math.abs(inputs.StatorCurrent) >= kHighCurrentThreshold && currentState == INTAKE) {
+            highCurrentFrames++;
+            if (highCurrentFrames >= kHighCurrentThresholdFrames) {
+                highCurrentFrames = 0;
+                changeStateForce(SAVE_OUTTAKE);
+            }
+        } else {
+            highCurrentFrames = 0;
+        }
+
         io.updateInputs(inputs);
         Logger.processInputs("Intake", inputs);
 
@@ -53,18 +68,13 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
 
     @Override
     protected void define() {
-        addOmniEdge(RESET, () -> Commands.runOnce(() -> {
-//            setVelocity(PositionsConstants.Intake.kIntake.get()); // TEMP: uncomment
-        }));
-
-        addEdge(RESET, INTAKE);
-        addEdge(RESET, IDLE); // TEMP: remove
-
         addEdge(IDLE, INTAKE, setVelocityCmd(PositionsConstants.Intake.kIntake.get()));
 
         addEdge(INTAKE, IDLE, stopCmd());
 
-        addStateEnd(RESET, () -> true, IDLE); // TEMP: INTAKE
+        addEdge(INTAKE, SAVE_OUTTAKE, setVelocityCmd(PositionsConstants.Intake.kOuttake.get()));
+
+        addStateEnd(SAVE_OUTTAKE, Commands.waitSeconds(0.1), INTAKE);
     }
 
     public void setVelocity(double velocity) {
