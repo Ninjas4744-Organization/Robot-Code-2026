@@ -41,7 +41,7 @@ public class RobotState extends RobotStateBase {
                 && !atHubY;
         else
             return isReady
-                && (!GeneralConstants.enableAutoTiming || hubActiveInTime)
+                && (!GeneralConstants.enableAutoTiming || hubActiveInTime || DriverStation.isAutonomous())
                 && FieldConstants.atAllianceZone();
     }
 
@@ -57,7 +57,7 @@ public class RobotState extends RobotStateBase {
     }
 
     public static void setShootingMode(ShootingMode shootingMode) {
-        Logger.recordOutput("/Shoot Mode", shootingMode.name());
+        Logger.recordOutput("Shoot Mode", shootingMode.name());
         RobotState.shootingMode = shootingMode;
     }
 

@@ -98,9 +98,9 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
             shootMachine.changeStateCommand(ShootMachine.ShootState.PREPARE_HUB),
-            Commands.waitSeconds(0.5),
+            Commands.waitSeconds(1),
             RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
-            Commands.waitSeconds(0.5),
+//            Commands.waitSeconds(0.5),
             RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
         )));
 

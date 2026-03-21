@@ -46,7 +46,7 @@ public class GeneralConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
 
-    public static final boolean enableAutoTiming = false;
+    public static final boolean enableAutoTiming = true;
     public static final double autoTimingSeconds = 3;
     public static final double autoTimingStopDeliverySeconds = 6;
 

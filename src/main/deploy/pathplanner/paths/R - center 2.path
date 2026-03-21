@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.913395149786019,
-        "y": 2.320627674750357
+        "x": 2.680499286733238,
+        "y": 2.074793152639087
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5798601995159527,
-        "y": 1.6811879611717324
+        "x": 2.3469643364631714,
+        "y": 1.4353534390604623
       },
       "isLocked": false,
       "linkedName": "R bump"
@@ -112,12 +112,12 @@
     },
     {
       "anchor": {
-        "x": 2.913395149786019,
-        "y": 2.320627674750357
+        "x": 2.680499286733238,
+        "y": 2.074793152639087
       },
       "prevControl": {
-        "x": 3.418002853067047,
-        "y": 2.6829101283880177
+        "x": 3.185106990014266,
+        "y": 2.4370756062767476
       },
       "nextControl": null,
       "isLocked": false,
@@ -156,7 +156,7 @@
       "minWaypointRelativePos": 2.592842673869007,
       "maxWaypointRelativePos": 5.941931127616398,
       "constraints": {
-        "maxVelocity": 1.75,
+        "maxVelocity": 1.5,
         "maxAcceleration": 6.5,
         "maxAngularVelocity": 500.0,
         "maxAngularAcceleration": 1200.0,
