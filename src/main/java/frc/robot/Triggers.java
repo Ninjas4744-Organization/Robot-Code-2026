@@ -47,12 +47,6 @@ public class Triggers {
                 RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
             }
         }));
-
-//        new Trigger(() -> RobotState.isTeleop() && RobotContainer.getVision().isResettedPose() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && (RobotContainer.getSwerve().nearRightTrench() || RobotContainer.getSwerve().nearLeftTrench()))
-//            .onTrue(Commands.runOnce(RobotContainer.getSwerve()::autoTrench));
-//
-//        new Trigger(() -> !RobotContainer.getSwerve().nearRightTrench() && !RobotContainer.getSwerve().nearLeftTrench() && Set.of(States.IDLE, States.INTAKE, States.BALLS_READY, States.DUMP).contains(RobotState.get().getRobotState()) && !StateMachine.getInstance().isTransitioning())
-//            .onTrue(Commands.runOnce(RobotContainer.getSwerve()::stop));
     }
 
     public static void configureBindings() {

@@ -7,7 +7,10 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
+import frc.lib.NinjasLib.swerve.Swerve;
+import frc.lib.NinjasLib.swerve.SwerveSpeeds;
 import frc.robot.RobotState;
+import frc.robot.ShootCalculator;
 
 import java.io.IOException;
 import java.util.List;
@@ -110,15 +113,37 @@ public class FieldConstants {
         return RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get();
     }
 
-    public static boolean nearLeftTrench() {
-        double leftTrenchDist = RobotState.get().getDistance(FieldConstants.getLeftTrenchPose());
-        double robotY = RobotState.get().getRobotPose().getY();
-        return leftTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getLeftTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
+    public static boolean atLeftTrench(Pose2d robotPose) {
+        double leftTrenchDist = robotPose.getTranslation().getDistance(FieldConstants.getLeftTrenchPose().getTranslation());
+        double robotY = robotPose.getY();
+        return leftTrenchDist < PositionsConstants.Swerve.AutoTrench.kThreshold.get() && FieldConstants.getLeftTrenchPose().getY() - robotY < PositionsConstants.Swerve.AutoTrench.kYThreshold.get();
     }
 
-    public static boolean nearRightTrench() {
-        double rightTrenchDist = RobotState.get().getDistance(FieldConstants.getRightTrenchPose());
-        double robotY = RobotState.get().getRobotPose().getY();
-        return rightTrenchDist < PositionsConstants.Swerve.kAutoTrenchThreshold.get() && Math.abs(FieldConstants.getRightTrenchPose().getY() - robotY) < PositionsConstants.Swerve.kAutoTrenchYThreshold.get();
+    public static boolean atRightTrench(Pose2d robotPose) {
+        double rightTrenchDist = robotPose.getTranslation().getDistance(FieldConstants.getRightTrenchPose().getTranslation());
+        double robotY = robotPose.getY();
+        return rightTrenchDist < PositionsConstants.Swerve.AutoTrench.kThreshold.get() && robotY - FieldConstants.getRightTrenchPose().getY() < PositionsConstants.Swerve.AutoTrench.kYThreshold.get();
+    }
+
+    public static boolean atLeftTrench() {
+        Pose2d robotPose = ShootCalculator.predict(
+            RobotState.get().getRobotPose(),
+            Swerve.getInstance().getSpeeds().getAsFieldRelative(),
+            new SwerveSpeeds(),
+            PositionsConstants.Swerve.AutoTrench.kPredict.get()
+        ).pose();
+
+        return atLeftTrench(robotPose);
+    }
+
+    public static boolean atRightTrench() {
+        Pose2d robotPose = ShootCalculator.predict(
+            RobotState.get().getRobotPose(),
+            Swerve.getInstance().getSpeeds().getAsFieldRelative(),
+            new SwerveSpeeds(),
+            PositionsConstants.Swerve.AutoTrench.kPredict.get()
+        ).pose();
+
+        return atRightTrench(robotPose);
     }
 }

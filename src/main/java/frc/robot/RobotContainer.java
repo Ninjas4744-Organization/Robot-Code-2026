@@ -129,16 +129,11 @@ public class RobotContainer {
     public void periodic() {
         SwerveSpeeds robotVel = Swerve.getInstance().getSpeeds();
 
-        Logger.recordOutput("Robot/Speed/Robot Speed", robotVel.getSpeed());
-        Logger.recordOutput("Robot/Speed/Robot Acceleration", swerveSubsystem.getAcceleration());
+        Logger.recordOutput("Robot Speed", robotVel.getSpeed());
+        Logger.recordOutput("Robot Acceleration", swerveSubsystem.getAcceleration());
 
-        Logger.recordOutput("Robot/Vision/MegaTag 1 Vision", visionSubsystem.getMegaTag1Pose());
-        Logger.recordOutput("Robot/Vision/MegaTag 1 Vision Dist", visionSubsystem.getMegaTag1DistFromTag());
-        Logger.recordOutput("Robot/Vision/Odometry Only Pose", RobotState.get().getOdometryOnlyRobotPose());
-        Logger.recordOutput("Robot/Vision/Odometry Vision Error", visionSubsystem.getLastVisionPose().getTranslation().getDistance(RobotState.get().getOdometryOnlyRobotPose().getTranslation()));
-
-        Logger.recordOutput("Robot/Timing/Active", RobotState.isHubActive());
-        Logger.recordOutput("Robot/Timing/Shift Time", Math.ceil(RobotState.timeUntilShiftChange()));
+        Logger.recordOutput("Hub Active", RobotState.isHubActive());
+        Logger.recordOutput("Shift Time", Math.ceil(RobotState.timeUntilShiftChange()));
 
         logField.setRobotPose(RobotState.get().getRobotPose());
         logField.getObject("Target").setPose(new Pose2d(ShootCalculator.getShootParams().virtualTarget(), Rotation2d.kZero));

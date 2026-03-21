@@ -17,9 +17,9 @@ public class ShootCalculator extends SubsystemBase {
     private static ShootParams shootParams;
 
     public record ShootParams(Rotation2d angle, double virtualDist, Translation2d virtualTarget) {}
-    private record Prediction(Pose2d pose, SwerveSpeeds speeds) {}
+    public record RobotPrediction(Pose2d pose, SwerveSpeeds speeds) {}
 
-    private static Prediction predict(Pose2d currentPose, SwerveSpeeds currentSpeeds, SwerveSpeeds accel, double dt) {
+    public static RobotPrediction predict(Pose2d currentPose, SwerveSpeeds currentSpeeds, SwerveSpeeds accel, double dt) {
         // 1. Predict Future Velocity (v = u + at)
         SwerveSpeeds futureSpeeds = new SwerveSpeeds(currentSpeeds.plus(accel.times(dt)), currentSpeeds.fieldRelative);
 
@@ -40,7 +40,7 @@ public class ShootCalculator extends SubsystemBase {
         // 4. Apply the twist to the current pose using Exponential Mapping
         Pose2d futurePose = currentPose.exp(twist);
 
-        return new Prediction(futurePose, futureSpeeds);
+        return new RobotPrediction(futurePose, futureSpeeds);
     }
 
     private static Translation2d calculateLookaheadTarget(Translation2d originalTarget, Pose2d robotPose, SwerveSpeeds speeds) {
@@ -59,7 +59,7 @@ public class ShootCalculator extends SubsystemBase {
     public static ShootParams calculateShootParams(Translation2d target) {
         Translation2d virtualTarget;
         if (predictSec > 0) {
-            Prediction prediction = predict(RobotState.get().getRobotPose(),
+            RobotPrediction prediction = predict(RobotState.get().getRobotPose(),
                 Swerve.getInstance().getSpeeds().getAsFieldRelative(),
                 new SwerveSpeeds(RobotContainer.getSwerve().getAcceleration(), 0, true),
                 predictSec);
@@ -82,13 +82,13 @@ public class ShootCalculator extends SubsystemBase {
     @Override
     public void periodic() {
         if (RobotState.getShootingMode() == ShootingMode.DELIVERY)
-            calculateShootParams(PositionsConstants.Swerve.getDeliveryTarget().getTranslation());
+            calculateShootParams(PositionsConstants.Swerve.Delivery.getDeliveryTarget().getTranslation());
         else
             calculateShootParams(FieldConstants.getHubPose().get().toPose2d().getTranslation());
 
-        Logger.recordOutput("Robot/Shooting/Virtual Target", new Pose2d(getShootParams().virtualTarget, Rotation2d.kZero));
-        Logger.recordOutput("Robot/Shooting/Shooting Ready", RobotState.isShootReady());
-        Logger.recordOutput("Robot/Shooting/Distance Hub", FieldConstants.getDistToHub().get());
-        Logger.recordOutput("Robot/Shooting/Distance Virtual Target", getShootParams().virtualDist);
+        Logger.recordOutput("ShootCalculator/Virtual Target", new Pose2d(getShootParams().virtualTarget, Rotation2d.kZero));
+        Logger.recordOutput("ShootCalculator/Shooting Ready", RobotState.isShootReady());
+        Logger.recordOutput("ShootCalculator/Distance Hub", FieldConstants.getDistToHub().get());
+        Logger.recordOutput("ShootCalculator/Distance Virtual Target", getShootParams().virtualDist);
     }
 }

@@ -171,29 +171,39 @@ public class PositionsConstants {
     }
 
     public static class Swerve {
-        public static final LoggedTunableNumber kPositionThreshold = new LoggedTunableNumber("Swerve/Pos Thresh", 0.05, false);
-        public static final LoggedTunableNumber kAngleThreshold = new LoggedTunableNumber("Swerve/Angle Thresh", 3, false);
+        public static final LoggedTunableNumber kPositionThreshold = new LoggedTunableNumber("Swerve/Position Threshold", 0.05, false);
+        public static final LoggedTunableNumber kAngleThreshold = new LoggedTunableNumber("Swerve/Angle Threshold", 3, false);
         public static final LoggedTunableNumber kAngleThresholdBase = new LoggedTunableNumber("Swerve/Angle Base Threshold", 12, false);
         public static final LoggedTunableNumber kAngleThresholdCoefficient = new LoggedTunableNumber("Swerve/Angle Coefficient", -1.9, false);
-        public static final LoggedTunableNumber kMaxAcceleration = new LoggedTunableNumber("Swerve/ Max Acceleration", 100, false);
-
-        public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub Min Dist", 2, false);
-        public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub Max Dist", 3, false);
+        public static final LoggedTunableNumber kMaxAcceleration = new LoggedTunableNumber("Swerve/Max Acceleration", 100, false);
 
         public static final LoggedTunableNumber kAllianceXThreshold = new LoggedTunableNumber("Swerve/Alliance X Threshold", 3.6, false);
         public static final LoggedTunableNumber kNeutralXThreshold = new LoggedTunableNumber("Swerve/Neutral X Threshold", 5.6, false);
 
-        private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery Target X", 2.25, true);
-        private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Left Delivery Target Y", 5.75, true);
-        private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Right Delivery Target Y", 2.25, true);
-        public static final LoggedTunableNumber kDeliveryYDistThreshold = new LoggedTunableNumber("Swerve/Delivery Y Dist Threshold", 1.5, false);
-        public static final LoggedTunableNumber kDeliveryXThreshold = new LoggedTunableNumber("Swerve/Delivery X Threshold", 10, false);
+        public static class Hub {
+            public static final LoggedTunableNumber kHubMinDist = new LoggedTunableNumber("Swerve/Hub/Hub Min Dist", 2, false);
+            public static final LoggedTunableNumber kHubMaxDist = new LoggedTunableNumber("Swerve/Hub/Hub Max Dist", 3, false);
+            public static final LoggedTunableNumber lookHubFF = new LoggedTunableNumber("Swerve/Hub/Look Hub FF", 0, false);
+        }
 
-        public static final LoggedTunableNumber kAutoTrenchThreshold = new LoggedTunableNumber("Swerve/Auto Trench Threshold", 1.5, false);
-        public static final LoggedTunableNumber kAutoTrenchYThreshold = new LoggedTunableNumber("Swerve/Auto Trench Y Threshold", 1.5, false);
+        public static class Delivery {
+            private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery/Delivery Target X", 2.25, true);
+            private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Left Delivery Target Y", 5.75, true);
+            private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Right Delivery Target Y", 2.25, true);
+            public static final LoggedTunableNumber kYDistThreshold = new LoggedTunableNumber("Swerve/Delivery/Y Dist Threshold", 1.5, false);
+            public static final LoggedTunableNumber kXThreshold = new LoggedTunableNumber("Swerve/Delivery/X Threshold", 10, false);
 
-        public static Pose2d getDeliveryTarget() {
-            return new Pose2d(kDeliveryTargetX.get(), RobotState.get().getRobotPose().getY() > 4 ? kLeftDeliveryTargetY.get() : kRightDeliveryTargetY.get(), Rotation2d.kZero);
+            public static Pose2d getDeliveryTarget() {
+                return new Pose2d(kDeliveryTargetX.get(), RobotState.get().getRobotPose().getY() > 4 ? kLeftDeliveryTargetY.get() : kRightDeliveryTargetY.get(), Rotation2d.kZero);
+            }
+        }
+
+        public static class AutoTrench {
+            public static final LoggedTunableNumber kThreshold = new LoggedTunableNumber("Swerve/Auto Trench/Threshold", 1.25, true);
+            public static final LoggedTunableNumber kYThreshold = new LoggedTunableNumber("Swerve/Auto Trench/Y Threshold", 100, true);
+            public static final LoggedTunableNumber kMaxStrength = new LoggedTunableNumber("Swerve/Auto Trench/Max Strength", 1, true);
+            public static final LoggedTunableNumber kExponent = new LoggedTunableNumber("Swerve/Auto Trench/Exponent", 0.25, true);
+            public static final LoggedTunableNumber kPredict = new LoggedTunableNumber("Swerve/Auto Trench/Predict", 0.5, true);
         }
     }
 }

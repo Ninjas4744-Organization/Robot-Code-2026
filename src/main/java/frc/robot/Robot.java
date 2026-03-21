@@ -77,7 +77,7 @@ public class Robot extends LoggedRobot {
         robotContainer.periodic();
 
         robotDt = RobotController.getFPGATime() / 1000000.0 - lastLoopTime;
-        Logger.recordOutput("Robot/Delta Time", getRobotDt());
+        Logger.recordOutput("Delta Time", getRobotDt());
         lastLoopTime = RobotController.getFPGATime() / 1000000.0;
     }
 

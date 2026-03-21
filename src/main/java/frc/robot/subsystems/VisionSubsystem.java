@@ -85,6 +85,11 @@ public class VisionSubsystem extends SubsystemBase {
                 resettedPose = true;
             }
         }
+
+        Logger.recordOutput("Vision/MegaTag 1 Vision", getMegaTag1Pose());
+        Logger.recordOutput("Vision/MegaTag 1 Vision Dist", getMegaTag1DistFromTag());
+        Logger.recordOutput("Vision/Odometry Only Pose", RobotState.get().getOdometryOnlyRobotPose());
+        Logger.recordOutput("Vision/Odometry Vision Error", getLastVisionPose().getTranslation().getDistance(RobotState.get().getOdometryOnlyRobotPose().getTranslation()));
     }
 
     public Matrix<N3, N1> getVisionStrength(VisionOutput estimation) {

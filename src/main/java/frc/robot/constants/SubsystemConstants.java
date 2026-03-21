@@ -282,7 +282,7 @@ public class SubsystemConstants {
     public static final SwerveControllerConstants kSwerveController = new SwerveControllerConstants();
     static {
         kSwerveController.swerveConstants = kSwerve;
-        kSwerveController.drivePIDConstants = ControlConstants.createPID(5, 0, 0, 0);
+        kSwerveController.drivePIDConstants = ControlConstants.createPID(6.5, 0, 0, 0);
         kSwerveController.rotationPIDConstants = ControlConstants.createPID(5.5, 0, 0, 0);
         kSwerveController.rotationPIDContinuousConnections = Pair.of(-Math.PI, Math.PI);
     }

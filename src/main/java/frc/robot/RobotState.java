@@ -32,7 +32,7 @@ public class RobotState extends RobotStateBase {
 
         boolean hubActiveInTime = RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds);
 
-        boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.kDeliveryYDistThreshold.get();
+        boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.Delivery.kYDistThreshold.get();
 
         if (shootingMode == ShootingMode.DELIVERY)
             return isReady
@@ -47,8 +47,8 @@ public class RobotState extends RobotStateBase {
 
     public static boolean isDeliveryReadyWhileShooting() {
         return (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds))
-            && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.kDeliveryYDistThreshold.get()
-            && RobotState.get().getRobotPose().getX() < PositionsConstants.Swerve.kDeliveryXThreshold.get()
+            && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.Delivery.kYDistThreshold.get()
+            && RobotState.get().getRobotPose().getX() < PositionsConstants.Swerve.Delivery.kXThreshold.get()
             && FieldConstants.atNeutralZone();
     }
 
@@ -57,7 +57,7 @@ public class RobotState extends RobotStateBase {
     }
 
     public static void setShootingMode(ShootingMode shootingMode) {
-        Logger.recordOutput("Robot/Shooting/Shoot Mode", shootingMode.name());
+        Logger.recordOutput("/Shoot Mode", shootingMode.name());
         RobotState.shootingMode = shootingMode;
     }
 
