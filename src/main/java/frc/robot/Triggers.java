@@ -15,10 +15,11 @@ import java.util.Set;
 
 public class Triggers {
     private static LoggedCommandController driverController;
-//    private LoggedCommandController operatorController;
+    private static LoggedCommandController operatorController;
     
-    public static void setControllers(LoggedCommandController driverController) {
+    public static void setControllers(LoggedCommandController driverController, LoggedCommandController operatorController) {
         Triggers.driverController = driverController;
+        Triggers.operatorController = operatorController;
     }
 
     public static void configureTriggers() {
@@ -64,9 +65,9 @@ public class Triggers {
                 RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
         })));
 
-        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
-            RobotContainer.getBox().changeState(Box.BoxState.OPENED);
-        })));
+//        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
+//            RobotContainer.getBox().changeState(Box.BoxState.OPENED);
+//        })));
 
 //        driverController.L2().toggleOnTrue(notTest(Commands.startEnd(
 //            () -> RobotContainer.getIntake().changeState(Intake.IntakeStates.INTAKE),
@@ -88,8 +89,8 @@ public class Triggers {
                 }),
                 Commands.either(
                     Commands.sequence(
-                        Commands.waitSeconds(1),
-                        RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
+//                        Commands.waitSeconds(1),
+//                        RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
                     ),
                     Commands.none(),
                     () -> RobotState.getShootingMode() == ShootingMode.ON_MOVE
@@ -114,12 +115,8 @@ public class Triggers {
 
         driverController.povRight().onTrue(notTest(Commands.runOnce(RobotContainer::resetStatemachines)));
 
-        driverController.povUp().onTrue(notTest(Commands.runOnce(() -> {
-            RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.IDLE);
-            RobotContainer.getIntake().changeState(Intake.IntakeStates.IDLE);
-            RobotContainer.getIntakeRail().changeState(IntakeRail.IntakeRailState.CLOSED);
-            RobotContainer.getBox().changeState(Box.BoxState.CLOSED);
-        })));
+        operatorController.triangle().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.OPENED)));
+        operatorController.cross().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.FORCE_CLOSE)));
     }
 
     private static Command inTest(Command command) {

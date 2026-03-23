@@ -7,7 +7,7 @@ import frc.lib.NinjasLib.controllers.Controller;
 import frc.lib.NinjasLib.controllers.ControllerIOInputsAutoLogged;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.lib.NinjasLib.subsystem.IO;
-import frc.robot.RobotState;
+import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.PositionsConstants;
 import frc.robot.constants.SubsystemConstants;
@@ -32,6 +32,7 @@ public class Box extends StateMachineBase<Box.BoxState> {
     private final ControllerIOInputsAutoLogged inputsLeft = new ControllerIOInputsAutoLogged();
     private final ControllerIOInputsAutoLogged inputsRight = new ControllerIOInputsAutoLogged();
     private boolean enabled;
+    private boolean forceClosed = false;
 
     public Box(boolean enabled) {
         super(Box.BoxState.class);
@@ -66,16 +67,16 @@ public class Box extends StateMachineBase<Box.BoxState> {
         Logger.processInputs("Box Left", inputsLeft);
         Logger.processInputs("Box Right", inputsRight);
 
+        if (!FieldConstants.atNeutralZone())
+            forceClosed = false;
+
         super.periodic();
     }
 
     @Override
     protected void define() {
         addOmniEdge(RESET, () -> Commands.sequence(
-//            setPercentCmd(-0.3),
-//            Commands.waitUntil(this::isReset),
-//            setPositionCmd(PositionsConstants.Box.kClose.get())
-//            resetEncoderCmd()
+            setPositionCmd(PositionsConstants.Box.kClose.get())
         ));
 
         addEdge(RESET, CLOSED);
@@ -102,6 +103,7 @@ public class Box extends StateMachineBase<Box.BoxState> {
         ));
 
         addEdge(List.of(OPENED, SLOW_CLOSE), FORCE_CLOSE, () -> Commands.sequence(
+            Commands.runOnce(() -> forceClosed = true),
             setPositionCmd(PositionsConstants.Box.kClose.get()),
             Commands.waitUntil(this::atGoal)
         ));
@@ -114,7 +116,7 @@ public class Box extends StateMachineBase<Box.BoxState> {
         addStateEnd(SLOW_CLOSE, () -> !DriverStation.isTest(), CLOSED);
 
         addStateEnd(CLOSED,
-            () -> !DriverStation.isTest() && RobotState.get().getRobotPose().getX() > PositionsConstants.Swerve.kNeutralXThreshold.get(),
+            () -> !forceClosed && !DriverStation.isTest() && FieldConstants.atNeutralZone(),
             OPENED
         );
 

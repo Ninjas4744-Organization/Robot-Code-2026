@@ -35,16 +35,21 @@ public class RobotContainer {
     private static Leds leds;
 
     private LoggedCommandController driverController;
+    private LoggedCommandController operatorController;
     private LoggedDashboardChooser<Command> autoChooser;
     private ShootCalculator shootCalculator;
     private NinjasTimebar timebar;
     private Field2d logField = new Field2d();
 
     public RobotContainer() {
-        if (!GeneralConstants.kRobotMode.isReplay())
+        if (!GeneralConstants.kRobotMode.isReplay()) {
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
-        else
+            operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIOPS5(GeneralConstants.kOperatorControllerPort));
+        }
+        else {
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
+            operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIO() {});
+        }
 
         swerveSubsystem = new SwerveSubsystem(true, false, driverController::getLeftX, driverController::getLeftY, driverController::getRightX, driverController::getRightY);
         RobotStateBase.set(new RobotState(SubsystemConstants.kSwerve.chassis.kinematics));
@@ -62,7 +67,7 @@ public class RobotContainer {
         shootMachine = new ShootMachine();
 
         configureAuto();
-        Triggers.setControllers(driverController);
+        Triggers.setControllers(driverController, operatorController);
         Triggers.configureBindings();
         Triggers.configureTestBindings();
         Triggers.configureTriggers();
@@ -123,7 +128,7 @@ public class RobotContainer {
 
     public void controllerPeriodic() {
         driverController.periodic();
-//        operatorController.periodic();
+        operatorController.periodic();
     }
 
     public void periodic() {
@@ -167,7 +172,8 @@ public class RobotContainer {
                 intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
                 intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
 
-                box.forceState(Box.BoxState.CLOSED);
+                box.forceState(Box.BoxState.UNKNOWN);
+                box.changeStateForce(Box.BoxState.RESET);
 
                 swerveSubsystem.reset();
                 Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
@@ -188,7 +194,8 @@ public class RobotContainer {
             intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
             intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
 
-            box.forceState(Box.BoxState.CLOSED);
+            box.forceState(Box.BoxState.UNKNOWN);
+            box.changeStateForce(Box.BoxState.RESET);
 
             swerveSubsystem.reset();
             Swerve.getInstance().setMaxSkidAcceleration(Double.MAX_VALUE);

@@ -18,7 +18,7 @@ public class PositionsConstants {
     }
 
     public static class Indexer {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 80, false);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 70, false);
         public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index Back", -20, false);
     }
 
@@ -28,8 +28,8 @@ public class PositionsConstants {
 
     public static class IntakeRail {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Rail/Close", 0, false);
-        public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 15, false);
-        public static final LoggedTunableNumber kSlowCloseHighThresh = new LoggedTunableNumber("Intake Rail/Slow Close High Thresh", 25, false);
+        public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 20, false);
+        public static final LoggedTunableNumber kSlowCloseHighThresh = new LoggedTunableNumber("Intake Rail/Slow Close High Thresh", 30, false);
         public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 35.34, true);
     }
 
@@ -190,7 +190,7 @@ public class PositionsConstants {
             private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery/Delivery Target X", 2.25, true);
             private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Left Delivery Target Y", 5.75, true);
             private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Right Delivery Target Y", 2.25, true);
-            public static final LoggedTunableNumber kYDistThreshold = new LoggedTunableNumber("Swerve/Delivery/Y Dist Threshold", 1.5, false);
+            public static final LoggedTunableNumber kYDistThreshold = new LoggedTunableNumber("Swerve/Delivery/Y Dist Threshold", 0.25, false);
             public static final LoggedTunableNumber kXThreshold = new LoggedTunableNumber("Swerve/Delivery/X Threshold", 10, false);
 
             public static Pose2d getDeliveryTarget() {
