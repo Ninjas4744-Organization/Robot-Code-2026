@@ -35,10 +35,10 @@ public class RobotState extends RobotStateBase {
         boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.Delivery.kYDistThreshold.get();
 
         if (shootingMode == ShootingMode.DELIVERY)
-            return isReady
-                && (!GeneralConstants.enableAutoTiming || !hubActiveInTime)
-                && FieldConstants.atNeutralZone()
-                && !atHubY;
+            return isReady;
+//                && (!GeneralConstants.enableAutoTiming || !hubActiveInTime)
+//                && FieldConstants.atNeutralZone()
+//                && !atHubY;
         else
             return isReady
                 && (!GeneralConstants.enableAutoTiming || hubActiveInTime || DriverStation.isAutonomous())

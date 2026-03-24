@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R - center 1"
+            "pathName": "R - center 1 - solo"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.5
+            "waitTime": 4.0
           }
         },
         {
@@ -31,13 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R - center 2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
+            "pathName": "R - center 2 - solo"
           }
         }
       ]

@@ -9,7 +9,7 @@ import frc.robot.RobotState;
 public class PositionsConstants {
     public static class Box {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Box/Closed", 0, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 30, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 15, false);
     }
 
     public static class Intake {

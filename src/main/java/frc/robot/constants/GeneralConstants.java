@@ -40,7 +40,7 @@ public class GeneralConstants {
     }
 
     private static final RobotMode kSimMode = RobotMode.SIM;
-    private static final RobotMode kRealMode = RobotMode.WORKSHOP;
+    private static final RobotMode kRealMode = RobotMode.COMP;
     public static final RobotMode kRobotMode = Robot.isReal() ? kRealMode : kSimMode;
 
     public static final int kDriverControllerPort = 0;

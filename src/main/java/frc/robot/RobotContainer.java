@@ -58,7 +58,7 @@ public class RobotContainer {
 
         intake = new Intake(true);
         intakeRail = new IntakeRail(true);
-        box = new Box(true);
+        box = new Box(false);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
@@ -109,16 +109,10 @@ public class RobotContainer {
             RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
         )));
 
-        NamedCommands.registerCommand("Stop", Commands.runOnce(() -> {
-            shootMachine.changeState(ShootMachine.ShootState.IDLE);
-            swerveSubsystem.stop();
-        }));
-
-        NamedCommands.registerCommand("Open Intake", Commands.runOnce(() -> {
-            intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
-        }));
-
-        NamedCommands.registerCommand("Close Box", Commands.sequence(
+        NamedCommands.registerCommand("Stop", Commands.sequence(
+            swerveSubsystem.stopCmd(),
+            shootMachine.changeStateCommand(ShootMachine.ShootState.IDLE),
+            intakeRail.changeStateForceCommand(IntakeRail.IntakeRailState.OPENED),
             box.changeStateForceCommand(Box.BoxState.CLOSED),
             Commands.waitUntil(box::atGoal)
         ));

@@ -64,22 +64,25 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
 
         addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
             indexer.stopCmd(),
-            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
-            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
-            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get())
+//            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
+//            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
+            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
+            shooter.setVelocityCmd(40)
         ));
 
-        addStateCommand(PREPARE_DELIVERY, Commands.parallel(
-            shooter.autoVelocity(true)
-        ));
+//        addStateCommand(PREPARE_DELIVERY, Commands.parallel(
+////            shooter.autoVelocity(true)
+//            shooter.setVelocityCmd(40)
+//        ));
 
         addEdge(PREPARE_DELIVERY, DELIVERY, Commands.sequence(
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
         ));
 
-        addStateCommand(DELIVERY, Commands.parallel(
-            shooter.autoVelocity(false)
-        ));
+//        addStateCommand(DELIVERY, Commands.parallel(
+////            shooter.autoVelocity(true)
+//            shooter.setVelocityCmd(40)
+//        ));
 
         addEdge(PREPARE_DELIVERY, PREPARE_HUB);
         addEdge(DELIVERY, HUB);
@@ -104,13 +107,13 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         );
 
         addStateEnd(PREPARE_DELIVERY,
-            () -> RobotState.isShootReady(),
+            () -> true,//RobotState.isShootReady(),
             DELIVERY
         );
 
-        addStateEnd(DELIVERY,
-            () -> !RobotState.isDeliveryReadyWhileShooting(),
-            PREPARE_DELIVERY
-        );
+//        addStateEnd(DELIVERY,
+//            () -> !RobotState.isDeliveryReadyWhileShooting(),
+//            PREPARE_DELIVERY
+//        );
     }
 }

@@ -45,7 +45,7 @@ public class Triggers {
                 RobotContainer.getSwerve().stop();
                 RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
                 RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
-                RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
+                RobotContainer.getBox().changeStateForce(Box.BoxState.FORCE_CLOSE);
             }
         }));
     }
@@ -54,15 +54,14 @@ public class Triggers {
         driverController.L1().onTrue(notTest(Commands.runOnce(() -> {
             RobotContainer.getSwerve().stop();
 
-            RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
-            RobotContainer.getIntake().changeStateForce(Intake.IntakeStates.INTAKE);
-            RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
             if (FieldConstants.atNeutralZone())
                 RobotContainer.getBox().changeStateForce(Box.BoxState.OPENED);
             else if (RobotContainer.getShootMachine().getCurrentState() != ShootMachine.ShootState.IDLE)
                 RobotContainer.getBox().changeStateForce(Box.BoxState.FORCE_CLOSE);
-            else
-                RobotContainer.getBox().changeStateForce(Box.BoxState.CLOSED);
+
+            RobotContainer.getShootMachine().changeStateForce(ShootMachine.ShootState.IDLE);
+            RobotContainer.getIntake().changeStateForce(Intake.IntakeStates.INTAKE);
+            RobotContainer.getIntakeRail().changeStateForce(IntakeRail.IntakeRailState.OPENED);
         })));
 
 //        driverController.R1().onTrue(notTest(Commands.runOnce(() -> {
