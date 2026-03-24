@@ -39,7 +39,7 @@ public class SubsystemConstants {
 
         /* Control */
         kIntake.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, 0, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
-        kIntake.real.control.enableFOC = false;
+        kIntake.real.control.enableFOC = true;
 
         /* Simulation */
         kIntake.simMotor = DCMotor.getKrakenX60(1);
@@ -269,6 +269,7 @@ public class SubsystemConstants {
         kSwerve.special.isReplay = GeneralConstants.kRobotMode.isReplay();
         kSwerve.special.robotStartPose = new Pose2d(2, 4, Rotation2d.kZero);
         kSwerve.special.CANBus = new CANBus("Swerve Bus");
+        kSwerve.special.enableAutoLock = false;
 
         try {
             kSwerve.special.robotConfig = RobotConfig.fromGUISettings();
