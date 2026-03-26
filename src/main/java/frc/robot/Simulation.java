@@ -16,7 +16,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -28,17 +27,17 @@ public class Simulation {
     private static int ballZigZagNum = 0;
 
     private static void spawnBalls() {
-        for (int x = 7 * 5; x <= 10 * 5; x++) {
-            for (int y = 2 * 5; y <= 6 * 5; y++) {
-                RebuiltFuelOnField ball = new RebuiltFuelOnField(new Translation2d(x / 5.0, y / 5.0));
+        for (int x = 7 * 6; x <= 10 * 6; x++) {
+            for (int y = 2 * 6; y <= 6 * 6; y++) {
+                RebuiltFuelOnField ball = new RebuiltFuelOnField(new Translation2d(x / 6.0, y / 6.0));
                 SimulatedArena.getInstance().addGamePiece(ball);
                 simFieldBalls.add(ball);
             }
         }
 
-        for (int x = 0 * 5; x <= 0.5 * 5; x++) {
-            for (int y = (int)(5.5 * 5); y <= 6.5 * 5; y++) {
-                RebuiltFuelOnField ball = new RebuiltFuelOnField(new Translation2d(x / 5.0, y / 5.0));
+        for (int x = 0 * 6; x <= 0.5 * 6; x++) {
+            for (int y = (int)(5.5 * 6); y <= 6.5 * 6; y++) {
+                RebuiltFuelOnField ball = new RebuiltFuelOnField(new Translation2d(x / 6.0, y / 6.0));
                 SimulatedArena.getInstance().addGamePiece(ball);
                 simFieldBalls.add(ball);
             }
@@ -47,7 +46,7 @@ public class Simulation {
 
     public static void reset() {
         points = 0;
-        ballsCollected = 0;
+        ballsCollected = 8;
         spawnBalls();
         Logger.recordOutput("Simulation/Points", points);
         Logger.recordOutput("Simulation/Balls Collected", ballsCollected);
@@ -58,7 +57,7 @@ public class Simulation {
         spawnBalls();
 
         CommandScheduler.getInstance().schedule(Commands.runOnce(() -> {
-            if (ballsCollected > 0 && Set.of(ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY).contains(RobotContainer.getShootMachine().getCurrentState())) {
+            if (ballsCollected > 0 && RobotContainer.getShootMachine().isInStates(ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY)) {
                 ballsCollected--;
                 Logger.recordOutput("Simulation/Balls Collected", ballsCollected);
 
@@ -76,7 +75,7 @@ public class Simulation {
                 simFlyingBalls.add(ball);
                 SimulatedArena.getInstance().addGamePieceProjectile(ball);
             }
-        }).andThen(Commands.waitSeconds(0.06)).repeatedly().ignoringDisable(true));
+        }).andThen(Commands.waitSeconds(1 / 8.0)).repeatedly().ignoringDisable(true));
     }
 
     public static void periodic() {
@@ -144,7 +143,7 @@ public class Simulation {
             }
         }
 
-        for (int i = 0; i < simFieldBalls.size() - 400; i++) {
+        for (int i = 0; i < simFieldBalls.size() - 500; i++) {
             SimulatedArena.getInstance().removePiece(simFieldBalls.get(0));
             simFieldBalls.remove(0);
         }
