@@ -16,7 +16,7 @@ public class NinjasTimebar {
     private final DoublePublisher endgameFlashTimePublisher;
 
     public NinjasTimebar(String tablePath) {
-        this(tablePath, GeneralConstants.autoTimingSeconds, GeneralConstants.autoTimingStopDeliverySeconds, 10);
+        this(tablePath, GeneralConstants.kAutoTimingSeconds, GeneralConstants.kAutoTimingStopDeliverySeconds, 10);
     }
 
     /**

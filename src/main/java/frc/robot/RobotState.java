@@ -30,7 +30,7 @@ public class RobotState extends RobotStateBase {
             && RobotContainer.getShooter().atGoal()
             && RobotContainer.getAccelerator().atGoal();
 
-        boolean hubActiveInTime = RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingSeconds);
+        boolean hubActiveInTime = RobotState.isHubAboutToBe(true, GeneralConstants.kAutoTimingSeconds);
 
         boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.Delivery.kYDistThreshold.get();
 
@@ -41,12 +41,12 @@ public class RobotState extends RobotStateBase {
 //                && !atHubY;
         else
             return isReady
-                && (!GeneralConstants.enableAutoTiming || hubActiveInTime || DriverStation.isAutonomous())
+                && (!GeneralConstants.kEnableAutoTiming || hubActiveInTime || DriverStation.isAutonomous())
                 && FieldConstants.atAllianceZone();
     }
 
     public static boolean isDeliveryReadyWhileShooting() {
-        return (!GeneralConstants.enableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds))
+        return (!GeneralConstants.kEnableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.kAutoTimingSeconds))
             && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.Delivery.kYDistThreshold.get()
             && RobotState.get().getRobotPose().getX() < PositionsConstants.Swerve.Delivery.kXThreshold.get()
             && FieldConstants.atNeutralZone();

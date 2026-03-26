@@ -5,6 +5,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -42,11 +43,12 @@ public class RobotContainer {
     private Field2d logField = new Field2d();
 
     public RobotContainer() {
+        DriverStation.silenceJoystickConnectionWarning(true);
+
         if (!GeneralConstants.kRobotMode.isReplay()) {
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
             operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIOPS5(GeneralConstants.kOperatorControllerPort));
-        }
-        else {
+        } else {
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIO() {});
             operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIO() {});
         }
@@ -134,9 +136,26 @@ public class RobotContainer {
         Logger.recordOutput("Hub Active", RobotState.isHubActive());
         Logger.recordOutput("Shift Time", Math.ceil(RobotState.timeUntilShiftChange()));
 
+        double taskTime = 0;
+        String taskName = "Auto";
+        for (int i = 0; i < GeneralConstants.kTasksTimings.length; i++) {
+            if (RobotState.getMatchTime() > GeneralConstants.kTasksTimings[i]) {
+                taskTime = Math.ceil(RobotState.getMatchTime() - GeneralConstants.kTasksTimings[i]);
+                taskName = GeneralConstants.KTasksNames[i];
+                break;
+            }
+        }
+        Logger.recordOutput("Task Time", taskTime);
+        Logger.recordOutput("Task Name", taskName);
+
         logField.setRobotPose(RobotState.get().getRobotPose());
         logField.getObject("Target").setPose(new Pose2d(ShootCalculator.getShootParams().virtualTarget(), Rotation2d.kZero));
         SmartDashboard.putData("Field", logField);
+
+        if (DriverStation.isAutonomousEnabled() && (RobotController.getFPGATime() - Robot.autoStartTime) / 1000000.0 > 19.5) {
+            shootMachine.changeStateForce(ShootMachine.ShootState.IDLE);
+            intake.changeStateForce(Intake.IntakeStates.IDLE);
+        }
 
         if(GeneralConstants.kRobotMode.isSim()) {
             Simulation.periodic();

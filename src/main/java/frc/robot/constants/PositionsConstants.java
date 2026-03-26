@@ -9,7 +9,7 @@ import frc.robot.RobotState;
 public class PositionsConstants {
     public static class Box {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Box/Closed", 0, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 15, false);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Box/Open", 20, false);
     }
 
     public static class Intake {
@@ -187,9 +187,9 @@ public class PositionsConstants {
         }
 
         public static class Delivery {
-            private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery/Delivery Target X", 2.25, true);
-            private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Left Delivery Target Y", 5.75, true);
-            private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Right Delivery Target Y", 2.25, true);
+            private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery/Delivery Target X", 1, true);
+            private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Left Delivery Target Y", 7.5, true);
+            private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Right Delivery Target Y", 1, true);
             public static final LoggedTunableNumber kYDistThreshold = new LoggedTunableNumber("Swerve/Delivery/Y Dist Threshold", 0.25, false);
             public static final LoggedTunableNumber kXThreshold = new LoggedTunableNumber("Swerve/Delivery/X Threshold", 10, false);
 

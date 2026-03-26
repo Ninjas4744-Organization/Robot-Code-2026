@@ -64,10 +64,10 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
 
         addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
             indexer.stopCmd(),
-//            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
-//            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
+            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
+            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
-            shooter.setVelocityCmd(40)
+            shooter.setVelocityCmd(65)
         ));
 
 //        addStateCommand(PREPARE_DELIVERY, Commands.parallel(

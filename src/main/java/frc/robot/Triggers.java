@@ -23,7 +23,7 @@ public class Triggers {
     }
 
     public static void configureTriggers() {
-        new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.autoTimingStopDeliverySeconds)).onTrue(Commands.runOnce(() -> {
+        new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.kEnableAutoTiming && RobotState.isHubAboutToBe(true, GeneralConstants.kAutoTimingStopDeliverySeconds)).onTrue(Commands.runOnce(() -> {
             RobotState.setShootingMode(ShootingMode.ON_MOVE);
 
             if (Set.of(ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY)
@@ -36,7 +36,7 @@ public class Triggers {
             }
         }));
 
-        new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.enableAutoTiming && RobotState.isHubAboutToBe(false, GeneralConstants.autoTimingSeconds)).onTrue(Commands.runOnce(() -> {
+        new Trigger(() -> DriverStation.isTeleop() && GeneralConstants.kEnableAutoTiming && RobotState.isHubAboutToBe(false, GeneralConstants.kAutoTimingSeconds)).onTrue(Commands.runOnce(() -> {
             RobotState.setShootingMode(ShootingMode.DELIVERY);
 
             if (Set.of(ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.HUB, ShootMachine.ShootState.DELIVERY)
@@ -85,6 +85,7 @@ public class Triggers {
                             RobotContainer.getShootMachine().changeState(ShootMachine.ShootState.PREPARE_DELIVERY);
                             break;
                     }
+                    RobotContainer.getIntake().changeState(Intake.IntakeStates.INTAKE);
                 }),
                 Commands.either(
                     Commands.sequence(
@@ -101,10 +102,10 @@ public class Triggers {
             () -> !RobotContainer.getShootMachine().isInStates(ShootMachine.ShootState.HUB, ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.DELIVERY)
         )));
 
-        driverController.R3().onTrue(notTest(RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.SNAP_ANGLE)
-//            .andThen(Commands.waitUntil(RobotContainer.getSwerve()::atGoal))
-//            .finallyDo(RobotContainer.getSwerve()::stop)
-            .onlyIf(() -> RobotContainer.getShootMachine().getCurrentState() == ShootMachine.ShootState.IDLE)));
+        driverController.R3().onTrue(notTest(
+            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.SNAP_ANGLE)
+            .onlyIf(() -> RobotContainer.getShootMachine().getCurrentState() == ShootMachine.ShootState.IDLE)
+        ));
 
         driverController.cross().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(ShootingMode.ON_MOVE))));
         driverController.square().onTrue(notTest(Commands.runOnce(() -> RobotState.setShootingMode(ShootingMode.DELIVERY))));
@@ -116,6 +117,10 @@ public class Triggers {
 
         operatorController.triangle().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.OPENED)));
         operatorController.cross().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.FORCE_CLOSE)));
+        operatorController.circle().onTrue(notTest(RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.OPENED)));
+        operatorController.square().onTrue(notTest(RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.CLOSED)));
+        operatorController.R1().onTrue(notTest(RobotContainer.getIntake().changeStateCommand(Intake.IntakeStates.INTAKE)));
+        operatorController.L1().onTrue(notTest(RobotContainer.getIntake().changeStateCommand(Intake.IntakeStates.IDLE)));
     }
 
     private static Command inTest(Command command) {
