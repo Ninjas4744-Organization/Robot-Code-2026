@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -100,6 +101,7 @@ public class Robot extends LoggedRobot {
 
         autoStartTime = RobotController.getFPGATime();
         robotContainer.reset();
+        RobotState.get().resetGyro(Rotation2d.k180deg);
 
         autonomousCommand = robotContainer.getAutonomousCommand();
         if (autonomousCommand != null) {

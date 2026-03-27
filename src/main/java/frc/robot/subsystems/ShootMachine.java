@@ -67,7 +67,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
             Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
-            shooter.setVelocityCmd(65)
+            shooter.setVelocityCmd(55)
         ));
 
 //        addStateCommand(PREPARE_DELIVERY, Commands.parallel(
