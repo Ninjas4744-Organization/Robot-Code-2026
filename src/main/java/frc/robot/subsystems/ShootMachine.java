@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.RobotContainer;
@@ -23,6 +25,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
     private Shooter shooter;
     private Accelerator accelerator;
     private Indexer indexer;
+    private Timer deliveryTimer;
 
     public ShootMachine() {
         super(ShootState.class);
@@ -34,6 +37,8 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         shooter = RobotContainer.getShooter();
         accelerator = RobotContainer.getAccelerator();
         indexer = RobotContainer.getIndexer();
+
+        deliveryTimer = new Timer();
 
         addOmniEdge(RESET, () -> Commands.parallel(
             shooter.reset(),
@@ -67,7 +72,8 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
             Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
-            shooter.setVelocityCmd(55)
+//            shooter.setVelocityCmd(60)
+            Commands.runOnce(deliveryTimer::restart)
         ));
 
 //        addStateCommand(PREPARE_DELIVERY, Commands.parallel(
@@ -79,10 +85,14 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
         ));
 
-//        addStateCommand(DELIVERY, Commands.parallel(
-////            shooter.autoVelocity(true)
-//            shooter.setVelocityCmd(40)
-//        ));
+        double minDelivery = 55;
+        double maxDelivery = 60;
+        double deliveryTime = 3;
+        addStateCommand(DELIVERY, Commands.parallel(
+            Commands.run(() -> {
+                shooter.setVelocity(MathUtil.clamp(maxDelivery - deliveryTimer.get() * (maxDelivery - minDelivery) / deliveryTime, minDelivery, maxDelivery));
+            })
+        ));
 
         addEdge(PREPARE_DELIVERY, PREPARE_HUB);
         addEdge(DELIVERY, HUB);

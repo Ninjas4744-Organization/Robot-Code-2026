@@ -115,12 +115,13 @@ public class Triggers {
 
         driverController.povRight().onTrue(notTest(Commands.runOnce(RobotContainer::resetStatemachines)));
 
-        operatorController.triangle().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.OPENED)));
-        operatorController.cross().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.FORCE_CLOSE)));
-        operatorController.circle().onTrue(notTest(RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.OPENED)));
-        operatorController.square().onTrue(notTest(RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.CLOSED)));
+//        operatorController.triangle().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.OPENED)));
+//        operatorController.cross().onTrue(notTest(RobotContainer.getBox().changeStateCommand(Box.BoxState.FORCE_CLOSE)));
+        operatorController.triangle().onTrue(notTest(RobotContainer.getIntakeRail().changeStateForceCommand(IntakeRail.IntakeRailState.OPENED)));
+        operatorController.cross().onTrue(notTest(RobotContainer.getIntakeRail().changeStateForceCommand(IntakeRail.IntakeRailState.CLOSED)));
         operatorController.R1().onTrue(notTest(RobotContainer.getIntake().changeStateCommand(Intake.IntakeStates.INTAKE)));
         operatorController.L1().onTrue(notTest(RobotContainer.getIntake().changeStateCommand(Intake.IntakeStates.IDLE)));
+        operatorController.povRight().onTrue(notTest(Commands.runOnce(RobotContainer::resetStatemachines)));
     }
 
     private static Command inTest(Command command) {

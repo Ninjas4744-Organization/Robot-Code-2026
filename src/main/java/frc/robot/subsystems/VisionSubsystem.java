@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
@@ -48,8 +49,9 @@ public class VisionSubsystem extends SubsystemBase {
 
         if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
             framesSinceGyroUpdate++;
-            if (framesSinceGyroUpdate >= 75 && getMegaTag1Pose() != null) {
+            if (framesSinceGyroUpdate >= 75/* && getMegaTag1Pose() != null*/) {
 //                RobotState.get().resetGyro(getMegaTag1Pose().getRotation());
+                RobotState.get().resetGyro(Rotation2d.k180deg);
                 resettedGyro = true;
                 framesSinceGyroUpdate = 0;
             }

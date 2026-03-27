@@ -187,9 +187,9 @@ public class PositionsConstants {
         }
 
         public static class Delivery {
-            private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery/Delivery Target X", 1, true);
+            private static final LoggedTunableNumber kDeliveryTargetX = new LoggedTunableNumber("Swerve/Delivery/Delivery Target X", 0.5, true);
             private static final LoggedTunableNumber kLeftDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Left Delivery Target Y", 7.5, true);
-            private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Right Delivery Target Y", 1, true);
+            private static final LoggedTunableNumber kRightDeliveryTargetY = new LoggedTunableNumber("Swerve/Delivery/Right Delivery Target Y", 0.5, true);
             public static final LoggedTunableNumber kYDistThreshold = new LoggedTunableNumber("Swerve/Delivery/Y Dist Threshold", 0.25, false);
             public static final LoggedTunableNumber kXThreshold = new LoggedTunableNumber("Swerve/Delivery/X Threshold", 10, false);
 

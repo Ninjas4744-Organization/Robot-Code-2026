@@ -152,7 +152,8 @@ public class RobotContainer {
         logField.getObject("Target").setPose(new Pose2d(ShootCalculator.getShootParams().virtualTarget(), Rotation2d.kZero));
         SmartDashboard.putData("Field", logField);
 
-        if (DriverStation.isAutonomousEnabled() && (RobotController.getFPGATime() - Robot.autoStartTime) / 1000000.0 > 19.5) {
+        if ((DriverStation.isAutonomousEnabled() && (RobotController.getFPGATime() - Robot.autoStartTime) / 1000000.0 > 19.5)
+            || (DriverStation.isTeleopEnabled() && (RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000.0 > 139.5)) {
             shootMachine.changeStateForce(ShootMachine.ShootState.IDLE);
             intake.changeStateForce(Intake.IntakeStates.IDLE);
         }
