@@ -30,6 +30,7 @@ public class VisionSubsystem extends SubsystemBase {
     private boolean resettedGyro = false;
     private boolean resettedPose = false;
     private int framesSinceGyroUpdate = 75;
+    private boolean isFirstDisable = true;
 
     public VisionSubsystem() {
         Vision.setInstance(new Vision(SubsystemConstants.kVision));
@@ -47,9 +48,13 @@ public class VisionSubsystem extends SubsystemBase {
         odometryDrift += Swerve.getInstance().getOdometryTwist().getNorm() * GeneralConstants.Vision.kOdometryDriftPerMeter;
         Logger.recordOutput("Vision/Odometry Drift", odometryDrift);
 
-        if (DriverStation.isDisabled() && !GeneralConstants.kRobotMode.isSim()) {
+        if (DriverStation.isAutonomousEnabled())
+            isFirstDisable = false;
+        else if (DriverStation.isTeleopEnabled() || DriverStation.isTestEnabled())
+            isFirstDisable = true;
+        else if (DriverStation.isDisabled() && isFirstDisable && !GeneralConstants.kRobotMode.isSim()) {
             framesSinceGyroUpdate++;
-            if (framesSinceGyroUpdate >= 75/* && getMegaTag1Pose() != null*/) {
+            if (framesSinceGyroUpdate >= 75 && getMegaTag1Pose() != null) {
 //                RobotState.get().resetGyro(getMegaTag1Pose().getRotation());
                 RobotState.get().resetGyro(Rotation2d.k180deg);
                 resettedGyro = true;

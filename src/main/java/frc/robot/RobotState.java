@@ -42,7 +42,7 @@ public class RobotState extends RobotStateBase {
         else
             return isReady
                 && (!GeneralConstants.kEnableAutoTiming || hubActiveInTime || DriverStation.isAutonomous())
-                && FieldConstants.atAllianceZone();
+                ;//&& FieldConstants.atAllianceZone();
     }
 
     public static boolean isDeliveryReadyWhileShooting() {

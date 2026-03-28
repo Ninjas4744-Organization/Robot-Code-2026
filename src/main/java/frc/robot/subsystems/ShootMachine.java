@@ -20,6 +20,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         PREPARE_DELIVERY,
         HUB,
         DELIVERY,
+        SAVE_ACCELERATOR,
     }
 
     private Shooter shooter;
@@ -72,13 +73,13 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
             Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
-//            shooter.setVelocityCmd(60)
+//            shooter.autoVelocity(true)
             Commands.runOnce(deliveryTimer::restart)
         ));
 
 //        addStateCommand(PREPARE_DELIVERY, Commands.parallel(
 ////            shooter.autoVelocity(true)
-//            shooter.setVelocityCmd(40)
+////            shooter.setVelocityCmd(40)
 //        ));
 
         addEdge(PREPARE_DELIVERY, DELIVERY, Commands.sequence(
@@ -86,12 +87,13 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         ));
 
         double minDelivery = 55;
-        double maxDelivery = 60;
+        double maxDelivery = 58;
         double deliveryTime = 3;
         addStateCommand(DELIVERY, Commands.parallel(
             Commands.run(() -> {
                 shooter.setVelocity(MathUtil.clamp(maxDelivery - deliveryTimer.get() * (maxDelivery - minDelivery) / deliveryTime, minDelivery, maxDelivery));
             })
+//            shooter.autoVelocity(true)
         ));
 
         addEdge(PREPARE_DELIVERY, PREPARE_HUB);
@@ -102,6 +104,14 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             accelerator.stopCmd(),
             indexer.stopCmd()
         ));
+
+        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE_ACCELERATOR, () -> Commands.parallel(
+            shooter.stopCmd(),
+            accelerator.setVelocityCmd(-20),
+            indexer.stopCmd()
+        ));
+
+        addEdge(SAVE_ACCELERATOR, IDLE, accelerator.stopCmd());
 
 
         addStateEnd(RESET, () -> true, IDLE);
@@ -119,6 +129,11 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addStateEnd(PREPARE_DELIVERY,
             () -> true,//RobotState.isShootReady(),
             DELIVERY
+        );
+
+        addStateEnd(SAVE_ACCELERATOR,
+            Commands.waitSeconds(0.5),
+            IDLE
         );
 
 //        addStateEnd(DELIVERY,
