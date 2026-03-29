@@ -20,7 +20,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         PREPARE_DELIVERY,
         HUB,
         DELIVERY,
-        SAVE_ACCELERATOR,
+        SAVE,
     }
 
     private Shooter shooter;
@@ -105,13 +105,16 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             indexer.stopCmd()
         ));
 
-        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE_ACCELERATOR, () -> Commands.parallel(
+        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE, () -> Commands.parallel(
             shooter.stopCmd(),
             accelerator.setVelocityCmd(-20),
-            indexer.stopCmd()
+            indexer.setVelocityCmd(-20)
         ));
 
-        addEdge(SAVE_ACCELERATOR, IDLE, accelerator.stopCmd());
+        addEdge(SAVE, IDLE, Commands.parallel(
+            accelerator.stopCmd(),
+            indexer.stopCmd()
+        ));
 
 
         addStateEnd(RESET, () -> true, IDLE);
@@ -131,7 +134,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             DELIVERY
         );
 
-        addStateEnd(SAVE_ACCELERATOR,
+        addStateEnd(SAVE,
             Commands.waitSeconds(0.5),
             IDLE
         );

@@ -122,7 +122,7 @@ public class Triggers {
         operatorController.R1().onTrue(notTest(RobotContainer.getIntake().changeStateCommand(Intake.IntakeStates.INTAKE)));
         operatorController.L1().onTrue(notTest(RobotContainer.getIntake().changeStateCommand(Intake.IntakeStates.IDLE)));
         operatorController.povRight().onTrue(notTest(Commands.runOnce(RobotContainer::resetStatemachines)));
-        operatorController.circle().onTrue(RobotContainer.getShootMachine().changeStateForceCommand(ShootMachine.ShootState.SAVE_ACCELERATOR));
+        operatorController.circle().onTrue(RobotContainer.getShootMachine().changeStateForceCommand(ShootMachine.ShootState.SAVE));
     }
 
     private static Command inTest(Command command) {

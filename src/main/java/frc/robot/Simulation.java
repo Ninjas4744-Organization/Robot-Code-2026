@@ -75,7 +75,7 @@ public class Simulation {
                 simFlyingBalls.add(ball);
                 SimulatedArena.getInstance().addGamePieceProjectile(ball);
             }
-        }).andThen(Commands.waitSeconds(1 / 8.0)).repeatedly().ignoringDisable(true));
+        }).andThen(Commands.waitSeconds(1 / 11.0)).repeatedly().ignoringDisable(true));
     }
 
     public static void periodic() {

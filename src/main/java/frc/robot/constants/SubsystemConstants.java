@@ -159,7 +159,7 @@ public class SubsystemConstants {
         kShooter.real.base.isBrakeMode = false;
 
         /* Control */
-        kShooter.real.control.controlConstants = ControlConstants.createPIDF(0.5, 1, 0, Double.POSITIVE_INFINITY, 0.1175, 0, 0, 0, GravityTypeValue.Elevator_Static);
+        kShooter.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.1175, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kShooter.real.control.velocityGoalTolerance = 6;
         kShooter.real.control.enableFOC = false;
 
@@ -178,7 +178,7 @@ public class SubsystemConstants {
         kAccelerator.real.base.isBrakeMode = false;
 
         /* Control */
-        kAccelerator.real.control.controlConstants = ControlConstants.createPIDF(0, 0, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
+        kAccelerator.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0.5, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kAccelerator.real.control.velocityGoalTolerance = 10;
         kAccelerator.real.control.enableFOC = false;
 
