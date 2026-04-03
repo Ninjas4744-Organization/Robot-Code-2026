@@ -14,7 +14,6 @@ import frc.robot.constants.SubsystemConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
-import java.util.Set;
 
 import static frc.robot.subsystems.IntakeRail.IntakeRailState.*;
 
@@ -59,15 +58,15 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
 
         io.periodic();
 
-        if (Math.abs(inputs.StatorCurrent) >= kHighCurrentThreshold && !inputs.LimitSwitch && !Set.of(CLOSED, OPENED, SLOW_CLOSE).contains(currentState)) {
-            highCurrentFrames++;
-            if (highCurrentFrames >= kHighCurrentThresholdFrames) {
-                highCurrentFrames = 0;
-                changeStateForce(SAVE_OPEN);
-            }
-        } else {
-            highCurrentFrames = 0;
-        }
+//        if (Math.abs(inputs.StatorCurrent) >= kHighCurrentThreshold && !inputs.LimitSwitch && !Set.of(CLOSED, OPENED, SLOW_CLOSE).contains(currentState)) {
+//            highCurrentFrames++;
+//            if (highCurrentFrames >= kHighCurrentThresholdFrames) {
+//                highCurrentFrames = 0;
+//                changeStateForce(SAVE_OPEN);
+//            }
+//        } else {
+//            highCurrentFrames = 0;
+//        }
 
         io.updateInputs(inputs);
         Logger.processInputs("Intake Rail", inputs);
@@ -112,7 +111,7 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             setPositionCmd(PositionsConstants.IntakeRail.kSlowCloseLowThresh.get())
         ));
 
-        addEdge(List.of(CLOSED, OPENED, SLOW_CLOSE), SAVE_OPEN, () -> Commands.sequence(
+        addEdge(List.of(CLOSED, OPENED, SLOW_CLOSE, RESET), SAVE_OPEN, () -> Commands.sequence(
             setPercentCmd(0.5)
         ));
 
@@ -121,7 +120,7 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
 
         addStateEnd(SLOW_CLOSE, () -> DriverStation.isTeleop(), OPENED);
 
-        addStateEnd(SAVE_OPEN, () -> inputs.LimitSwitches[1], OPENED);
+        addStateEnd(SAVE_OPEN, Commands.waitSeconds(0.5), RESET);
     }
 
     private boolean isReset() {

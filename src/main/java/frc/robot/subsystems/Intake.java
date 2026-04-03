@@ -76,7 +76,7 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
 
         addEdge(INTAKE, SAVE_OUTTAKE, setVelocityCmd(PositionsConstants.Intake.kOuttake.get()));
 
-        addStateEnd(SAVE_OUTTAKE, Commands.waitSeconds(0.04), INTAKE);
+        addStateEnd(SAVE_OUTTAKE, Commands.waitSeconds(0.1), INTAKE);
     }
 
     public void setVelocity(double velocity) {
