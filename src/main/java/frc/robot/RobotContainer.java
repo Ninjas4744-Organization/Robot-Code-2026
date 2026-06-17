@@ -59,7 +59,7 @@ public class RobotContainer {
         shootCalculator = new ShootCalculator();
 
         intake = new Intake(true);
-        intakeRail = new IntakeRail(false);
+        intakeRail = new IntakeRail(true);
         box = new Box(false);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
@@ -106,7 +106,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
             shootMachine.changeStateCommand(ShootMachine.ShootState.PREPARE_HUB),
             Commands.waitSeconds(1),
-            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE),
+            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.PUMPING),
 //            Commands.waitSeconds(0.5),
             RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
         )));

@@ -30,7 +30,7 @@ public class PositionsConstants {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Rail/Close", 0, false);
         public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 26, false);
         public static final LoggedTunableNumber kSlowCloseHighThresh = new LoggedTunableNumber("Intake Rail/Slow Close High Thresh", 32, false);
-        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 35.34, true);
+        public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 33, true);
     }
 
     public static class Shooter {

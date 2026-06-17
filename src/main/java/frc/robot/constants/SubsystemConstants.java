@@ -56,8 +56,7 @@ public class SubsystemConstants {
         kIntakeRail.real.base.isBrakeMode = false;
 
         /* Control */
-        kIntakeRail.real.control.controlConstants = ControlConstants.createPID(11, 4, 0.3, 1);
-        kIntakeRail.real.control.conversionFactor = 1;//0.0089768737241178;
+        kIntakeRail.real.control.controlConstants = ControlConstants.createProfiledPIDF(4, 0, 0, 0, 95, 500, 0, 0, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kIntakeRail.real.control.positionGoalTolerance = 0.5;
         kIntakeRail.real.control.enableFOC = false;
 
@@ -77,7 +76,7 @@ public class SubsystemConstants {
         kIntakeRail.real.hardLimits.limits[1].frames = 12;
         kIntakeRail.real.hardLimits.limits[1].direction = 1;
         kIntakeRail.real.hardLimits.limits[1].autoStopReset = true;
-        kIntakeRail.real.hardLimits.limits[1].homePosition = 37;
+        kIntakeRail.real.hardLimits.limits[1].homePosition = 33;
 
         /* Simulation */
         kIntakeRail.simMotor = DCMotor.getKrakenX60(1);
@@ -176,6 +175,9 @@ public class SubsystemConstants {
         kAccelerator.real.base.main.id = 33;
         kAccelerator.real.base.main.inverted = true;
         kAccelerator.real.base.isBrakeMode = false;
+        kAccelerator.real.base.followers = new SimpleControllerConstants[] { new SimpleControllerConstants() };
+        kAccelerator.real.base.followers[0].id = 34;
+        kAccelerator.real.base.followers[0].inverted = false;
 
         /* Control */
         kAccelerator.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0.5, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);

@@ -23,17 +23,13 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         RESET,
         CLOSED,
         OPENED,
-        SLOW_CLOSE,
+        PUMPING,
         SAVE_OPEN,
     }
 
     private IO.All<ControllerIOInputsAutoLogged> io;
     private final ControllerIOInputsAutoLogged inputs = new ControllerIOInputsAutoLogged();
     private boolean enabled;
-
-    private int highCurrentFrames = 0;
-    private static final int kHighCurrentThreshold = 12;
-    private static final int kHighCurrentThresholdFrames = 12;
 
     public IntakeRail(boolean enabled) {
         super(IntakeRailState.class);
@@ -58,16 +54,6 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
 
         io.periodic();
 
-//        if (Math.abs(inputs.StatorCurrent) >= kHighCurrentThreshold && !inputs.LimitSwitch && !Set.of(CLOSED, OPENED, SLOW_CLOSE).contains(currentState)) {
-//            highCurrentFrames++;
-//            if (highCurrentFrames >= kHighCurrentThresholdFrames) {
-//                highCurrentFrames = 0;
-//                changeStateForce(SAVE_OPEN);
-//            }
-//        } else {
-//            highCurrentFrames = 0;
-//        }
-
         io.updateInputs(inputs);
         Logger.processInputs("Intake Rail", inputs);
 
@@ -79,7 +65,7 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         addOmniEdge(RESET, () -> Commands.sequence(
             setPercentCmd(-0.5),
             Commands.waitUntil(this::isReset),
-            Commands.waitSeconds(0.06),
+            Commands.waitSeconds(0.2),
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
             Commands.waitUntil(this::atGoal)
         ));
@@ -91,12 +77,12 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             Commands.waitUntil(this::atGoal)
         ));
 
-        addEdge(List.of(CLOSED, SLOW_CLOSE, SAVE_OPEN), OPENED, () -> Commands.sequence(
+        addEdge(List.of(CLOSED, PUMPING, SAVE_OPEN), OPENED, () -> Commands.sequence(
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
             Commands.waitUntil(this::atGoal)
         ));
 
-        addEdge(OPENED, SLOW_CLOSE, Commands.sequence(
+        addEdge(OPENED, PUMPING, Commands.sequence(
             new LoopCommand(
                 Commands.sequence(
                     setPercentCmd(0.4),
@@ -111,14 +97,14 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             setPositionCmd(PositionsConstants.IntakeRail.kSlowCloseLowThresh.get())
         ));
 
-        addEdge(List.of(CLOSED, OPENED, SLOW_CLOSE, RESET), SAVE_OPEN, () -> Commands.sequence(
+        addEdge(List.of(CLOSED, OPENED, PUMPING, RESET), SAVE_OPEN, () -> Commands.sequence(
             setPercentCmd(0.5)
         ));
 
 
         addStateEnd(RESET, () -> true, OPENED);
 
-        addStateEnd(SLOW_CLOSE, () -> DriverStation.isTeleop(), OPENED);
+        addStateEnd(PUMPING, () -> DriverStation.isTeleop(), OPENED);
 
         addStateEnd(SAVE_OPEN, Commands.waitSeconds(0.5), RESET);
     }

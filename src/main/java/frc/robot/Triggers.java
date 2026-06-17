@@ -97,7 +97,7 @@ public class Triggers {
                 )
             ),
             Commands.sequence(
-                RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SLOW_CLOSE)
+                RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.PUMPING)
             ),
             () -> !RobotContainer.getShootMachine().isInStates(ShootMachine.ShootState.HUB, ShootMachine.ShootState.PREPARE_HUB, ShootMachine.ShootState.PREPARE_DELIVERY, ShootMachine.ShootState.DELIVERY)
         )));

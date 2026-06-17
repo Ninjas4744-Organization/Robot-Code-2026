@@ -52,7 +52,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addEdge(List.of(IDLE, HUB), PREPARE_HUB, () -> Commands.sequence(
             indexer.stopCmd(),
             RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.LOOK_HUB),
-            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.LOOK_HUB && RobotContainer.getSwerve().atGoal()),
+//            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.LOOK_HUB && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get())
         ));
 
@@ -120,7 +120,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addStateEnd(RESET, () -> true, IDLE);
 
         addStateEnd(PREPARE_HUB,
-            () -> RobotState.isShootReady(),
+            () -> RobotState.isShootReady() || true,
             HUB
         );
 
