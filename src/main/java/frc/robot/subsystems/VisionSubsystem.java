@@ -56,7 +56,8 @@ public class VisionSubsystem extends SubsystemBase {
             framesSinceGyroUpdate++;
             if (framesSinceGyroUpdate >= 75 && getMegaTag1Pose() != null) {
 //                RobotState.get().resetGyro(getMegaTag1Pose().getRotation());
-                RobotState.get().resetGyro(Rotation2d.k180deg);
+                if (GeneralConstants.kRobotMode.isComp())
+                    RobotState.get().resetGyro(Rotation2d.k180deg);
                 resettedGyro = true;
                 framesSinceGyroUpdate = 0;
             }

@@ -18,12 +18,12 @@ public class PositionsConstants {
     }
 
     public static class Indexer {
-        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 75, true);
+        public static final LoggedTunableNumber kIndex = new LoggedTunableNumber("Indexer/Index", 74, true);
         public static final LoggedTunableNumber kIndexBack = new LoggedTunableNumber("Indexer/Index Back", -20, false);
     }
 
     public static class Accelerator {
-        public static final LoggedTunableNumber kAccelerate = new LoggedTunableNumber("Accelerator/Accelerate", 80, false);
+        public static final LoggedTunableNumber kAccelerate = new LoggedTunableNumber("Accelerator/Accelerate", 90, false);
     }
 
     public static class IntakeRail {

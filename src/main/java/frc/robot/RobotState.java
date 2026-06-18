@@ -30,9 +30,9 @@ public class RobotState extends RobotStateBase {
             && RobotContainer.getShooter().atGoal()
             && RobotContainer.getAccelerator().atGoal();
 
-        boolean hubActiveInTime = RobotState.isHubAboutToBe(true, GeneralConstants.kAutoTimingSeconds);
+//        boolean hubActiveInTime = RobotState.isHubAboutToBe(true, GeneralConstants.kAutoTimingSeconds);
 
-        boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.Delivery.kYDistThreshold.get();
+//        boolean atHubY = Math.abs(4 - RobotState.get().getRobotPose().getY()) < PositionsConstants.Swerve.Delivery.kYDistThreshold.get();
 
         if (shootingMode == ShootingMode.DELIVERY)
             return isReady;
@@ -40,9 +40,9 @@ public class RobotState extends RobotStateBase {
 //                && FieldConstants.atNeutralZone()
 //                && !atHubY;
         else
-            return isReady
-                && (!GeneralConstants.kEnableAutoTiming || hubActiveInTime || DriverStation.isAutonomous())
-                ;//&& FieldConstants.atAllianceZone();
+            return isReady;
+//                && (!GeneralConstants.kEnableAutoTiming || hubActiveInTime || DriverStation.isAutonomous())
+                //&& FieldConstants.atAllianceZone();
     }
 
     public static boolean isDeliveryReadyWhileShooting() {

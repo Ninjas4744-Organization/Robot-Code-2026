@@ -105,4 +105,8 @@ public class Accelerator extends SubsystemBase implements
 
         return inputs.Goal;
     }
+
+    public double getCurrent() {
+        return inputs.StatorCurrent;
+    }
 }

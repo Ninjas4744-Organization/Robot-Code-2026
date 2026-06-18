@@ -20,13 +20,14 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         PREPARE_DELIVERY,
         HUB,
         DELIVERY,
-        SAVE,
+//        SAVE,
     }
 
     private Shooter shooter;
     private Accelerator accelerator;
     private Indexer indexer;
     private Timer deliveryTimer;
+    private boolean activatedSave = false;
 
     public ShootMachine() {
         super(ShootState.class);
@@ -65,8 +66,19 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         ));
 
         addStateCommand(HUB, Commands.parallel(
-            shooter.autoVelocity(false)
-        ));
+            shooter.autoVelocity(false),
+            Commands.run(() -> {
+                if (accelerator.getCurrent() > 82) {
+                    accelerator.setVelocity(-20);
+                    indexer.setVelocity(-20);
+                    activatedSave = true;
+                }
+                else if (activatedSave) {
+                    accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get());
+                    indexer.setVelocity(PositionsConstants.Indexer.kIndex.get());
+                }
+            })
+        ).andThen(() -> activatedSave = false));
 
         addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
             indexer.stopCmd(),
@@ -94,7 +106,18 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
                 shooter.setVelocity(MathUtil.clamp(maxDelivery - deliveryTimer.get() * (maxDelivery - minDelivery) / deliveryTime, minDelivery, maxDelivery));
             })
 //            shooter.autoVelocity(true)
-        ));
+            , Commands.run(() -> {
+                if (accelerator.getCurrent() > 82) {
+                    accelerator.setVelocity(-20);
+                    indexer.setVelocity(-20);
+                    activatedSave = true;
+                }
+                else if (activatedSave) {
+                    accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get());
+                    indexer.setVelocity(PositionsConstants.Indexer.kIndex.get());
+                }
+            })
+        ).andThen(() -> activatedSave = false));
 
         addEdge(PREPARE_DELIVERY, PREPARE_HUB);
         addEdge(DELIVERY, HUB);
@@ -105,43 +128,43 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             indexer.stopCmd()
         ));
 
-        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE, () -> Commands.parallel(
-            shooter.stopCmd(),
-            accelerator.setVelocityCmd(-20),
-            indexer.setVelocityCmd(-20)
-        ));
+//        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE, () -> Commands.parallel(
+//            shooter.stopCmd(),
+//            accelerator.setVelocityCmd(-20),
+//            indexer.setVelocityCmd(-20)
+//        ));
 
-        addEdge(SAVE, IDLE, Commands.parallel(
-            accelerator.stopCmd(),
-            indexer.stopCmd()
-        ));
+//        addEdge(SAVE, IDLE, Commands.parallel(
+//            accelerator.stopCmd(),
+//            indexer.stopCmd()
+//        ));
 
 
         addStateEnd(RESET, () -> true, IDLE);
 
         addStateEnd(PREPARE_HUB,
-            () -> RobotState.isShootReady() || true,
+            () -> RobotState.isShootReady(),
             HUB
         );
 
-        addStateEnd(HUB,
-            () -> !RobotState.isShootReady(),
-            PREPARE_HUB
-        );
+//        addStateEnd(HUB,
+//            () -> !RobotState.isShootReady(),
+//            PREPARE_HUB
+//        );
 
         addStateEnd(PREPARE_DELIVERY,
             () -> true,//RobotState.isShootReady(),
             DELIVERY
         );
 
-        addStateEnd(SAVE,
-            Commands.waitSeconds(0.5),
-            IDLE
-        );
-
 //        addStateEnd(DELIVERY,
 //            () -> !RobotState.isDeliveryReadyWhileShooting(),
 //            PREPARE_DELIVERY
+//        );
+
+//        addStateEnd(SAVE,
+//            Commands.waitSeconds(0.5),
+//            IDLE
 //        );
     }
 }

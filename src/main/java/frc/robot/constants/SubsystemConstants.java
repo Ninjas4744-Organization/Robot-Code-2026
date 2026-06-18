@@ -160,7 +160,7 @@ public class SubsystemConstants {
         /* Control */
         kShooter.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0, 0, Double.POSITIVE_INFINITY, 0.1175, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kShooter.real.control.velocityGoalTolerance = 6;
-        kShooter.real.control.enableFOC = false;
+        kShooter.real.control.enableFOC = true;
 
         /* Simulation */
         kShooter.simMotor = DCMotor.getKrakenX60(2);
@@ -182,7 +182,7 @@ public class SubsystemConstants {
         /* Control */
         kAccelerator.real.control.controlConstants = ControlConstants.createPIDF(0.5, 0.5, 0, Double.POSITIVE_INFINITY, 0.13, 0, 0, 0, GravityTypeValue.Elevator_Static);
         kAccelerator.real.control.velocityGoalTolerance = 10;
-        kAccelerator.real.control.enableFOC = false;
+        kAccelerator.real.control.enableFOC = true;
 
         /* Simulation */
         kAccelerator.simMotor = DCMotor.getKrakenX60(1);
