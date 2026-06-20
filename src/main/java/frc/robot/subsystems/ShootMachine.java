@@ -78,7 +78,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
                     indexer.setVelocity(PositionsConstants.Indexer.kIndex.get());
                 }
             })
-        ).andThen(() -> activatedSave = false));
+        ).finallyDo(() -> activatedSave = false));
 
         addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
             indexer.stopCmd(),
@@ -117,7 +117,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
                     indexer.setVelocity(PositionsConstants.Indexer.kIndex.get());
                 }
             })
-        ).andThen(() -> activatedSave = false));
+        ).finallyDo(() -> activatedSave = false));
 
         addEdge(PREPARE_DELIVERY, PREPARE_HUB);
         addEdge(DELIVERY, HUB);
