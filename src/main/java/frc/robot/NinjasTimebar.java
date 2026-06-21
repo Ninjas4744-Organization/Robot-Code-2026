@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.networktables.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
-import frc.robot.constants.GeneralConstants;
 
 public class NinjasTimebar {
     private final DoublePublisher timePublisher;
@@ -16,7 +15,7 @@ public class NinjasTimebar {
     private final DoublePublisher endgameFlashTimePublisher;
 
     public NinjasTimebar(String tablePath) {
-        this(tablePath, GeneralConstants.kAutoTimingSeconds, GeneralConstants.kAutoTimingStopDeliverySeconds, 10);
+        this(tablePath, 3, 6, 10);
     }
 
     /**

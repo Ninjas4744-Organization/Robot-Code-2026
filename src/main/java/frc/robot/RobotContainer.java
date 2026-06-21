@@ -136,17 +136,17 @@ public class RobotContainer {
         Logger.recordOutput("Hub Active", RobotState.isHubActive());
         Logger.recordOutput("Shift Time", Math.ceil(RobotState.timeUntilShiftChange()));
 
-        double taskTime = 0;
-        String taskName = "Auto";
-        for (int i = 0; i < GeneralConstants.kTasksTimings.length; i++) {
-            if (RobotState.getMatchTime() > GeneralConstants.kTasksTimings[i]) {
-                taskTime = Math.ceil(RobotState.getMatchTime() - GeneralConstants.kTasksTimings[i]);
-                taskName = GeneralConstants.KTasksNames[i];
-                break;
-            }
-        }
-        Logger.recordOutput("Task Time", taskTime);
-        Logger.recordOutput("Task Name", taskName);
+//        double taskTime = 0;
+//        String taskName = "Auto";
+//        for (int i = 0; i < GeneralConstants.kTasksTimings.length; i++) {
+//            if (RobotState.getMatchTime() > GeneralConstants.kTasksTimings[i]) {
+//                taskTime = Math.ceil(RobotState.getMatchTime() - GeneralConstants.kTasksTimings[i]);
+//                taskName = GeneralConstants.KTasksNames[i];
+//                break;
+//            }
+//        }
+//        Logger.recordOutput("Task Time", taskTime);
+//        Logger.recordOutput("Task Name", taskName);
 
         logField.setRobotPose(RobotState.get().getRobotPose());
         logField.getObject("Target").setPose(new Pose2d(ShootCalculator.getShootParams().virtualTarget(), Rotation2d.kZero));
@@ -177,58 +177,35 @@ public class RobotContainer {
 
         if (DriverStation.isTeleop()) {
             if (GeneralConstants.kRobotMode.isComp()) {
-                shootMachine.forceState(ShootMachine.ShootState.IDLE);
-                shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
-
-                intake.forceState(Intake.IntakeStates.IDLE);
-                intake.changeStateForce(Intake.IntakeStates.INTAKE);
-
-                intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
-                intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
-
-                box.forceState(Box.BoxState.UNKNOWN);
-                box.changeStateForce(Box.BoxState.RESET);
-
-                swerveSubsystem.reset();
+                resetStatemachines(false);
                 Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
                 Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
             } else {
-                resetStatemachines();
-
+                resetStatemachines(true);
                 Swerve.getInstance().setMaxSkidAcceleration(SubsystemConstants.kSwerve.limits.maxSkidAcceleration);
                 Swerve.getInstance().setMaxForwardAcceleration(SubsystemConstants.kSwerve.limits.maxForwardAcceleration);
             }
         } else {
-            shootMachine.forceState(ShootMachine.ShootState.IDLE);
-            shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
-
-            intake.forceState(Intake.IntakeStates.IDLE);
-            intake.changeStateForce(Intake.IntakeStates.INTAKE);
-
-            intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
-            intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
-
-            box.forceState(Box.BoxState.UNKNOWN);
-            box.changeStateForce(Box.BoxState.RESET);
-
-            swerveSubsystem.reset();
+            resetStatemachines(false);
             Swerve.getInstance().setMaxSkidAcceleration(Double.MAX_VALUE);
             Swerve.getInstance().setMaxForwardAcceleration(Double.MAX_VALUE);
         }
     }
 
-    public static void resetStatemachines() {
+    public static void resetStatemachines(boolean resetIntakeRail) {
         shootMachine.forceState(ShootMachine.ShootState.IDLE);
         shootMachine.changeStateForce(ShootMachine.ShootState.RESET);
 
         intake.forceState(Intake.IntakeStates.IDLE);
         intake.changeStateForce(Intake.IntakeStates.INTAKE);
 
-        intakeRail.forceState(IntakeRail.IntakeRailState.UNKNOWN);
-        intakeRail.changeStateForce(IntakeRail.IntakeRailState.RESET);
-
-        box.forceState(Box.BoxState.UNKNOWN);
-        box.changeStateForce(Box.BoxState.RESET);
+        if (resetIntakeRail) {
+            intakeRail.forceState(IntakeRail.IntakeRailState.UNKNOWN);
+            intakeRail.changeStateForce(IntakeRail.IntakeRailState.RESET);
+        } else {
+            intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
+            intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
+        }
 
         swerveSubsystem.reset();
     }

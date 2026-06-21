@@ -4,9 +4,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.NinjasLib.statemachine.RobotStateBase;
-import frc.robot.constants.FieldConstants;
 import frc.robot.constants.GeneralConstants;
-import frc.robot.constants.PositionsConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.Optional;
@@ -45,12 +43,12 @@ public class RobotState extends RobotStateBase {
                 //&& FieldConstants.atAllianceZone();
     }
 
-    public static boolean isDeliveryReadyWhileShooting() {
-        return (!GeneralConstants.kEnableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.kAutoTimingSeconds))
-            && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.Delivery.kYDistThreshold.get()
-            && RobotState.get().getRobotPose().getX() < PositionsConstants.Swerve.Delivery.kXThreshold.get()
-            && FieldConstants.atNeutralZone();
-    }
+//    public static boolean isDeliveryReadyWhileShooting() {
+//        return (!GeneralConstants.kEnableAutoTiming || RobotState.isHubAboutToBe(false, GeneralConstants.kAutoTimingSeconds))
+//            && Math.abs(4 - RobotState.get().getRobotPose().getY()) > PositionsConstants.Swerve.Delivery.kYDistThreshold.get()
+//            && RobotState.get().getRobotPose().getX() < PositionsConstants.Swerve.Delivery.kXThreshold.get()
+//            && FieldConstants.atNeutralZone();
+//    }
 
     public static ShootingMode getShootingMode() {
         return shootingMode;

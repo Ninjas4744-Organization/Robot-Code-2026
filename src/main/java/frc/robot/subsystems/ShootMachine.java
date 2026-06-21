@@ -20,14 +20,17 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         PREPARE_DELIVERY,
         HUB,
         DELIVERY,
-//        SAVE,
+        SAVE_OUTTAKE_BACK,
+        REVERSE_BALLS,
     }
 
     private Shooter shooter;
     private Accelerator accelerator;
     private Indexer indexer;
+
     private Timer deliveryTimer;
-    private boolean activatedSave = false;
+
+    private ShootState stateBeforeSave = IDLE;
 
     public ShootMachine() {
         super(ShootState.class);
@@ -48,96 +51,68 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
             indexer.reset()
         ));
 
-        addEdge(RESET, IDLE);
-
-        addEdge(List.of(IDLE, HUB), PREPARE_HUB, () -> Commands.sequence(
-            indexer.stopCmd(),
-            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.LOOK_HUB),
-//            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.LOOK_HUB && RobotContainer.getSwerve().atGoal()),
-            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get())
-        ));
-
-        addStateCommand(PREPARE_HUB, Commands.parallel(
-            shooter.autoVelocity(false)
-        ));
-
-        addEdge(PREPARE_HUB, HUB, Commands.sequence(
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
-        ));
-
-        addStateCommand(HUB, Commands.parallel(
-            shooter.autoVelocity(false),
-            Commands.run(() -> {
-                if (accelerator.getCurrent() > 82) {
-                    accelerator.setVelocity(-20);
-                    indexer.setVelocity(-20);
-                    activatedSave = true;
-                }
-                else if (activatedSave) {
-                    accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get());
-                    indexer.setVelocity(PositionsConstants.Indexer.kIndex.get());
-                }
-            })
-        ).finallyDo(() -> activatedSave = false));
-
-        addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
-            indexer.stopCmd(),
-            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY),
-            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
-            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
-//            shooter.autoVelocity(true)
-            Commands.runOnce(deliveryTimer::restart)
-        ));
-
-//        addStateCommand(PREPARE_DELIVERY, Commands.parallel(
-////            shooter.autoVelocity(true)
-////            shooter.setVelocityCmd(40)
-//        ));
-
-        addEdge(PREPARE_DELIVERY, DELIVERY, Commands.sequence(
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
-        ));
-
-        double minDelivery = 55;
-        double maxDelivery = 58;
-        double deliveryTime = 3;
-        addStateCommand(DELIVERY, Commands.parallel(
-            Commands.run(() -> {
-                shooter.setVelocity(MathUtil.clamp(maxDelivery - deliveryTimer.get() * (maxDelivery - minDelivery) / deliveryTime, minDelivery, maxDelivery));
-            })
-//            shooter.autoVelocity(true)
-            , Commands.run(() -> {
-                if (accelerator.getCurrent() > 82) {
-                    accelerator.setVelocity(-20);
-                    indexer.setVelocity(-20);
-                    activatedSave = true;
-                }
-                else if (activatedSave) {
-                    accelerator.setVelocity(PositionsConstants.Accelerator.kAccelerate.get());
-                    indexer.setVelocity(PositionsConstants.Indexer.kIndex.get());
-                }
-            })
-        ).finallyDo(() -> activatedSave = false));
-
-        addEdge(PREPARE_DELIVERY, PREPARE_HUB);
-        addEdge(DELIVERY, HUB);
-
-        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY), IDLE, () -> Commands.parallel(
+        addOmniEdge(IDLE, () -> Commands.parallel(
             shooter.stopCmd(),
             accelerator.stopCmd(),
             indexer.stopCmd()
         ));
 
-//        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE, () -> Commands.parallel(
-//            shooter.stopCmd(),
-//            accelerator.setVelocityCmd(-20),
-//            indexer.setVelocityCmd(-20)
-//        ));
 
-//        addEdge(SAVE, IDLE, Commands.parallel(
-//            accelerator.stopCmd(),
-//            indexer.stopCmd()
-//        ));
+
+        addEdge(List.of(IDLE, HUB), PREPARE_HUB, () -> Commands.sequence(
+            indexer.stopCmd(),
+            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.LOOK_HUB)
+        ));
+        addStateCommand(PREPARE_HUB, Commands.sequence(
+            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.LOOK_HUB && RobotContainer.getSwerve().atGoal()),
+            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
+            shooter.autoVelocity(false)
+        ));
+        addEdge(PREPARE_HUB, HUB, Commands.sequence(
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
+        ));
+        addStateCommand(HUB, shooter.autoVelocity(false));
+
+
+
+        double minDelivery = 55;
+        double maxDelivery = 58;
+        double deliveryTime = 3;
+        addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
+            indexer.stopCmd(),
+            RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY)
+        ));
+        addStateCommand(PREPARE_DELIVERY, Commands.sequence(
+            Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
+            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
+            shooter.setVelocityCmd(minDelivery)
+        ));
+        addEdge(PREPARE_DELIVERY, DELIVERY, Commands.sequence(
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
+            Commands.runOnce(deliveryTimer::restart)
+        ));
+        addStateCommand(DELIVERY, Commands.parallel(
+            Commands.run(() -> {
+                shooter.setVelocity(MathUtil.clamp(maxDelivery - deliveryTimer.get() * (maxDelivery - minDelivery) / deliveryTime, minDelivery, maxDelivery));
+            })
+//            shooter.autoVelocity(true)
+        ));
+
+
+
+        addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE_OUTTAKE_BACK, () -> Commands.parallel(
+            accelerator.setVelocityCmd(-20),
+            indexer.setVelocityCmd(-20)
+        ));
+        addEdge(SAVE_OUTTAKE_BACK, HUB, Commands.parallel(
+            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
+        ));
+        addEdge(SAVE_OUTTAKE_BACK, DELIVERY, Commands.parallel(
+            accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
+        ));
+
 
 
         addStateEnd(RESET, () -> true, IDLE);
@@ -153,18 +128,38 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
 //        );
 
         addStateEnd(PREPARE_DELIVERY,
-            () -> true,//RobotState.isShootReady(),
+            () -> RobotState.isShootReady(),
             DELIVERY
         );
 
 //        addStateEnd(DELIVERY,
-//            () -> !RobotState.isDeliveryReadyWhileShooting(),
+//            () -> !RobotState.isShootReady(),
 //            PREPARE_DELIVERY
 //        );
 
-//        addStateEnd(SAVE,
-//            Commands.waitSeconds(0.5),
-//            IDLE
-//        );
+        addStateEnd(HUB, Commands.waitUntil(() -> {
+            if (accelerator.getCurrent() > 82) {
+                stateBeforeSave = HUB;
+                return true;
+            }
+            return false;
+        }), SAVE_OUTTAKE_BACK);
+
+        addStateEnd(DELIVERY, Commands.waitUntil(() -> {
+            if (accelerator.getCurrent() > 82) {
+                stateBeforeSave = DELIVERY;
+                return true;
+            }
+            return false;
+        }), SAVE_OUTTAKE_BACK);
+
+        addStateEnd(SAVE_OUTTAKE_BACK, Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> stateBeforeSave == HUB)), HUB);
+        addStateEnd(SAVE_OUTTAKE_BACK, Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> stateBeforeSave == DELIVERY)), DELIVERY);
+        addStateEnd(SAVE_OUTTAKE_BACK, Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> stateBeforeSave != HUB && stateBeforeSave != DELIVERY)), IDLE);
+    }
+
+    public void saveOuttakeBack() {
+        stateBeforeSave = getCurrentState();
+        changeState(SAVE_OUTTAKE_BACK);
     }
 }
