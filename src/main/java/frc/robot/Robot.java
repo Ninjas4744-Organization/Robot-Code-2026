@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.NinjasLib.swerve.Swerve;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
-import frc.robot.subsystems.Box;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.IntakeRail;
 import frc.robot.subsystems.ShootMachine;
@@ -145,7 +144,6 @@ public class Robot extends LoggedRobot {
         RobotContainer.getShootMachine().forceState(ShootMachine.ShootState.IDLE);
         RobotContainer.getIntakeRail().forceState(IntakeRail.IntakeRailState.CLOSED);
         RobotContainer.getIntake().forceState(Intake.IntakeStates.IDLE);
-        RobotContainer.getBox().forceState(Box.BoxState.CLOSED);
 
         RobotContainer.getSwerve().reset();
         RobotContainer.getShooter().stop();
@@ -153,16 +151,6 @@ public class Robot extends LoggedRobot {
         RobotContainer.getAccelerator().stop();
         RobotContainer.getIntake().stop();
         RobotContainer.getIntakeRail().stop();
-        RobotContainer.getBox().stop();
-//        CommandScheduler.getInstance().schedule(Commands.sequence(
-//            Commands.runOnce(RobotContainer.getSwerve()::reset),
-//            RobotContainer.getShooter().stopCmd(),
-//            RobotContainer.getIndexer().stopCmd(),
-//            RobotContainer.getAccelerator().stopCmd(),
-//            RobotContainer.getIntake().stopCmd(),
-//            RobotContainer.getIntakeRail().stopCmd(),
-//            RobotContainer.getBox().stopCmd()
-//        ));
     }
 
     @Override

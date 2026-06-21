@@ -28,9 +28,11 @@ public class PositionsConstants {
 
     public static class IntakeRail {
         public static final LoggedTunableNumber kClose = new LoggedTunableNumber("Intake Rail/Close", 0, false);
-        public static final LoggedTunableNumber kSlowCloseLowThresh = new LoggedTunableNumber("Intake Rail/Slow Close Low Thresh", 26, false);
-        public static final LoggedTunableNumber kSlowCloseHighThresh = new LoggedTunableNumber("Intake Rail/Slow Close High Thresh", 32, false);
         public static final LoggedTunableNumber kOpen = new LoggedTunableNumber("Intake Rail/Open", 33, true);
+        public static final LoggedTunableNumber kHardPumpLowThresh = new LoggedTunableNumber("Intake Rail/Hard Pump Low Thresh", 26, false);
+        public static final LoggedTunableNumber kHardPumpHighThresh = new LoggedTunableNumber("Intake Rail/Hard Pump High Thresh", 32, false);
+        public static final LoggedTunableNumber kSoftPumpLowThresh = new LoggedTunableNumber("Intake Rail/Soft Pump Low Thresh", 28.5, false);
+        public static final LoggedTunableNumber kSoftPumpHighThresh = new LoggedTunableNumber("Intake Rail/Soft Pump High Thresh", 29.5, false);
     }
 
     public static class Shooter {
@@ -39,17 +41,17 @@ public class PositionsConstants {
         private static final LoggedTunableNumber kShoot2 = new LoggedTunableNumber("Shooter/Shoot/2", 53.75, true);
         private static final LoggedTunableNumber kShoot225 = new LoggedTunableNumber("Shooter/Shoot/2.25", 54, true);
         private static final LoggedTunableNumber kShoot25 = new LoggedTunableNumber("Shooter/Shoot/2.5", 55, true);
-        private static final LoggedTunableNumber kShoot275 = new LoggedTunableNumber("Shooter/Shoot/2.75", 56.5, true);
-        private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot/3", 58.5, true);
-        private static final LoggedTunableNumber kShoot325 = new LoggedTunableNumber("Shooter/Shoot/3.25", 60, true);
-        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 62, true);
-        private static final LoggedTunableNumber kShoot375 = new LoggedTunableNumber("Shooter/Shoot/3.75", 65, true);
-        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 66, true);
-        private static final LoggedTunableNumber kShoot425 = new LoggedTunableNumber("Shooter/Shoot/4.25", 70, true);
-        private static final LoggedTunableNumber kShoot45 = new LoggedTunableNumber("Shooter/Shoot/4.5", 71, true);
-        private static final LoggedTunableNumber kShoot475 = new LoggedTunableNumber("Shooter/Shoot/4.75", 73.5, true);
-        private static final LoggedTunableNumber kShoot5 = new LoggedTunableNumber("Shooter/Shoot/5", 77.5, true);
-        private static final LoggedTunableNumber kShoot6 = new LoggedTunableNumber("Shooter/Shoot/6", 91, true);
+        private static final LoggedTunableNumber kShoot275 = new LoggedTunableNumber("Shooter/Shoot/2.75", 57, true);
+        private static final LoggedTunableNumber kShoot3 = new LoggedTunableNumber("Shooter/Shoot/3", 59, true);
+        private static final LoggedTunableNumber kShoot325 = new LoggedTunableNumber("Shooter/Shoot/3.25", 60.5, true);
+        private static final LoggedTunableNumber kShoot35 = new LoggedTunableNumber("Shooter/Shoot/3.5", 62.5, true);
+        private static final LoggedTunableNumber kShoot375 = new LoggedTunableNumber("Shooter/Shoot/3.75", 65.5, true);
+        private static final LoggedTunableNumber kShoot4 = new LoggedTunableNumber("Shooter/Shoot/4", 66.5, true);
+        private static final LoggedTunableNumber kShoot425 = new LoggedTunableNumber("Shooter/Shoot/4.25", 70.5, true);
+        private static final LoggedTunableNumber kShoot45 = new LoggedTunableNumber("Shooter/Shoot/4.5", 71.5, true);
+        private static final LoggedTunableNumber kShoot475 = new LoggedTunableNumber("Shooter/Shoot/4.75", 74, true);
+        private static final LoggedTunableNumber kShoot5 = new LoggedTunableNumber("Shooter/Shoot/5", 78, true);
+        private static final LoggedTunableNumber kShoot6 = new LoggedTunableNumber("Shooter/Shoot/6", 91.5, true);
 
         private static final int kShootMapId = "ShootMap".hashCode();
 

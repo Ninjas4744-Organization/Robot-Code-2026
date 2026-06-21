@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -112,20 +113,31 @@ public class Shooter extends SubsystemBase implements
         return stopCmd();
     }
 
+    double minDelivery = 55;
+    double maxDelivery = 58;
+    double deliveryTime = 3;
+    private Timer deliveryTimer = new Timer();
     public Command autoVelocity(boolean isDelivery) {
         if (!enabled)
             return Commands.none();
 
-        return Commands.run(() -> {
-            double speed;
-            double virtualDist = ShootCalculator.getShootParams().virtualDist();
+        return Commands.sequence(
+            Commands.runOnce(() -> {
+                if (isDelivery)
+                    deliveryTimer.restart();
+            }),
+            Commands.run(() -> {
+                double speed;
+                double virtualDist = ShootCalculator.getShootParams().virtualDist();
 
-            if (isDelivery)
-                speed = PositionsConstants.Shooter.getDeliverySpeed(virtualDist);
-            else
-                speed = PositionsConstants.Shooter.getShootSpeed(virtualDist);
+                if (isDelivery)
+//                    speed = PositionsConstants.Shooter.getDeliverySpeed(virtualDist);
+                    speed = MathUtil.clamp(maxDelivery - deliveryTimer.get() * (maxDelivery - minDelivery) / deliveryTime, minDelivery, maxDelivery);
+                else
+                    speed = PositionsConstants.Shooter.getShootSpeed(virtualDist);
 
-            io.setVelocity(MathUtil.clamp(speed, 0, 95));
-        });
+                io.setVelocity(MathUtil.clamp(speed, 0, 95));
+            })
+        );
     }
 }

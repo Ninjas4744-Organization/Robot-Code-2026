@@ -5,24 +5,6 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stop"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "L - center 1"
@@ -37,7 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 2.0
+            "waitTime": 3.5
           }
         },
         {
@@ -50,36 +32,6 @@
           "type": "path",
           "data": {
             "pathName": "L - center 2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Shoot"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.0
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stop"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "L - depot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "depot - depot shoot"
           }
         },
         {

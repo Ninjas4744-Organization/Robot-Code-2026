@@ -15,6 +15,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.IntakeRail.IntakeRailState.*;
 
 public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
@@ -23,7 +24,8 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         RESET,
         CLOSED,
         OPENED,
-        PUMPING,
+        HARD_PUMPING,
+        SOFT_PUMPING,
         SAVE_OPEN,
     }
 
@@ -77,36 +79,44 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             Commands.waitUntil(this::atGoal)
         ));
 
-        addEdge(List.of(CLOSED, PUMPING, SAVE_OPEN), OPENED, () -> Commands.sequence(
+        addEdge(List.of(CLOSED, HARD_PUMPING, SOFT_PUMPING, SAVE_OPEN), OPENED, () -> Commands.sequence(
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
             Commands.waitUntil(this::atGoal)
         ));
 
-        addEdge(OPENED, PUMPING, Commands.sequence(
+        addEdge(List.of(OPENED, SOFT_PUMPING), HARD_PUMPING, () -> Commands.sequence(
             new LoopCommand(
                 Commands.sequence(
                     setPercentCmd(0.4),
-                    Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSlowCloseHighThresh.get()),
+                    Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kHardPumpHighThresh.get()),
                     setPercentCmd(-0.4),
-                    Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset())
+                    Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kHardPumpLowThresh.get() || isReset())
                 ),
                 3
             ),
-//            setPercentCmd(-0.2),
-//            Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSlowCloseLowThresh.get() || isReset()),
-            setPositionCmd(PositionsConstants.IntakeRail.kSlowCloseLowThresh.get())
+            setPositionCmd(PositionsConstants.IntakeRail.kHardPumpLowThresh.get())
         ));
 
-        addEdge(List.of(CLOSED, OPENED, PUMPING, RESET), SAVE_OPEN, () -> Commands.sequence(
+        addEdge(List.of(OPENED, HARD_PUMPING), SOFT_PUMPING);
+
+        addStateCommand(SOFT_PUMPING, Commands.repeatingSequence(
+            setPercentCmd(0.2),
+            Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSoftPumpHighThresh.get()),
+            setPercentCmd(-0.2),
+            Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSoftPumpLowThresh.get() || isReset())
+        ));
+
+        addEdge(List.of(CLOSED, OPENED, HARD_PUMPING, SOFT_PUMPING, RESET), SAVE_OPEN, () -> Commands.sequence(
             setPercentCmd(0.5)
         ));
 
 
+
         addStateEnd(RESET, () -> true, OPENED);
 
-        addStateEnd(PUMPING, () -> DriverStation.isTeleop(), OPENED);
+        addStateEnd(HARD_PUMPING, () -> DriverStation.isTeleopEnabled(), SOFT_PUMPING);
 
-        addStateEnd(SAVE_OPEN, Commands.waitSeconds(0.5), RESET);
+        addStateEnd(SAVE_OPEN, Seconds.of(0.5), RESET);
     }
 
     private boolean isReset() {

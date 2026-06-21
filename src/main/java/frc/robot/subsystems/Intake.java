@@ -13,6 +13,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.List;
 
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.subsystems.Intake.IntakeStates.*;
 
 public class Intake extends StateMachineBase<Intake.IntakeStates> {
@@ -76,7 +77,7 @@ public class Intake extends StateMachineBase<Intake.IntakeStates> {
 
         addEdge(INTAKE, SAVE_OUTTAKE, setVelocityCmd(PositionsConstants.Intake.kOuttake.get()));
 
-        addStateEnd(SAVE_OUTTAKE, Commands.waitSeconds(0.1), INTAKE);
+        addStateEnd(SAVE_OUTTAKE, Seconds.of(0.1), INTAKE);
     }
 
     public void setVelocity(double velocity) {

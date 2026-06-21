@@ -1,8 +1,7 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.NinjasLib.commands.StateEndCommand;
 import frc.lib.NinjasLib.statemachine.StateMachineBase;
 import frc.robot.RobotContainer;
 import frc.robot.RobotState;
@@ -28,8 +27,6 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
     private Accelerator accelerator;
     private Indexer indexer;
 
-    private Timer deliveryTimer;
-
     private ShootState stateBeforeSave = IDLE;
 
     public ShootMachine() {
@@ -42,8 +39,6 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         shooter = RobotContainer.getShooter();
         accelerator = RobotContainer.getAccelerator();
         indexer = RobotContainer.getIndexer();
-
-        deliveryTimer = new Timer();
 
         addOmniEdge(RESET, () -> Commands.parallel(
             shooter.reset(),
@@ -59,7 +54,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
 
 
 
-        addEdge(List.of(IDLE, HUB), PREPARE_HUB, () -> Commands.sequence(
+        addEdge(List.of(IDLE, REVERSE_BALLS, HUB), PREPARE_HUB, () -> Commands.sequence(
             indexer.stopCmd(),
             RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.LOOK_HUB)
         ));
@@ -71,37 +66,42 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addEdge(PREPARE_HUB, HUB, Commands.sequence(
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
         ));
-        addStateCommand(HUB, shooter.autoVelocity(false));
+        addStateCommand(HUB, Commands.parallel(
+            shooter.autoVelocity(false),
+            Commands.sequence(
+                Commands.waitSeconds(0.8),
+                RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SOFT_PUMPING)
+            )
+        ));
 
 
 
-        double minDelivery = 55;
-        double maxDelivery = 58;
-        double deliveryTime = 3;
-        addEdge(List.of(IDLE, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
+        addEdge(List.of(IDLE, REVERSE_BALLS, DELIVERY), PREPARE_DELIVERY, () -> Commands.sequence(
             indexer.stopCmd(),
             RobotContainer.getSwerve().changeStateCommand(SwerveSubsystem.SwerveState.DELIVERY)
         ));
         addStateCommand(PREPARE_DELIVERY, Commands.sequence(
             Commands.waitUntil(() -> RobotContainer.getSwerve().getCurrentState() == SwerveSubsystem.SwerveState.DELIVERY && RobotContainer.getSwerve().atGoal()),
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
-            shooter.setVelocityCmd(minDelivery)
+            shooter.autoVelocity(true)
         ));
         addEdge(PREPARE_DELIVERY, DELIVERY, Commands.sequence(
-            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get()),
-            Commands.runOnce(deliveryTimer::restart)
+            indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
         ));
-        addStateCommand(DELIVERY, Commands.parallel(
-            Commands.run(() -> {
-                shooter.setVelocity(MathUtil.clamp(maxDelivery - deliveryTimer.get() * (maxDelivery - minDelivery) / deliveryTime, minDelivery, maxDelivery));
-            })
-//            shooter.autoVelocity(true)
+        addStateCommand(HUB, Commands.parallel(
+            shooter.autoVelocity(true),
+            Commands.sequence(
+                Commands.waitSeconds(0.8),
+                RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SOFT_PUMPING)
+            )
         ));
 
 
 
         addEdge(List.of(PREPARE_HUB, HUB, PREPARE_DELIVERY, DELIVERY, IDLE), SAVE_OUTTAKE_BACK, () -> Commands.parallel(
-            accelerator.setVelocityCmd(-20),
+            accelerator.stopCmd(),
+            indexer.stopCmd(),
+            Commands.waitUntil(() -> indexer.getVelocity() < 20),
             indexer.setVelocityCmd(-20)
         ));
         addEdge(SAVE_OUTTAKE_BACK, HUB, Commands.parallel(
@@ -111,6 +111,19 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addEdge(SAVE_OUTTAKE_BACK, DELIVERY, Commands.parallel(
             accelerator.setVelocityCmd(PositionsConstants.Accelerator.kAccelerate.get()),
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
+        ));
+
+
+
+        addEdge(List.of(HUB, DELIVERY), REVERSE_BALLS, () -> Commands.sequence(
+            shooter.stopCmd(),
+            accelerator.stopCmd(),
+            indexer.stopCmd()
+        ));
+        addStateCommand(REVERSE_BALLS, Commands.sequence(
+            Commands.waitUntil(() -> accelerator.getVelocity() < 30),
+            accelerator.setVelocityCmd(-20),
+            indexer.setVelocityCmd(-20)
         ));
 
 
@@ -137,25 +150,39 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
 //            PREPARE_DELIVERY
 //        );
 
-        addStateEnd(HUB, Commands.waitUntil(() -> {
+        addStateEnd(HUB, () -> {
             if (accelerator.getCurrent() > 82) {
                 stateBeforeSave = HUB;
                 return true;
             }
             return false;
-        }), SAVE_OUTTAKE_BACK);
+        }, SAVE_OUTTAKE_BACK);
 
-        addStateEnd(DELIVERY, Commands.waitUntil(() -> {
+        addStateEnd(DELIVERY, () -> {
             if (accelerator.getCurrent() > 82) {
                 stateBeforeSave = DELIVERY;
                 return true;
             }
             return false;
-        }), SAVE_OUTTAKE_BACK);
+        }, SAVE_OUTTAKE_BACK);
 
-        addStateEnd(SAVE_OUTTAKE_BACK, Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> stateBeforeSave == HUB)), HUB);
-        addStateEnd(SAVE_OUTTAKE_BACK, Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> stateBeforeSave == DELIVERY)), DELIVERY);
-        addStateEnd(SAVE_OUTTAKE_BACK, Commands.waitSeconds(0.5).andThen(Commands.waitUntil(() -> stateBeforeSave != HUB && stateBeforeSave != DELIVERY)), IDLE);
+        addStateEnd(SAVE_OUTTAKE_BACK, new StateEndCommand(
+            Commands.waitSeconds(0.5),
+            Commands.waitUntil(() -> stateBeforeSave == HUB)
+        ), HUB);
+        addStateEnd(SAVE_OUTTAKE_BACK, new StateEndCommand(
+            Commands.waitSeconds(0.5),
+            Commands.waitUntil(() -> stateBeforeSave == DELIVERY)
+        ), DELIVERY);
+        addStateEnd(SAVE_OUTTAKE_BACK, new StateEndCommand(
+            Commands.waitSeconds(0.5),
+            Commands.waitUntil(() -> stateBeforeSave != HUB && stateBeforeSave != DELIVERY)
+        ), IDLE);
+
+        addStateEnd(REVERSE_BALLS, new StateEndCommand(
+            Commands.waitUntil(() -> accelerator.getVelocity() < 30),
+            Commands.waitSeconds(1)
+        ), IDLE);
     }
 
     public void saveOuttakeBack() {

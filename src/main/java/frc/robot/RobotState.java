@@ -15,8 +15,8 @@ public class RobotState extends RobotStateBase {
     public RobotState(SwerveDriveKinematics kinematics) {
         super(kinematics);
 
-        shootingMode = ShootingMode.ON_MOVE;
-        setShootingMode(ShootingMode.ON_MOVE);
+        shootingMode = ShootingMode.HUB;
+        setShootingMode(ShootingMode.HUB);
     }
 
     public static RobotState get() {

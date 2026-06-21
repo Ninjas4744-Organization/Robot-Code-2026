@@ -5,7 +5,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,12 +27,10 @@ public class RobotContainer {
     private static VisionSubsystem visionSubsystem;
     private static Intake intake;
     private static IntakeRail intakeRail;
-    private static Box box;
     private static Indexer indexer;
     private static Shooter shooter;
     private static Accelerator accelerator;
     private static ShootMachine shootMachine;
-    private static Leds leds;
 
     private LoggedCommandController driverController;
     private LoggedCommandController operatorController;
@@ -60,11 +57,9 @@ public class RobotContainer {
 
         intake = new Intake(true);
         intakeRail = new IntakeRail(true);
-        box = new Box(false);
         indexer = new Indexer(true);
         shooter = new Shooter(true);
         accelerator = new Accelerator(true);
-        leds = new Leds(false);
 
         shootMachine = new ShootMachine();
 
@@ -85,12 +80,10 @@ public class RobotContainer {
     public static VisionSubsystem getVision() { return visionSubsystem; }
     public static Intake getIntake() { return intake; }
     public static IntakeRail getIntakeRail() { return intakeRail; }
-    public static Box getBox() { return box; }
     public static Indexer getIndexer() { return indexer; }
     public static Shooter getShooter() { return shooter; }
     public static Accelerator getAccelerator() { return accelerator; }
     public static ShootMachine getShootMachine() { return shootMachine; }
-    public static Leds getLeds() { return leds; }
 
     private void configureAuto() {
         AutoBuilder.configure(
@@ -105,18 +98,15 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
             shootMachine.changeStateCommand(ShootMachine.ShootState.PREPARE_HUB),
+            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SOFT_PUMPING),
             Commands.waitSeconds(1),
-            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.PUMPING),
-//            Commands.waitSeconds(0.5),
-            RobotContainer.getBox().changeStateCommand(Box.BoxState.SLOW_CLOSE)
+            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.HARD_PUMPING)
         )));
 
         NamedCommands.registerCommand("Stop", Commands.sequence(
             swerveSubsystem.stopCmd(),
-            shootMachine.changeStateCommand(ShootMachine.ShootState.IDLE),
-            intakeRail.changeStateForceCommand(IntakeRail.IntakeRailState.OPENED),
-            box.changeStateForceCommand(Box.BoxState.CLOSED),
-            Commands.waitUntil(box::atGoal)
+            shootMachine.changeStateCommand(ShootMachine.ShootState.REVERSE_BALLS),
+            intakeRail.changeStateForceCommand(IntakeRail.IntakeRailState.OPENED)
         ));
 
         autoChooser = new LoggedDashboardChooser<>("Auto Chooser", AutoBuilder.buildAutoChooser());
@@ -136,27 +126,15 @@ public class RobotContainer {
         Logger.recordOutput("Hub Active", RobotState.isHubActive());
         Logger.recordOutput("Shift Time", Math.ceil(RobotState.timeUntilShiftChange()));
 
-//        double taskTime = 0;
-//        String taskName = "Auto";
-//        for (int i = 0; i < GeneralConstants.kTasksTimings.length; i++) {
-//            if (RobotState.getMatchTime() > GeneralConstants.kTasksTimings[i]) {
-//                taskTime = Math.ceil(RobotState.getMatchTime() - GeneralConstants.kTasksTimings[i]);
-//                taskName = GeneralConstants.KTasksNames[i];
-//                break;
-//            }
-//        }
-//        Logger.recordOutput("Task Time", taskTime);
-//        Logger.recordOutput("Task Name", taskName);
-
         logField.setRobotPose(RobotState.get().getRobotPose());
         logField.getObject("Target").setPose(new Pose2d(ShootCalculator.getShootParams().virtualTarget(), Rotation2d.kZero));
         SmartDashboard.putData("Field", logField);
 
-        if ((DriverStation.isAutonomousEnabled() && (RobotController.getFPGATime() - Robot.autoStartTime) / 1000000.0 > 19.5)
-            || (DriverStation.isTeleopEnabled() && (RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000.0 > 139.5)) {
-            shootMachine.changeStateForce(ShootMachine.ShootState.IDLE);
-            intake.changeStateForce(Intake.IntakeStates.IDLE);
-        }
+//        if ((DriverStation.isAutonomousEnabled() && (RobotController.getFPGATime() - Robot.autoStartTime) / 1000000.0 > 19.5)
+//            || (DriverStation.isTeleopEnabled() && (RobotController.getFPGATime() - Robot.teleopStartTime) / 1000000.0 > 139.5)) {
+//            shootMachine.changeStateForce(ShootMachine.ShootState.IDLE);
+//            intake.changeStateForce(Intake.IntakeStates.IDLE);
+//        }
 
         if(GeneralConstants.kRobotMode.isSim()) {
             Simulation.periodic();
@@ -173,7 +151,7 @@ public class RobotContainer {
         if (GeneralConstants.kRobotMode.isSim())
             Simulation.reset();
 
-        RobotState.setShootingMode(ShootingMode.ON_MOVE);
+        RobotState.setShootingMode(ShootingMode.HUB);
 
         if (DriverStation.isTeleop()) {
             if (GeneralConstants.kRobotMode.isComp()) {
