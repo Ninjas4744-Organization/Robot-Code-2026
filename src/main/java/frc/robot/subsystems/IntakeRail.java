@@ -24,6 +24,7 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         RESET,
         CLOSED,
         OPENED,
+        AUTO_OPENED,
         HARD_PUMPING,
         SOFT_PUMPING,
         SAVE_OPEN,
@@ -84,6 +85,15 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             Commands.waitUntil(this::atGoal)
         ));
 
+        addEdge(CLOSED, AUTO_OPENED, Commands.sequence(
+            Commands.waitSeconds(0.5),
+            setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
+            Commands.waitUntil(this::atGoal)
+        ));
+        addEdge(AUTO_OPENED, OPENED);
+
+
+
         addEdge(List.of(OPENED, SOFT_PUMPING), HARD_PUMPING, () -> Commands.sequence(
             new LoopCommand(
                 Commands.sequence(
@@ -117,6 +127,8 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         addStateEnd(HARD_PUMPING, () -> DriverStation.isTeleopEnabled(), SOFT_PUMPING);
 
         addStateEnd(SAVE_OPEN, Seconds.of(0.5), RESET);
+
+        addStateEnd(AUTO_OPENED, () -> true, OPENED);
     }
 
     private boolean isReset() {

@@ -118,13 +118,14 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addEdge(List.of(HUB, DELIVERY), REVERSE_BALLS, () -> Commands.sequence(
             shooter.stopCmd(),
             accelerator.stopCmd(),
-            indexer.stopCmd()
-        ));
-        addStateCommand(REVERSE_BALLS, Commands.sequence(
-            Commands.waitUntil(() -> accelerator.getVelocity() < 30),
-            accelerator.setVelocityCmd(-20),
+//            indexer.stopCmd()
             indexer.setVelocityCmd(-20)
         ));
+//        addStateCommand(REVERSE_BALLS, Commands.sequence(
+//            Commands.waitUntil(() -> accelerator.getVelocity() < 30),
+//            accelerator.setVelocityCmd(-20),
+//            indexer.setVelocityCmd(-20)
+//        ));
 
 
 

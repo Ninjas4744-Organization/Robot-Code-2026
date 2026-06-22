@@ -29,7 +29,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     private boolean resettedGyro = false;
     private boolean resettedPose = false;
-//    private int framesSinceGyroUpdate = 75;
+    private int framesSinceGyroUpdate = 75;
     private boolean isFirstDisable = true;
 
     public VisionSubsystem() {
@@ -52,9 +52,16 @@ public class VisionSubsystem extends SubsystemBase {
             isFirstDisable = false;
         else if (DriverStation.isTeleopEnabled() || DriverStation.isTestEnabled())
             isFirstDisable = true;
-        else if (DriverStation.isDisabled() && isFirstDisable && !GeneralConstants.kRobotMode.isSim() && GeneralConstants.kRobotMode.isComp()) {
-            RobotState.get().resetGyro(Rotation2d.k180deg);
-            resettedGyro = true;
+        else if (DriverStation.isDisabled() && isFirstDisable && !GeneralConstants.kRobotMode.isSim() && (GeneralConstants.kRobotMode.isComp() || DriverStation.isAutonomous())) {
+            framesSinceGyroUpdate++;
+            if (framesSinceGyroUpdate >= 75) {
+//                RobotState.get().resetGyro(Rotation2d.kCW_90deg); // 9470
+                RobotState.get().resetGyro(Rotation2d.kCCW_90deg); // 9470 left
+//                RobotState.get().resetGyro(Rotation2d.k180deg); // normal
+//                RobotState.get().resetGyro(Rotation2d.kZero); // normal left
+                resettedGyro = true;
+                framesSinceGyroUpdate = 0;
+            }
         }
 
         megaTag1Pose = null;

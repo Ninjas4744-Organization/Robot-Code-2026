@@ -98,8 +98,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Shoot", new DetachedCommand(Commands.sequence(
             shootMachine.changeStateCommand(ShootMachine.ShootState.PREPARE_HUB),
-            RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.SOFT_PUMPING),
-            Commands.waitSeconds(1),
+            Commands.waitSeconds(1.5),
             RobotContainer.getIntakeRail().changeStateCommand(IntakeRail.IntakeRailState.HARD_PUMPING)
         )));
 
@@ -182,7 +181,7 @@ public class RobotContainer {
             intakeRail.changeStateForce(IntakeRail.IntakeRailState.RESET);
         } else {
             intakeRail.forceState(IntakeRail.IntakeRailState.CLOSED);
-            intakeRail.changeStateForce(IntakeRail.IntakeRailState.OPENED);
+            intakeRail.changeStateForce(IntakeRail.IntakeRailState.AUTO_OPENED);
         }
 
         swerveSubsystem.reset();
