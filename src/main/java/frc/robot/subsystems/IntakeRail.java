@@ -66,7 +66,7 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
     @Override
     protected void define() {
         addOmniEdge(RESET, () -> Commands.sequence(
-            setPercentCmd(-0.5),
+            setPercentCmd(-0.25),
             Commands.waitUntil(this::isReset),
             Commands.waitSeconds(0.2),
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
@@ -97,9 +97,9 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         addEdge(List.of(OPENED, SOFT_PUMPING), HARD_PUMPING, () -> Commands.sequence(
             new LoopCommand(
                 Commands.sequence(
-                    setPercentCmd(0.4),
+                    setPercentCmd(0.25),
                     Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kHardPumpHighThresh.get()),
-                    setPercentCmd(-0.4),
+                    setPercentCmd(-0.25),
                     Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kHardPumpLowThresh.get() || isReset())
                 ),
                 3
@@ -110,14 +110,14 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         addEdge(List.of(OPENED, HARD_PUMPING), SOFT_PUMPING);
 
         addStateCommand(SOFT_PUMPING, Commands.repeatingSequence(
-            setPercentCmd(0.2),
+            setPercentCmd(0.15),
             Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSoftPumpHighThresh.get()),
-            setPercentCmd(-0.2),
+            setPercentCmd(-0.15),
             Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSoftPumpLowThresh.get() || isReset())
         ));
 
         addEdge(List.of(CLOSED, OPENED, HARD_PUMPING, SOFT_PUMPING, RESET), SAVE_OPEN, () -> Commands.sequence(
-            setPercentCmd(0.5)
+            setPercentCmd(0.25)
         ));
 
 

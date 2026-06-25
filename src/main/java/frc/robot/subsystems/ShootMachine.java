@@ -88,7 +88,7 @@ public class ShootMachine extends StateMachineBase<ShootMachine.ShootState> {
         addEdge(PREPARE_DELIVERY, DELIVERY, Commands.sequence(
             indexer.setVelocityCmd(PositionsConstants.Indexer.kIndex.get())
         ));
-        addStateCommand(HUB, Commands.parallel(
+        addStateCommand(DELIVERY, Commands.parallel(
             shooter.autoVelocity(true),
             Commands.sequence(
                 Commands.waitSeconds(0.8),

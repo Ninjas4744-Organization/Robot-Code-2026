@@ -56,8 +56,8 @@ public class SubsystemConstants {
         kIntakeRail.real.base.isBrakeMode = false;
 
         /* Control */
-        kIntakeRail.real.control.controlConstants = ControlConstants.createProfiledPIDF(4, 0, 0, 0, 95, 500, 0, 0, 0, 0, 0, GravityTypeValue.Elevator_Static);
-        kIntakeRail.real.control.positionGoalTolerance = 0.5;
+        kIntakeRail.real.control.controlConstants = ControlConstants.createProfiledPIDF(6, 0, 0, 0, 50, 200, 0, 0, 0, 0.5, 0, GravityTypeValue.Elevator_Static);
+        kIntakeRail.real.control.positionGoalTolerance = 0.15;
         kIntakeRail.real.control.enableFOC = false;
 
         /* Soft Limits */
@@ -76,7 +76,7 @@ public class SubsystemConstants {
         kIntakeRail.real.hardLimits.limits[1].frames = 12;
         kIntakeRail.real.hardLimits.limits[1].direction = 1;
         kIntakeRail.real.hardLimits.limits[1].autoStopReset = true;
-        kIntakeRail.real.hardLimits.limits[1].homePosition = 33;
+        kIntakeRail.real.hardLimits.limits[1].homePosition = 11;
 
         /* Simulation */
         kIntakeRail.simMotor = DCMotor.getKrakenX60(1);
@@ -216,7 +216,7 @@ public class SubsystemConstants {
         kSwerve.limits.discretizeFactor = 2.75;
 
         /* Modules */
-        double wheelRadius = 0.049;
+        double wheelRadius = 0.051;
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.statorCurrentLimit = 100;
