@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.NinjasLib.localization.vision.Vision;
 import frc.lib.NinjasLib.localization.vision.VisionOutput;
 import frc.lib.NinjasLib.swerve.Swerve;
+import frc.robot.RobotContainer;
 import frc.robot.RobotState;
 import frc.robot.constants.GeneralConstants;
 import frc.robot.constants.SubsystemConstants;
@@ -55,10 +56,25 @@ public class VisionSubsystem extends SubsystemBase {
         else if (DriverStation.isDisabled() && isFirstDisable && !GeneralConstants.kRobotMode.isSim() && (GeneralConstants.kRobotMode.isComp() || DriverStation.isAutonomous())) {
             framesSinceGyroUpdate++;
             if (framesSinceGyroUpdate >= 75) {
-//                RobotState.get().resetGyro(Rotation2d.kCW_90deg); // 9470
-                RobotState.get().resetGyro(Rotation2d.kCCW_90deg); // 9470 left
-//                RobotState.get().resetGyro(Rotation2d.k180deg); // normal
-//                RobotState.get().resetGyro(Rotation2d.kZero); // normal left
+                if (RobotContainer.getAutonomousCommand() != null) {
+                    switch (RobotContainer.getAutonomousCommand().getName()) {
+                        case "R - 9470":
+                            RobotState.get().resetGyro(Rotation2d.kCW_90deg);
+                            break;
+
+                        case "L - 9470":
+                            RobotState.get().resetGyro(Rotation2d.kCCW_90deg);
+                            break;
+
+                        case "R - 2x center":
+                            RobotState.get().resetGyro(Rotation2d.k180deg);
+                            break;
+
+                        case "L - 2x center":
+                            RobotState.get().resetGyro(Rotation2d.kZero);
+                            break;
+                    }
+                }
                 resettedGyro = true;
                 framesSinceGyroUpdate = 0;
             }

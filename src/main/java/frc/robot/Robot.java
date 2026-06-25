@@ -100,7 +100,7 @@ public class Robot extends LoggedRobot {
         robotContainer.reset();
 //        RobotState.get().resetGyro(Rotation2d.k180deg);
 
-        autonomousCommand = robotContainer.getAutonomousCommand();
+        autonomousCommand = RobotContainer.getAutonomousCommand();
         if (autonomousCommand != null) {
             CommandScheduler.getInstance().schedule(autonomousCommand);
         }

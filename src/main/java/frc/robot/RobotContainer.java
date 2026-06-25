@@ -34,7 +34,7 @@ public class RobotContainer {
 
     private LoggedCommandController driverController;
     private LoggedCommandController operatorController;
-    private LoggedDashboardChooser<Command> autoChooser;
+    private static LoggedDashboardChooser<Command> autoChooser;
     private ShootCalculator shootCalculator;
     private NinjasTimebar timebar;
     private Field2d logField = new Field2d();
@@ -142,7 +142,7 @@ public class RobotContainer {
         timebar.update();
     }
 
-    public Command getAutonomousCommand() {
+    public static Command getAutonomousCommand() {
         return autoChooser.get();
     }
 
