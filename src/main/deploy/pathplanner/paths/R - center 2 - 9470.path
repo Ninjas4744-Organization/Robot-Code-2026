@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.318216833095578,
-        "y": 1.4019828815977178
+        "x": 1.969349552180712,
+        "y": 0.7540865027558239
       },
       "isLocked": false,
       "linkedName": "R bump"
@@ -20,8 +20,8 @@
         "y": 0.65
       },
       "prevControl": {
-        "x": 3.25,
-        "y": 0.6500000000000001
+        "x": 3.0,
+        "y": 0.6500000000000002
       },
       "nextControl": {
         "x": 5.1592558238541475,
@@ -85,7 +85,7 @@
       },
       "prevControl": {
         "x": 7.885940068404857,
-        "y": 4.004508404713202
+        "y": 4.004508404713201
       },
       "nextControl": {
         "x": 7.380883381165204,
@@ -110,7 +110,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.626865671641806,
+      "waypointRelativePos": 0.5,
       "rotationDegrees": 180.0
     },
     {

@@ -62,7 +62,7 @@ public class GeneralConstants {
     public static class Vision {
         public static final double kMaxDistanceFilter = 5;
         public static final double kMinDistanceFilter = 0.6;
-        public static final double kMaxSpeedFilter = 3;
+        public static final double kMaxSpeedFilter = 2;
         public static final double kMaxAngularSpeedFilter = 3;
         public static final double kMaxAmbiguityFilter = 0.2;
         public static final double kOdometryDriftPerMeter = 0.02316;

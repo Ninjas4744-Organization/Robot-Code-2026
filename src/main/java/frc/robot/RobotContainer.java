@@ -40,8 +40,6 @@ public class RobotContainer {
     private Field2d logField = new Field2d();
 
     public RobotContainer() {
-        DriverStation.silenceJoystickConnectionWarning(true);
-
         if (!GeneralConstants.kRobotMode.isReplay()) {
             driverController = new LoggedCommandController("Driver", new LoggedCommandControllerIOPS5(GeneralConstants.kDriverControllerPort));
             operatorController = new LoggedCommandController("Operator", new LoggedCommandControllerIOPS5(GeneralConstants.kOperatorControllerPort));

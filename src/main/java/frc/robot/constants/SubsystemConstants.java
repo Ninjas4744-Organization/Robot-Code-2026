@@ -216,7 +216,7 @@ public class SubsystemConstants {
         kSwerve.limits.discretizeFactor = 2.75;
 
         /* Modules */
-        double wheelRadius = 0.051;
+        double wheelRadius = 0.0495;
         kSwerve.modules.openLoop = GeneralConstants.kRobotMode.isSim();
         kSwerve.modules.driveMotorConstants = new ControllerConstants();
         kSwerve.modules.driveMotorConstants.real.base.statorCurrentLimit = 100;

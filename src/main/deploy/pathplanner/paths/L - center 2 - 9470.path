@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.637714678385811,
-        "y": 6.69780872673843
+        "x": 2.2888446356944265,
+        "y": 7.345703618462299
       },
       "isLocked": false,
       "linkedName": "L bump"
@@ -20,7 +20,7 @@
         "y": 7.45
       },
       "prevControl": {
-        "x": 3.25,
+        "x": 3.0,
         "y": 7.45
       },
       "nextControl": {
@@ -110,7 +110,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.626865671641806,
+      "waypointRelativePos": 0.5,
       "rotationDegrees": 180.0
     },
     {
