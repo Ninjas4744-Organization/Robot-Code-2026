@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R - center 1"
+            "pathName": "R - CREW 1"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.5
+            "waitTime": 3.25
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "R - center 2"
+            "pathName": "R - CREW 2"
           }
         },
         {

@@ -58,21 +58,21 @@ public class VisionSubsystem extends SubsystemBase {
             if (framesSinceGyroUpdate >= 75) {
                 if (RobotContainer.getAutonomousCommand() != null) {
                     switch (RobotContainer.getAutonomousCommand().getName()) {
-                        case "R - 9470":
+                        case "R - CREW", "R - KITKAT":
                             RobotState.get().resetGyro(Rotation2d.kCW_90deg);
                             break;
 
-                        case "L - 9470":
+                        case "L - CREW", "L - KITKAT":
                             RobotState.get().resetGyro(Rotation2d.kCCW_90deg);
                             break;
 
-                        case "R - 2x center":
-                            RobotState.get().resetGyro(Rotation2d.k180deg);
-                            break;
-
-                        case "L - 2x center":
-                            RobotState.get().resetGyro(Rotation2d.kZero);
-                            break;
+//                        case "R - 2x center":
+//                            RobotState.get().resetGyro(Rotation2d.k180deg);
+//                            break;
+//
+//                        case "L - 2x center":
+//                            RobotState.get().resetGyro(Rotation2d.kZero);
+//                            break;
                     }
                 }
                 resettedGyro = true;

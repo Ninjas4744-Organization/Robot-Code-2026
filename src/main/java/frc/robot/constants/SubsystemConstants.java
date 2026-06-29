@@ -71,8 +71,8 @@ public class SubsystemConstants {
         kIntakeRail.real.hardLimits.limits[0].homePosition = 0;
 
         kIntakeRail.real.hardLimits.limits[1].isVirtual = true;
-        kIntakeRail.real.hardLimits.limits[1].virtualStallThreshold = 25;
-        kIntakeRail.real.hardLimits.limits[1].minPos = 31;
+        kIntakeRail.real.hardLimits.limits[1].virtualStallThreshold = 30;
+        kIntakeRail.real.hardLimits.limits[1].minPos = 10.5;
         kIntakeRail.real.hardLimits.limits[1].frames = 12;
         kIntakeRail.real.hardLimits.limits[1].direction = 1;
         kIntakeRail.real.hardLimits.limits[1].autoStopReset = true;
