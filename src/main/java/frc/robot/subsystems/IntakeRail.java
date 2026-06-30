@@ -70,25 +70,26 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             Commands.waitUntil(this::isReset),
             Commands.waitSeconds(0.2),
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
-            Commands.waitUntil(this::atGoal)
+            Commands.waitUntil(this::atGoalUp)
         ));
 
         addEdge(RESET, OPENED);
 
         addEdge(OPENED, CLOSED, Commands.sequence(
             setPositionCmd(PositionsConstants.IntakeRail.kClose.get()),
-            Commands.waitUntil(this::atGoal)
+            Commands.waitUntil(this::atGoalDown)
         ));
 
         addEdge(List.of(CLOSED, HARD_PUMPING, SOFT_PUMPING, SAVE_OPEN), OPENED, () -> Commands.sequence(
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
-            Commands.waitUntil(this::atGoal)
+            Commands.waitUntil(this::atGoalUp)
         ));
 
         addEdge(CLOSED, AUTO_OPENED, Commands.sequence(
+            Commands.runOnce(() -> io.resetVirtualLimits()),
             Commands.waitSeconds(0.5),
             setPositionCmd(PositionsConstants.IntakeRail.kOpen.get()),
-            Commands.waitUntil(this::atGoal)
+            Commands.waitUntil(this::atGoalUp)
         ));
         addEdge(AUTO_OPENED, OPENED);
 
@@ -98,9 +99,11 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
             new LoopCommand(
                 Commands.sequence(
                     setPercentCmd(0.25),
-                    Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kHardPumpHighThresh.get()),
+                    Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kHardPumpHighThresh.get())
+                        .withTimeout(0.7),
                     setPercentCmd(-0.25),
                     Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kHardPumpLowThresh.get() || isReset())
+                        .withTimeout(0.7)
                 ),
                 3
             ),
@@ -111,9 +114,11 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
 
         addStateCommand(SOFT_PUMPING, Commands.repeatingSequence(
             setPercentCmd(0.15),
-            Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSoftPumpHighThresh.get()),
+            Commands.waitUntil(() -> getPosition() > PositionsConstants.IntakeRail.kSoftPumpHighThresh.get())
+                .withTimeout(0.7),
             setPercentCmd(-0.15),
             Commands.waitUntil(() -> getPosition() < PositionsConstants.IntakeRail.kSoftPumpLowThresh.get() || isReset())
+                .withTimeout(0.7)
         ));
 
         addEdge(List.of(CLOSED, OPENED, HARD_PUMPING, SOFT_PUMPING, RESET), SAVE_OPEN, () -> Commands.sequence(
@@ -135,8 +140,12 @@ public class IntakeRail extends StateMachineBase<IntakeRail.IntakeRailState> {
         return !enabled || inputs.LimitSwitches[0];
     }
 
-    private boolean atGoal() {
-        return !enabled || inputs.AtGoal;
+    private boolean atGoalUp() {
+        return !enabled || inputs.AtGoal || inputs.LimitSwitches[1];
+    }
+
+    private boolean atGoalDown() {
+        return !enabled || inputs.AtGoal || inputs.LimitSwitches[0];
     }
 
     public void setPercent(double percent) {

@@ -75,9 +75,14 @@ public class Triggers {
 
         driverController.povRight().onTrue(notTest(Commands.runOnce(() -> RobotContainer.resetStatemachines(true))));
 
+        driverController.L2().onTrue(notTest(RobotContainer.getShootMachine().changeStateCommand(ShootMachine.ShootState.HUB)));
 
 
-        operatorController.triangle().onTrue(notTest(RobotContainer.getIntakeRail().changeStateForceCommand(IntakeRail.IntakeRailState.OPENED)));
+
+        operatorController.triangle().whileTrue(notTest(Commands.startEnd(
+            () -> RobotContainer.getIntakeRail().setPercent(0.5),
+            () -> RobotContainer.getIntakeRail().setPercent(0)
+        )));
         operatorController.cross().onTrue(notTest(RobotContainer.getIntakeRail().changeStateForceCommand(IntakeRail.IntakeRailState.CLOSED)));
 
         operatorController.R1().onTrue(notTest(RobotContainer.getIntake().changeStateCommand(Intake.IntakeStates.INTAKE)));
